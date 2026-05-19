@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Minus, Send, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { useAuthStore } from '../../store/authStore';
 
 interface Message {
   id: string;
@@ -20,6 +21,8 @@ export function ChatbotPanel() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const session = useAuthStore(state => state.session);
+  const user = useAuthStore(state => state.user);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -48,10 +51,13 @@ export function ChatbotPanel() {
       
       const response = await fetch('http://localhost:3000/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': session ? `Bearer ${session.access_token}` : ''
+        },
         body: JSON.stringify({ 
-          userId: 'test-auth-id', // ID temporal para propósitos de demo
-          email: 'andrea@example.com', 
+          userId: user?.id || 'test-auth-id',
+          email: user?.email || 'andrea@example.com', 
           message: userMessage.text 
         })
       });

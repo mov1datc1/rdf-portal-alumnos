@@ -5,9 +5,11 @@ import { PrismaService } from './prisma.service';
 import { ProgressModule } from './progress/progress.module';
 import { ClassesModule } from './classes/classes.module';
 import { AiModule } from './ai/ai.module';
+import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
-  imports: [ProgressModule, ClassesModule, AiModule],
+  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],

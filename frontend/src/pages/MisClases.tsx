@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react';
 import { CalendarWidget } from '../components/dashboard/CalendarWidget';
 import { Video, Calendar, Clock, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../store/authStore';
 
 export function MisClases() {
   const [clases, setClases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const session = useAuthStore(state => state.session);
 
   useEffect(() => {
-    fetch('http://localhost:3000/classes/upcoming')
+    if (!session?.access_token) return;
+
+    fetch('http://localhost:3000/classes/upcoming', {
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`
+      }
+    })
       .then((res) => res.json())
       .then((data) => {
         setClases(data);
@@ -17,7 +25,7 @@ export function MisClases() {
         console.error('Error fetching classes:', err);
         setLoading(false);
       });
-  }, []);
+  }, [session]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
