@@ -64,7 +64,7 @@ La estrategia de despliegue sugerida es utilizar **Vercel** para el Frontend (po
 4. Configura el entorno:
    - **Root Directory:** `backend`
    - **Environment:** `Node`
-   - **Build Command:** `npm install && npx prisma generate && npm run build`
+   - **Build Command:** `npm install --include=dev && npx prisma generate && npm run build`
    - **Start Command:** `npm run start:prod`
 5. Configura las **Environment Variables** en Render pegando los valores de `DATABASE_URL`, `DIRECT_URL` y `OPENAI_API_KEY`.
 6. Haz clic en **Deploy**. Al finalizar, Render te dará un dominio (ej. `https://rdf-backend.onrender.com`).
