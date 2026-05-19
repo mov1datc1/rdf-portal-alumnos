@@ -34,6 +34,7 @@ model User {
   role           Role           @default(STUDENT)
   firstName      String?
   lastName       String?
+  isActive       Boolean        @default(true)
   currentLevelId String?        @db.Uuid
   currentLevel   Level?         @relation(fields: [currentLevelId], references: [id])
   progress       UserProgress[]
