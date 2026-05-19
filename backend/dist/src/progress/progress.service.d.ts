@@ -7,38 +7,38 @@ export declare class ProgressService {
             module: {
                 level: {
                     id: string;
-                    name: string;
                     createdAt: Date;
                     updatedAt: Date;
+                    name: string;
                     totalScoreTarget: number;
                 };
             } & {
                 id: string;
-                title: string;
                 createdAt: Date;
                 updatedAt: Date;
-                levelId: string;
                 orderIndex: number;
+                title: string;
+                levelId: string;
             };
         } & {
-            id: string;
-            moduleId: string;
-            type: import("@prisma/client").$Enums.ResourceType;
-            title: string;
-            description: string | null;
             url: string | null;
-            scheduledAt: Date | null;
-            durationExpected: number;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            title: string;
+            type: import("@prisma/client").$Enums.ResourceType;
+            description: string | null;
+            scheduledAt: Date | null;
+            durationExpected: number;
+            moduleId: string;
         };
     } & {
         id: string;
-        userId: string;
-        resourceId: string;
         status: import("@prisma/client").$Enums.ProgressStatus;
         timeSpentSeconds: number;
         score: number | null;
         lastAccessedAt: Date;
+        userId: string;
+        resourceId: string;
     })[]>;
 }
