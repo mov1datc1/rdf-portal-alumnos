@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  TEACHER
+}
+
+enum ResourceType {
+  LIVE_CLASS
+  RECORDED_VIDEO
+  PDF
+  TEST
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String         @unique
+  role           Role           @default(STUDENT)
+  firstName      String?
+  lastName       String?
+  currentLevelId String?        @db.Uuid
+  currentLevel   Level?         @relation(fields: [currentLevelId], references: [id])
+  progress       UserProgress[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Level {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String   // e.g., "B1 - Intermedio"
+  totalScoreTarget Int      @default(100)
+  modules          Module[]
+  users            User[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Module {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  levelId    String     @db.Uuid
+  level      Level      @relation(fields: [levelId], references: [id])
+  orderIndex Int
+  title      String
+  resources  Resource[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Resource {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  moduleId         String         @db.Uuid
+  module           Module         @relation(fields: [moduleId], references: [id])
+  type             ResourceType
+  title            String
+  description      String?
+  url              String?        // Link de Zoom, YouTube ID, o URL del PDF
+  scheduledAt      DateTime?      // Para clases en vivo
+  durationExpected Int            // Tiempo estimado en segundos
+  userProgress     UserProgress[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model UserProgress {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String         @db.Uuid
+  user             User           @relation(fields: [userId], references: [id])
+  resourceId       String         @db.Uuid
+  resource         Resource       @relation(fields: [resourceId], references: [id])
+  status           ProgressStatus @default(NOT_STARTED)
+  timeSpentSeconds Int            @default(0)
+  score            Int?
+  lastAccessedAt   DateTime       @default(now())
+
+  @@unique([userId, resourceId])
+}
