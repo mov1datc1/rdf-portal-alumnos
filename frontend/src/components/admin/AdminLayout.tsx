@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Users, FileText, LayoutDashboard, LogOut } from 'lucide-react';
+import { Users, FileText, LayoutDashboard, LogOut, Calendar } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
 
@@ -33,6 +33,10 @@ export function AdminLayout() {
           <NavLink to="/admin/resources" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <FileText className="w-5 h-5" />
             Recursos
+          </NavLink>
+          <NavLink to="/admin/schedule" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
+            <Calendar className="w-5 h-5" />
+            Programación
           </NavLink>
         </nav>
 

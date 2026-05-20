@@ -34,4 +34,14 @@ export class AdminController {
   createResource(@Body() body: any) {
     return this.adminService.createResource(body);
   }
+
+  @Get('levels')
+  getLevelsWithModules() {
+    return this.adminService.getLevelsWithModules();
+  }
+
+  @Post('schedule')
+  scheduleClass(@Body() body: any) {
+    return this.adminService.scheduleClass(body);
+  }
 }

@@ -5,13 +5,24 @@ import { PrismaService } from '../prisma.service';
 export class ClassesService {
   constructor(private prisma: PrismaService) {}
 
-  async getUpcomingClasses() {
+  async getUpcomingClasses(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.currentLevelId) {
+      return [];
+    }
+
     return this.prisma.resource.findMany({
       where: {
-        type: 'LIVE_CLASS'
+        type: 'LIVE_CLASS',
+        module: {
+          levelId: user.currentLevelId
+        },
+        scheduledAt: {
+          gte: new Date()
+        }
       },
       orderBy: {
-        createdAt: 'asc'
+        scheduledAt: 'asc'
       },
       take: 5
     });

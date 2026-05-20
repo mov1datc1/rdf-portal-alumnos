@@ -17,6 +17,7 @@ import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UsersManager } from './pages/admin/UsersManager';
 import { ResourcesManager } from './pages/admin/ResourcesManager';
+import { ScheduleManager } from './pages/admin/ScheduleManager';
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
@@ -69,6 +70,7 @@ function App() {
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<UsersManager />} />
             <Route path="resources" element={<ResourcesManager />} />
+            <Route path="schedule" element={<ScheduleManager />} />
           </Route>
         </Route>
 

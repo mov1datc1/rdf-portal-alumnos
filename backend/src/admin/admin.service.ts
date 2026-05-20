@@ -15,7 +15,7 @@ export class AdminService {
 
   async getUsers() {
     return this.prisma.user.findMany({
-      select: { id: true, email: true, firstName: true, lastName: true, role: true, isActive: true },
+      select: { id: true, email: true, firstName: true, lastName: true, role: true, isActive: true, currentLevelId: true },
       orderBy: { createdAt: 'desc' }
     });
   }
@@ -57,6 +57,7 @@ export class AdminService {
         firstName: data.firstName,
         lastName: data.lastName,
         role: data.role || 'STUDENT',
+        currentLevelId: data.currentLevelId || null,
       },
     });
   }
@@ -76,6 +77,29 @@ export class AdminService {
         type: data.type || 'RECORDED_VIDEO',
         moduleId: data.moduleId,
         durationExpected: data.durationExpected || 0,
+      },
+    });
+  }
+
+  async getLevelsWithModules() {
+    return this.prisma.level.findMany({
+      include: {
+        modules: {
+          orderBy: { orderIndex: 'asc' }
+        }
+      }
+    });
+  }
+
+  async scheduleClass(data: any) {
+    return this.prisma.resource.create({
+      data: {
+        title: data.title,
+        url: data.url,
+        type: 'LIVE_CLASS',
+        moduleId: data.moduleId,
+        scheduledAt: new Date(data.scheduledAt),
+        durationExpected: data.durationExpected || 3600,
       },
     });
   }

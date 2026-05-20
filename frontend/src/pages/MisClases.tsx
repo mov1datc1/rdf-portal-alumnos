@@ -86,7 +86,7 @@ export function MisClases() {
         </div>
 
         <div>
-          <CalendarWidget />
+          <CalendarWidget clases={clases} />
         </div>
       </div>
     </div>

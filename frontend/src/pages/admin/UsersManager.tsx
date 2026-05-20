@@ -12,20 +12,24 @@ export function UsersManager() {
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    password: '',
+    currentLevelId: ''
   });
+
+  const [levels, setLevels] = useState<any[]>([]);
 
   const session = useAuthStore(state => state.session);
 
-  const fetchUsers = async () => {
+  const fetchUsersAndLevels = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users`, {
-        headers: { 'Authorization': `Bearer ${session?.access_token}` }
-      });
-      if (res.ok) {
-        setUsers(await res.json());
-      }
+      const [usersRes, levelsRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/admin/users`, { headers: { 'Authorization': `Bearer ${session?.access_token}` } }),
+        fetch(`${import.meta.env.VITE_API_URL}/admin/levels`, { headers: { 'Authorization': `Bearer ${session?.access_token}` } })
+      ]);
+      
+      if (usersRes.ok) setUsers(await usersRes.json());
+      if (levelsRes.ok) setLevels(await levelsRes.json());
     } catch (e) {
       console.error(e);
     } finally {
@@ -34,7 +38,7 @@ export function UsersManager() {
   };
 
   useEffect(() => {
-    if (session) fetchUsers();
+    if (session) fetchUsersAndLevels();
   }, [session]);
 
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
@@ -53,6 +57,22 @@ export function UsersManager() {
     } catch (e) {
       console.error('Error toggling status', e);
     }
+  const handleAssignLevel = async (userId: string, levelId: string) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ currentLevelId: levelId || null })
+      });
+      if (res.ok) {
+        setUsers(users.map(u => u.id === userId ? { ...u, currentLevelId: levelId || null } : u));
+      }
+    } catch (e) {
+      console.error('Error assigning level', e);
+    }
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -69,8 +89,8 @@ export function UsersManager() {
       });
       if (res.ok) {
         setIsModalOpen(false);
-        setFormData({ firstName: '', lastName: '', email: '', password: '' });
-        fetchUsers();
+        setFormData({ firstName: '', lastName: '', email: '', password: '', currentLevelId: '' });
+        fetchUsersAndLevels();
       } else {
         const error = await res.json();
         alert(`Error: ${error.message}`);
@@ -104,6 +124,7 @@ export function UsersManager() {
             <tr>
               <th className="p-4">Nombre / Correo</th>
               <th className="p-4">Rol</th>
+              <th className="p-4">Nivel (Grupo)</th>
               <th className="p-4">Estado</th>
               <th className="p-4 text-right">Acciones</th>
             </tr>
@@ -111,11 +132,11 @@ export function UsersManager() {
           <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan={4} className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-[#1D3A8A]"/></td>
+                <td colSpan={5} className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-[#1D3A8A]"/></td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-8 text-center text-slate-500">No hay usuarios registrados.</td>
+                <td colSpan={5} className="p-8 text-center text-slate-500">No hay usuarios registrados.</td>
               </tr>
             ) : (
               users.map(u => (
@@ -125,6 +146,22 @@ export function UsersManager() {
                     <p className="text-xs text-slate-500">{u.email}</p>
                   </td>
                   <td className="p-4"><span className="bg-blue-50 text-[#1D3A8A] px-2 py-1 rounded text-xs font-bold">{u.role}</span></td>
+                  <td className="p-4">
+                    {u.role === 'STUDENT' ? (
+                      <select 
+                        value={u.currentLevelId || ''} 
+                        onChange={(e) => handleAssignLevel(u.id, e.target.value)}
+                        className="bg-slate-50 border border-slate-200 text-sm rounded-lg p-1.5 focus:ring-2 focus:ring-[#1D3A8A]/20"
+                      >
+                        <option value="">Sin Asignar</option>
+                        {levels.map(l => (
+                          <option key={l.id} value={l.id}>{l.name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className="text-slate-400 text-xs">-</span>
+                    )}
+                  </td>
                   <td className="p-4">
                     {u.isActive ? 
                       <span className="text-emerald-600 flex items-center gap-1 text-xs font-bold"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Activo</span> :
@@ -182,6 +219,16 @@ export function UsersManager() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Contraseña Temporal</label>
                 <input required type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="Ej. LesRois2026!" className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50" />
                 <p className="text-xs text-slate-500 mt-1">Mínimo 6 caracteres.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Asignar Grupo (Opcional)</label>
+                <select value={formData.currentLevelId} onChange={e => setFormData({...formData, currentLevelId: e.target.value})} className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50">
+                  <option value="">Sin Asignar</option>
+                  {levels.map(l => (
+                    <option key={l.id} value={l.id}>{l.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="pt-4 flex gap-3">
