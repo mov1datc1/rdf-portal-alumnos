@@ -39,7 +39,7 @@ export function MisClases() {
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
           <h2 className="text-lg font-bold text-slate-800 mb-6 border-b border-gray-100 pb-4">
-            Próximas Sesiones (Desde Backend)
+            Próximas Sesiones
           </h2>
           
           <div className="space-y-4">
