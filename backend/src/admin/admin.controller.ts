@@ -59,4 +59,19 @@ export class AdminController {
   updateScheduledClass(@Param('id') id: string, @Body() body: any) {
     return this.adminService.updateScheduledClass(id, body);
   }
+
+  @Post('levels')
+  createLevel(@Body() body: any) {
+    return this.adminService.createLevel(body);
+  }
+
+  @Patch('levels/:id')
+  updateLevel(@Param('id') id: string, @Body() body: any) {
+    return this.adminService.updateLevel(id, body);
+  }
+
+  @Delete('levels/:id')
+  deleteLevel(@Param('id') id: string) {
+    return this.adminService.deleteLevel(id);
+  }
 }

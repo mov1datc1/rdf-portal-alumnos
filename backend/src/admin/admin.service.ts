@@ -133,4 +133,45 @@ export class AdminService {
       }
     });
   }
+
+  async createLevel(data: any) {
+    const level = await this.prisma.level.create({
+      data: {
+        name: data.name,
+        totalScoreTarget: 100,
+      }
+    });
+    
+    await this.prisma.module.create({
+      data: {
+        levelId: level.id,
+        title: 'Módulo Único',
+        orderIndex: 1,
+      }
+    });
+    
+    return level;
+  }
+
+  async updateLevel(id: string, data: any) {
+    return this.prisma.level.update({
+      where: { id },
+      data: { name: data.name }
+    });
+  }
+
+  async deleteLevel(id: string) {
+    const modules = await this.prisma.module.findMany({ where: { levelId: id } });
+    const moduleIds = modules.map(m => m.id);
+    
+    const resources = await this.prisma.resource.findMany({ where: { moduleId: { in: moduleIds } } });
+    const resourceIds = resources.map(r => r.id);
+    
+    await this.prisma.userProgress.deleteMany({ where: { resourceId: { in: resourceIds } } });
+    await this.prisma.resource.deleteMany({ where: { moduleId: { in: moduleIds } } });
+    await this.prisma.module.deleteMany({ where: { levelId: id } });
+    await this.prisma.user.updateMany({ where: { currentLevelId: id }, data: { currentLevelId: null } });
+    
+    return this.prisma.level.delete({ where: { id } });
+  }
 }
