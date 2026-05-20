@@ -103,4 +103,34 @@ export class AdminService {
       },
     });
   }
+
+  async getScheduledClasses() {
+    return this.prisma.resource.findMany({
+      where: { type: 'LIVE_CLASS' },
+      include: {
+        module: {
+          include: { level: true }
+        }
+      },
+      orderBy: { scheduledAt: 'desc' }
+    });
+  }
+
+  async deleteScheduledClass(id: string) {
+    // Eliminar progresos asociados para evitar error de foreign key
+    await this.prisma.userProgress.deleteMany({ where: { resourceId: id } });
+    return this.prisma.resource.delete({ where: { id } });
+  }
+
+  async updateScheduledClass(id: string, data: any) {
+    return this.prisma.resource.update({
+      where: { id },
+      data: {
+        title: data.title,
+        url: data.url,
+        moduleId: data.moduleId,
+        scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
+      }
+    });
+  }
 }

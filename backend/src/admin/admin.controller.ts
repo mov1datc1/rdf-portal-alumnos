@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -43,5 +43,20 @@ export class AdminController {
   @Post('schedule')
   scheduleClass(@Body() body: any) {
     return this.adminService.scheduleClass(body);
+  }
+
+  @Get('schedule')
+  getScheduledClasses() {
+    return this.adminService.getScheduledClasses();
+  }
+
+  @Delete('schedule/:id')
+  deleteScheduledClass(@Param('id') id: string) {
+    return this.adminService.deleteScheduledClass(id);
+  }
+
+  @Patch('schedule/:id')
+  updateScheduledClass(@Param('id') id: string, @Body() body: any) {
+    return this.adminService.updateScheduledClass(id, body);
   }
 }

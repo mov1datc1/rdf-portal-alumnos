@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Loader2, Plus, Clock, Link as LinkIcon, BookOpen } from 'lucide-react';
+import { Calendar, Loader2, Plus, Clock, Link as LinkIcon, BookOpen, Search, Trash2, Edit2, X, Check } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 export function ScheduleManager() {
   const [levels, setLevels] = useState<any[]>([]);
+  const [scheduledClasses, setScheduledClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const session = useAuthStore(state => state.session);
 
   const [formData, setFormData] = useState({
@@ -18,21 +21,29 @@ export function ScheduleManager() {
     durationExpected: 3600
   });
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [levelsRes, scheduleRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_API_URL}/admin/levels`, {
+          headers: { 'Authorization': `Bearer ${session?.access_token}` }
+        }),
+        fetch(`${import.meta.env.VITE_API_URL}/admin/schedule`, {
+          headers: { 'Authorization': `Bearer ${session?.access_token}` }
+        })
+      ]);
+      
+      if (levelsRes.ok) setLevels(await levelsRes.json());
+      if (scheduleRes.ok) setScheduledClasses(await scheduleRes.json());
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (!session) return;
-    const fetchLevels = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/levels`, {
-          headers: { 'Authorization': `Bearer ${session.access_token}` }
-        });
-        if (res.ok) setLevels(await res.json());
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLevels();
+    if (session) fetchData();
   }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,8 +53,13 @@ export function ScheduleManager() {
     const scheduledAt = new Date(`${formData.scheduledAtDate}T${formData.scheduledAtTime}`);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule`, {
-        method: 'POST',
+      const url = editingId 
+        ? `${import.meta.env.VITE_API_URL}/admin/schedule/${editingId}`
+        : `${import.meta.env.VITE_API_URL}/admin/schedule`;
+      const method = editingId ? 'PATCH' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
@@ -58,7 +74,6 @@ export function ScheduleManager() {
       });
 
       if (res.ok) {
-        alert('Clase programada exitosamente');
         setFormData({
           levelId: '',
           moduleId: '',
@@ -68,6 +83,8 @@ export function ScheduleManager() {
           scheduledAtTime: '',
           durationExpected: 3600
         });
+        setEditingId(null);
+        fetchData();
       } else {
         const error = await res.json();
         alert(`Error: ${error.message}`);
@@ -80,8 +97,60 @@ export function ScheduleManager() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta clase?')) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleEdit = (cls: any) => {
+    const dt = new Date(cls.scheduledAt);
+    const dateStr = dt.toISOString().split('T')[0];
+    const timeStr = dt.toTimeString().substring(0, 5);
+
+    setFormData({
+      levelId: cls.module?.levelId || '',
+      moduleId: cls.moduleId || '',
+      title: cls.title || '',
+      url: cls.url || '',
+      scheduledAtDate: dateStr,
+      scheduledAtTime: timeStr,
+      durationExpected: cls.durationExpected || 3600
+    });
+    setEditingId(cls.id);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setFormData({
+      levelId: '',
+      moduleId: '',
+      title: '',
+      url: '',
+      scheduledAtDate: '',
+      scheduledAtTime: '',
+      durationExpected: 3600
+    });
+  };
+
   const selectedLevel = levels.find(l => l.id === formData.levelId);
   const availableModules = selectedLevel ? selectedLevel.modules : [];
+
+  const filteredClasses = scheduledClasses.filter(c => {
+    const term = searchTerm.toLowerCase();
+    const matchTitle = c.title?.toLowerCase().includes(term);
+    const matchLevel = c.module?.level?.name?.toLowerCase().includes(term);
+    return matchTitle || matchLevel;
+  });
 
   return (
     <div className="space-y-6">
@@ -90,14 +159,21 @@ export function ScheduleManager() {
         <p className="text-slate-500 text-sm">Agenda sesiones en vivo para grupos específicos.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-[#1D3A8A]" />
-            Nueva Clase
-          </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm sticky top-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <Calendar className="w-6 h-6 text-[#1D3A8A]" />
+              {editingId ? 'Editar Clase' : 'Nueva Clase'}
+            </h2>
+            {editingId && (
+              <button onClick={cancelEdit} className="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
+                <X className="w-4 h-4" /> Cancelar
+              </button>
+            )}
+          </div>
 
-          {loading ? (
+          {loading && !levels.length ? (
             <div className="flex justify-center p-8">
               <Loader2 className="w-8 h-8 text-[#1D3A8A] animate-spin" />
             </div>
@@ -201,23 +277,87 @@ export function ScheduleManager() {
                 disabled={isSubmitting || !formData.moduleId}
                 className="w-full py-3 rounded-xl font-bold text-white bg-[#1D3A8A] hover:bg-blue-800 transition-colors flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
               >
-                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-                Programar Clase
+                {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingId ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
+                {editingId ? 'Guardar Cambios' : 'Programar Clase'}
               </button>
             </form>
           )}
         </div>
 
-        {/* Podríamos poner otra sección aquí con las clases programadas próximamente */}
-        <div className="bg-[#1D3A8A]/5 rounded-3xl p-8 border border-blue-100 flex items-center justify-center text-center">
-          <div>
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <Calendar className="w-10 h-10 text-[#1D3A8A]" />
+        {/* Tabla Resumen de Clases Programadas */}
+        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col h-[700px]">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <Calendar className="w-6 h-6 text-[#1D3A8A]" />
+              Clases Programadas
+            </h2>
+          </div>
+
+          <div className="relative mb-4">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="w-4 h-4 text-slate-400" />
             </div>
-            <h3 className="text-xl font-bold text-[#1D3A8A] mb-2">Sincronización Automática</h3>
-            <p className="text-slate-600 max-w-sm mx-auto">
-              Al programar una clase para un Grupo, ésta aparecerá automáticamente en la vista "Mis Clases" y en el Calendario de todos los alumnos asignados a ese nivel.
-            </p>
+            <input 
+              type="text" 
+              placeholder="Buscar por título o grupo..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full border border-slate-200 rounded-xl py-2 pl-10 pr-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm" 
+            />
+          </div>
+
+          <div className="overflow-y-auto flex-1 pr-2">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-gray-100 sticky top-0 z-10">
+                <tr>
+                  <th className="p-3">Clase / Grupo</th>
+                  <th className="p-3">Fecha y Hora</th>
+                  <th className="p-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading && !scheduledClasses.length ? (
+                  <tr>
+                    <td colSpan={3} className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-[#1D3A8A]"/></td>
+                  </tr>
+                ) : filteredClasses.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="p-8 text-center text-slate-500">No hay clases que coincidan con la búsqueda.</td>
+                  </tr>
+                ) : (
+                  filteredClasses.map(cls => (
+                    <tr key={cls.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="p-3">
+                        <p className="font-bold text-slate-800">{cls.title}</p>
+                        <p className="text-xs text-slate-500">{cls.module?.level?.name || 'Sin grupo'}</p>
+                      </td>
+                      <td className="p-3">
+                        <p className="font-semibold text-slate-700">{new Date(cls.scheduledAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-slate-500">{new Date(cls.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                      </td>
+                      <td className="p-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => handleEdit(cls)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Editar clase"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(cls.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar clase"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
