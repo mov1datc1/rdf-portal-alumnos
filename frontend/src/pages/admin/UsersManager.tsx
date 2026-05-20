@@ -57,6 +57,8 @@ export function UsersManager() {
     } catch (e) {
       console.error('Error toggling status', e);
     }
+  };
+
   const handleAssignLevel = async (userId: string, levelId: string) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users/${userId}`, {
