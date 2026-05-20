@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, MoreVertical, Loader2, X, Check, Power, PowerOff } from 'lucide-react';
+import { UserPlus, Loader2, X, Check, Power, PowerOff } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 export function UsersManager() {
