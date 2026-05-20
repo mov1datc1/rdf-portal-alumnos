@@ -12,12 +12,17 @@ export function Login() {
   
   const navigate = useNavigate();
   const session = useAuthStore((state) => state.session);
+  const isAdmin = useAuthStore((state) => state.isAdmin);
 
   useEffect(() => {
     if (session) {
-      navigate('/');
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     }
-  }, [session, navigate]);
+  }, [session, isAdmin, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

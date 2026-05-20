@@ -11,18 +11,20 @@ interface Message {
 
 export function ChatbotPanel() {
   const [isOpen, setIsOpen] = useState(true);
+  const session = useAuthStore(state => state.session);
+  const user = useAuthStore(state => state.user);
+  const firstName = user?.user_metadata?.firstName || 'Alumno';
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
       sender: 'bot',
-      text: 'Bonjour Andrea 👋 Puedo ayudarte a encontrar tu próxima clase, abrir un PDF o revisar tu avance.'
+      text: `Bonjour ${firstName} 👋 Puedo ayudarte a encontrar tu próxima clase, abrir un PDF o revisar tu avance.`
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const session = useAuthStore(state => state.session);
-  const user = useAuthStore(state => state.user);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {

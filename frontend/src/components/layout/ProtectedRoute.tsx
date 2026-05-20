@@ -13,5 +13,9 @@ export function ProtectedRoute({ requireAdmin = false }: { requireAdmin?: boolea
     return <Navigate to="/" replace />;
   }
 
+  if (!requireAdmin && isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
+
   return <Outlet />;
 }

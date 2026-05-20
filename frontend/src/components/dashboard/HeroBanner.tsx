@@ -1,4 +1,9 @@
+import { useAuthStore } from '../../store/authStore';
+
 export function HeroBanner() {
+  const user = useAuthStore(state => state.user);
+  const firstName = user?.user_metadata?.firstName || 'Alumno';
+
   return (
     <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#1D3A8A] to-[#EF4444] text-white p-10 shadow-lg">
       <div className="absolute inset-0 bg-black/10" /> {/* Overlay */}
@@ -8,7 +13,7 @@ export function HeroBanner() {
             🇲🇽 MÉXICO - PORTAL ACADÉMICO PREMIUM
           </p>
           <h2 className="text-4xl font-extrabold mb-4 leading-tight">
-            Bonjour, Andrea 👋<br />
+            Bonjour, {firstName} 👋<br />
             Tu aprendizaje del francés<br />
             ahora vive en un solo lugar.
           </h2>
