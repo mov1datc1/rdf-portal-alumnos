@@ -47,11 +47,12 @@ export function Login() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-[#1D3A8A] p-8 text-center">
-          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-            <span className="text-3xl">👑</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white">Les Rois Du Français</h1>
-          <p className="text-blue-200 text-sm mt-2">Portal de Alumnos</p>
+          <img 
+            src="https://lesroisdufrancais.com/wp-content/uploads/2024/06/Copia-de-LogoFinal-01-scaled-1-2048x1151.webp" 
+            alt="Les Rois Du Français" 
+            className="h-16 w-auto object-contain mx-auto mb-4 filter brightness-0 invert" 
+          />
+          <p className="text-blue-200 text-sm mt-2 font-medium">Portal de Alumnos</p>
         </div>
         
         <div className="p-8">

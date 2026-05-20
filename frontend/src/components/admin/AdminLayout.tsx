@@ -17,7 +17,11 @@ export function AdminLayout() {
     <div className="flex h-screen bg-slate-50">
       <aside className="w-64 bg-[#1D3A8A] text-white p-6 flex flex-col">
         <div className="mb-10">
-          <h2 className="text-2xl font-bold">Admin RDF</h2>
+          <img 
+            src="https://lesroisdufrancais.com/wp-content/uploads/2024/06/Copia-de-LogoFinal-01-scaled-1-2048x1151.webp" 
+            alt="Admin RDF" 
+            className="w-32 object-contain filter brightness-0 invert mb-2" 
+          />
           <p className="text-xs text-blue-300">Panel de Control</p>
         </div>
 

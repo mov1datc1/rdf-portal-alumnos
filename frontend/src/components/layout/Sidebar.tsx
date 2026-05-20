@@ -28,14 +28,11 @@ export function Sidebar() {
     <aside className="w-64 bg-white min-h-screen border-r border-gray-100 flex flex-col fixed left-0 top-0">
       <div className="p-6">
         <div className="flex items-center gap-3">
-          {/* Placeholder for Logo */}
-          <div className="w-8 h-8 bg-[#1D3A8A] rounded-md flex items-center justify-center text-white font-bold text-xs">
-            RDF
-          </div>
-          <div>
-            <h1 className="text-[#1D3A8A] font-bold leading-tight">Les Rois<br/>Du Français</h1>
-            <p className="text-[#EF4444] text-[10px] font-bold uppercase tracking-wider mt-1">Portal de Alumnos</p>
-          </div>
+          <img 
+            src="https://lesroisdufrancais.com/wp-content/uploads/2024/06/Copia-de-LogoFinal-01-scaled-1-2048x1151.webp" 
+            alt="Les Rois Du Français" 
+            className="w-40 object-contain" 
+          />
         </div>
       </div>
 
