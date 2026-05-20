@@ -1,6 +1,14 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { passportJwtSecret } from 'jwks-rsa';
+
+const jwksProvider = passportJwtSecret({
+  cache: true,
+  rateLimit: true,
+  jwksRequestsPerMinute: 5,
+  jwksUri: `${process.env.SUPABASE_URL}/auth/v1/.well-known/jwks.json`,
+});
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -8,7 +16,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.SUPABASE_JWT_SECRET as string,
+      secretOrKeyProvider: (request: any, rawJwtToken: any, done: any) => {
+        jwksProvider(request, rawJwtToken, (err, secret) => {
+          if (err || !secret) {
+            // Fallback to legacy HS256 string secret
+            return done(null, process.env.SUPABASE_JWT_SECRET as string);
+          }
+          done(null, secret);
+        });
+      },
       algorithms: ['HS256', 'ES256', 'RS256'],
     });
   }
