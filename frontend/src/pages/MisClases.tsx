@@ -11,7 +11,7 @@ export function MisClases() {
   useEffect(() => {
     if (!session?.access_token) return;
 
-    fetch('http://localhost:3000/classes/upcoming', {
+    fetch(`${import.meta.env.VITE_API_URL}/classes/upcoming`, {
       headers: {
         'Authorization': `Bearer ${session.access_token}`
       }

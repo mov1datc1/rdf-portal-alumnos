@@ -20,7 +20,7 @@ export function UsersManager() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:3000/admin/users', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users`, {
         headers: { 'Authorization': `Bearer ${session?.access_token}` }
       });
       if (res.ok) {
@@ -39,7 +39,7 @@ export function UsersManager() {
 
   const handleToggleStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      const res = await fetch(`http://localhost:3000/admin/users/${userId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users/${userId}`, {
         method: 'PATCH',
         headers: { 
           'Authorization': `Bearer ${session?.access_token}`,
@@ -59,7 +59,7 @@ export function UsersManager() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch('http://localhost:3000/admin/users', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${session?.access_token}`,

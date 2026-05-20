@@ -51,7 +51,7 @@ export function ChatbotPanel() {
       // Haremos un pequeño "hack" pasando el email como userId para que el backend lo encuentre, o actualizamos el backend para buscar por email si pasamos un email.
       // O simplemente asumimos que el backend busca al primer usuario si mandamos un ID genérico.
       
-      const response = await fetch('http://localhost:3000/ai/chat', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

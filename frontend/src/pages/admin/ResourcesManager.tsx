@@ -16,7 +16,7 @@ export function ResourcesManager() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('http://localhost:3000/admin/resources', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/resources`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${session?.access_token}`,
