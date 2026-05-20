@@ -10,6 +10,11 @@ import { Roles } from '../auth/roles.decorator';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @Get('dashboard')
+  getDashboardMetrics() {
+    return this.adminService.getDashboardMetrics();
+  }
+
   @Get('users')
   getUsers() {
     return this.adminService.getUsers();

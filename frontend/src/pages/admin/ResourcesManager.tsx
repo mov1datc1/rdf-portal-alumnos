@@ -1,6 +1,44 @@
-import { Upload, Link as LinkIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Upload, Link as LinkIcon, Check, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 export function ResourcesManager() {
+  const session = useAuthStore(state => state.session);
+  const [formData, setFormData] = useState({ title: '', url: '', type: 'RECORDED_VIDEO' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleCreateResource = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.url) {
+      alert('Por favor completa el título y la URL');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('http://localhost:3000/admin/resources', {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (res.ok) {
+        alert('¡Recurso creado exitosamente!');
+        setFormData({ title: '', url: '', type: 'RECORDED_VIDEO' });
+      } else {
+        const error = await res.json();
+        alert(`Error: ${error.message}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Ocurrió un error de conexión');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -28,8 +66,8 @@ export function ResourcesManager() {
                 <p className="text-xs text-slate-400 mt-1">PDF o MP4 (Máx 50MB)</p>
               </div>
             </div>
-            <button type="button" className="w-full bg-[#1D3A8A] text-white py-3 rounded-xl font-bold hover:bg-blue-800 transition-colors">
-              Subir a Supabase Storage
+            <button type="button" onClick={() => alert('Función de subida de archivos físicos en desarrollo. Usa los enlaces externos.')} className="w-full bg-[#1D3A8A] text-white py-3 rounded-xl font-bold hover:bg-blue-800 transition-colors">
+              Subir
             </button>
           </form>
         </div>
@@ -39,19 +77,25 @@ export function ResourcesManager() {
             <LinkIcon className="w-5 h-5 text-emerald-500" /> 
             Vincular Link Externo (Zoom/Drive)
           </h2>
-          <form className="space-y-4">
+          <form onSubmit={handleCreateResource} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Título</label>
+              <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20" placeholder="Ej. Clase 1 en Vivo" />
+            </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Tipo de Recurso</label>
-              <select className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20">
-                <option>Clase en Vivo (Zoom)</option>
-                <option>Video Externo (YouTube)</option>
+              <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20">
+                <option value="LIVE_CLASS">Clase en Vivo (Zoom)</option>
+                <option value="RECORDED_VIDEO">Video Externo (YouTube)</option>
+                <option value="PDF_DOCUMENT">Documento (Drive/PDF)</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">URL del Link</label>
-              <input type="url" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20" placeholder="https://" />
+              <input type="url" required value={formData.url} onChange={e => setFormData({...formData, url: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20" placeholder="https://" />
             </div>
-            <button type="button" className="w-full bg-white border border-slate-300 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-50 transition-colors">
+            <button disabled={isSubmitting} type="submit" className="w-full bg-white border border-slate-300 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-50 transition-colors flex justify-center items-center gap-2">
+              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
               Guardar Enlace
             </button>
           </form>

@@ -16,7 +16,21 @@ export class AdminService {
   async getUsers() {
     return this.prisma.user.findMany({
       select: { id: true, email: true, firstName: true, lastName: true, role: true, isActive: true },
+      orderBy: { createdAt: 'desc' }
     });
+  }
+
+  async getDashboardMetrics() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const [activeStudents, totalResources, newStudents] = await Promise.all([
+      this.prisma.user.count({ where: { role: 'STUDENT', isActive: true } }),
+      this.prisma.resource.count(),
+      this.prisma.user.count({ where: { role: 'STUDENT', createdAt: { gte: thirtyDaysAgo } } })
+    ]);
+
+    return { activeStudents, totalResources, newStudents };
   }
 
   async createUser(data: any) {

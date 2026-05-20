@@ -1,6 +1,32 @@
-import { Users, FileText, Activity } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Users, FileText, Activity, Loader2 } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 export function AdminDashboard() {
+  const [metrics, setMetrics] = useState({ activeStudents: 0, totalResources: 0, newStudents: 0 });
+  const [loading, setLoading] = useState(true);
+  const session = useAuthStore(state => state.session);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/admin/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setMetrics(data);
+        }
+      } catch (error) {
+        console.error('Error fetching metrics', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (session) fetchMetrics();
+  }, [session]);
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
@@ -15,7 +41,9 @@ export function AdminDashboard() {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-500">Alumnos Activos</p>
-            <h3 className="text-2xl font-bold text-slate-800">124</h3>
+            <h3 className="text-2xl font-bold text-slate-800">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin mt-1" /> : metrics.activeStudents}
+            </h3>
           </div>
         </div>
 
@@ -25,7 +53,9 @@ export function AdminDashboard() {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-500">Recursos Totales</p>
-            <h3 className="text-2xl font-bold text-slate-800">45</h3>
+            <h3 className="text-2xl font-bold text-slate-800">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin mt-1" /> : metrics.totalResources}
+            </h3>
           </div>
         </div>
 
@@ -35,7 +65,9 @@ export function AdminDashboard() {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-500">Nuevos (Mes)</p>
-            <h3 className="text-2xl font-bold text-slate-800">+12</h3>
+            <h3 className="text-2xl font-bold text-slate-800">
+              {loading ? <Loader2 className="w-5 h-5 animate-spin mt-1" /> : `+${metrics.newStudents}`}
+            </h3>
           </div>
         </div>
       </div>
