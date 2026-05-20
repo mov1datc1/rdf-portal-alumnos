@@ -1,8 +1,6 @@
-import { useState } from 'react';
-import { Upload, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Upload, Link as LinkIcon } from 'lucide-react';
 
 export function ResourcesManager() {
-  const [loading, setLoading] = useState(false);
 
   return (
     <div className="space-y-6">
