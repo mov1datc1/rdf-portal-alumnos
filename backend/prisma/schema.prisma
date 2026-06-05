@@ -20,6 +20,7 @@ enum ResourceType {
   RECORDED_VIDEO
   PDF
   TEST
+  HOMEWORK
 }
 
 enum ProgressStatus {

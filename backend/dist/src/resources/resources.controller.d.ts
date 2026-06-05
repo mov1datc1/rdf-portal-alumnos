@@ -1,8 +1,8 @@
-import { ClassesService } from './classes.service';
-export declare class ClassesController {
-    private readonly classesService;
-    constructor(classesService: ClassesService);
-    getUpcomingClasses(req: any): Promise<{
+import { ResourcesService } from './resources.service';
+export declare class ResourcesController {
+    private readonly resourcesService;
+    constructor(resourcesService: ResourcesService);
+    getMyResources(req: any): Promise<{
         url: string | null;
         id: string;
         createdAt: Date;

@@ -9,39 +9,40 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClassesService = void 0;
+exports.ResourcesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
-let ClassesService = class ClassesService {
+let ResourcesService = class ResourcesService {
     prisma;
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async getUpcomingClasses(userId) {
-        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    async getMyResources(userId) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { currentLevelId: true }
+        });
         if (!user || !user.currentLevelId) {
             return [];
         }
         return this.prisma.resource.findMany({
             where: {
-                type: 'LIVE_CLASS',
                 module: {
                     levelId: user.currentLevelId
                 },
-                scheduledAt: {
-                    gte: new Date()
+                type: {
+                    in: ['RECORDED_VIDEO', 'PDF', 'HOMEWORK', 'TEST']
                 }
             },
             orderBy: {
-                scheduledAt: 'asc'
-            },
-            take: 5
+                createdAt: 'desc'
+            }
         });
     }
 };
-exports.ClassesService = ClassesService;
-exports.ClassesService = ClassesService = __decorate([
+exports.ResourcesService = ResourcesService;
+exports.ResourcesService = ResourcesService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
-], ClassesService);
-//# sourceMappingURL=classes.service.js.map
+], ResourcesService);
+//# sourceMappingURL=resources.service.js.map

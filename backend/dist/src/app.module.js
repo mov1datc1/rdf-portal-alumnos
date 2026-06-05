@@ -15,12 +15,14 @@ const progress_module_1 = require("./progress/progress.module");
 const classes_module_1 = require("./classes/classes.module");
 const ai_module_1 = require("./ai/ai.module");
 const auth_module_1 = require("./auth/auth.module");
+const admin_module_1 = require("./admin/admin.module");
+const resources_module_1 = require("./resources/resources.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [progress_module_1.ProgressModule, classes_module_1.ClassesModule, ai_module_1.AiModule, auth_module_1.AuthModule],
+        imports: [progress_module_1.ProgressModule, classes_module_1.ClassesModule, ai_module_1.AiModule, auth_module_1.AuthModule, admin_module_1.AdminModule, resources_module_1.ResourcesModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, prisma_service_1.PrismaService],
         exports: [prisma_service_1.PrismaService],

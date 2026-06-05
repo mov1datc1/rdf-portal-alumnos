@@ -32,11 +32,18 @@ let AiService = class AiService {
                 currentLevel: true,
             }
         });
-        const upcomingClasses = await this.prisma.resource.findMany({
-            where: { type: 'LIVE_CLASS' },
+        const upcomingClasses = user?.currentLevelId ? await this.prisma.resource.findMany({
+            where: {
+                type: 'LIVE_CLASS',
+                module: { levelId: user.currentLevelId },
+                scheduledAt: { gte: new Date() }
+            },
             orderBy: { scheduledAt: 'asc' },
-            take: 1,
-        });
+            take: 5,
+        }) : [];
+        const classesList = upcomingClasses.length > 0
+            ? upcomingClasses.map(c => `- ${c.title} (Fecha: ${c.scheduledAt?.toLocaleString()})`).join('\n      ')
+            : 'No hay clases programadas actualmente.';
         const progress = user ? await this.prisma.userProgress.findFirst({
             where: { userId: user.id },
             orderBy: { lastAccessedAt: 'desc' }
@@ -48,12 +55,14 @@ let AiService = class AiService {
       CONTEXTO REAL DEL ALUMNO:
       - Nombre: ${user?.firstName || 'Alumno'}
       - Nivel actual: ${user?.currentLevel?.name || 'Por definir'}
-      - Próxima clase programada: ${upcomingClasses[0]?.title || 'Ninguna'} (Fecha: ${upcomingClasses[0]?.scheduledAt?.toLocaleDateString() || 'N/A'})
+      - Próximas clases programadas:
+      ${classesList}
       - Último progreso registrado: ${progress?.score || 0}%
       
       REGLAS:
       - Responde a las preguntas del alumno basándote ESTRICTAMENTE en su contexto.
-      - Si preguntan por su progreso o próxima clase, dales los datos exactos que tienes arriba.
+      - Si preguntan por sus próximas clases, dales los datos exactos que tienes arriba.
+      - Si preguntan cuál sigue después de una clase, lee cuidadosamente la lista de "Próximas clases programadas" en orden cronológico para responder.
       - No inventes clases ni horarios que no estén en el contexto.
       - Sé muy conciso y directo (máximo 2-3 oraciones).
     `;

@@ -1,16 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, Link as LinkIcon, Check, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 export function ResourcesManager() {
   const session = useAuthStore(state => state.session);
-  const [formData, setFormData] = useState({ title: '', url: '', type: 'RECORDED_VIDEO' });
+  const [formData, setFormData] = useState({ title: '', url: '', type: 'RECORDED_VIDEO', levelId: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [levels, setLevels] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchLevels();
+  }, []);
+
+  const fetchLevels = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/levels`, {
+        headers: { 'Authorization': `Bearer ${session?.access_token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLevels(data);
+        if (data.length > 0) {
+          setFormData(prev => ({ ...prev, levelId: data[0].id }));
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleCreateResource = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.url) {
-      alert('Por favor completa el título y la URL');
+    if (!formData.title || !formData.url || !formData.levelId) {
+      alert('Por favor completa todos los campos (Título, URL, y Grupo)');
+      return;
+    }
+
+    const selectedLevel = levels.find(l => l.id === formData.levelId);
+    const moduleId = selectedLevel?.modules?.[0]?.id;
+
+    if (!moduleId) {
+      alert('El grupo seleccionado no tiene un módulo válido asignado.');
       return;
     }
 
@@ -22,12 +52,17 @@ export function ResourcesManager() {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          title: formData.title,
+          url: formData.url,
+          type: formData.type,
+          moduleId: moduleId
+        })
       });
       
       if (res.ok) {
         alert('¡Recurso creado exitosamente!');
-        setFormData({ title: '', url: '', type: 'RECORDED_VIDEO' });
+        setFormData(prev => ({ ...prev, title: '', url: '' }));
       } else {
         const error = await res.json();
         alert(`Error: ${error.message}`);
@@ -82,12 +117,24 @@ export function ResourcesManager() {
               <label className="block text-sm font-semibold text-slate-700 mb-1">Título</label>
               <input type="text" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20" placeholder="Ej. Clase 1 en Vivo" />
             </div>
+            
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Grupo Asignado</label>
+              <select value={formData.levelId} onChange={e => setFormData({...formData, levelId: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20">
+                {levels.length === 0 && <option value="">Cargando grupos...</option>}
+                {levels.map(level => (
+                  <option key={level.id} value={level.id}>{level.name}</option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Tipo de Recurso</label>
               <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20">
                 <option value="LIVE_CLASS">Clase en Vivo (Zoom)</option>
                 <option value="RECORDED_VIDEO">Video Externo (YouTube)</option>
-                <option value="PDF_DOCUMENT">Documento (Drive/PDF)</option>
+                <option value="PDF">Documento PDF</option>
+                <option value="HOMEWORK">Tareas (Word/Doc)</option>
               </select>
             </div>
             <div>

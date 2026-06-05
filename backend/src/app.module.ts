@@ -7,9 +7,10 @@ import { ClassesModule } from './classes/classes.module';
 import { AiModule } from './ai/ai.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
+import { ResourcesModule } from './resources/resources.module';
 
 @Module({
-  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule],
+  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],

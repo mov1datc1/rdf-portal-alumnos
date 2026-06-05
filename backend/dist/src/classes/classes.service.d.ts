@@ -2,7 +2,7 @@ import { PrismaService } from '../prisma.service';
 export declare class ClassesService {
     private prisma;
     constructor(prisma: PrismaService);
-    getUpcomingClasses(): Promise<{
+    getUpcomingClasses(userId: string): Promise<{
         url: string | null;
         id: string;
         createdAt: Date;

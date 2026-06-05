@@ -12,30 +12,30 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClassesController = void 0;
+exports.ResourcesController = void 0;
 const common_1 = require("@nestjs/common");
-const classes_service_1 = require("./classes.service");
+const resources_service_1 = require("./resources.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
-let ClassesController = class ClassesController {
-    classesService;
-    constructor(classesService) {
-        this.classesService = classesService;
+let ResourcesController = class ResourcesController {
+    resourcesService;
+    constructor(resourcesService) {
+        this.resourcesService = resourcesService;
     }
-    async getUpcomingClasses(req) {
-        return this.classesService.getUpcomingClasses(req.user.userId);
+    async getMyResources(req) {
+        return this.resourcesService.getMyResources(req.user.userId || req.user.id);
     }
 };
-exports.ClassesController = ClassesController;
+exports.ResourcesController = ResourcesController;
 __decorate([
-    (0, common_1.Get)('upcoming'),
+    (0, common_1.Get)('my-resources'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], ClassesController.prototype, "getUpcomingClasses", null);
-exports.ClassesController = ClassesController = __decorate([
-    (0, common_1.Controller)('classes'),
+], ResourcesController.prototype, "getMyResources", null);
+exports.ResourcesController = ResourcesController = __decorate([
+    (0, common_1.Controller)('resources'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [classes_service_1.ClassesService])
-], ClassesController);
-//# sourceMappingURL=classes.controller.js.map
+    __metadata("design:paramtypes", [resources_service_1.ResourcesService])
+], ResourcesController);
+//# sourceMappingURL=resources.controller.js.map
