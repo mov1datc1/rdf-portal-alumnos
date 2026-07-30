@@ -138,6 +138,8 @@ export class AdminService {
     const level = await this.prisma.level.create({
       data: {
         name: data.name,
+        levelCode: data.levelCode || 'A1',
+        schedule: data.schedule || null,
         totalScoreTarget: 100,
       }
     });
@@ -154,9 +156,14 @@ export class AdminService {
   }
 
   async updateLevel(id: string, data: any) {
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.levelCode !== undefined) updateData.levelCode = data.levelCode;
+    if (data.schedule !== undefined) updateData.schedule = data.schedule;
+
     return this.prisma.level.update({
       where: { id },
-      data: { name: data.name }
+      data: updateData,
     });
   }
 

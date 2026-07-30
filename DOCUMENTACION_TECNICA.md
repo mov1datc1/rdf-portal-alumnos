@@ -1,5 +1,5 @@
 # Portal de Alumnos - Les Rois Du Français
-## Documentación Técnica v1.0
+## Documentación Técnica v1.1
 
 Este documento contiene la arquitectura técnica, configuración y pasos de despliegue para el Portal de Alumnos de Les Rois Du Français.
 
@@ -45,7 +45,7 @@ VITE_API_URL="https://tu-backend-en-render.onrender.com"
 
 La base de datos relacional almacena el progreso granular del alumno. Modelos principales:
 - **`User`**: Alumno o Profesor (`role`, `email`, `currentLevelId`).
-- **`Level`**: Ej. B1 · Intermedio.
+- **`Level`**: Grupo de estudio. Campos: `name` (nombre del grupo, ej. "Grupo París"), `levelCode` (nivel académico: A1-C2), `schedule` (horario, ej. "Lun, Mier, Vier · 10:00-12:00").
 - **`Module`**: Sub-unidad del nivel.
 - **`Resource`**: Clases en vivo, Videos grabados, PDFs.
 - **`UserProgress`**: Tabla pivote que registra el % de avance, score y estado (`IN_PROGRESS`, `COMPLETED`) de un usuario en un recurso.
@@ -89,3 +89,8 @@ El chatbot funciona mediante un patrón de **Inyección de Contexto**.
 2. NestJS (`AiService`) recibe el mensaje y hace un query a la BD buscando el nombre, nivel y próxima clase del usuario.
 3. NestJS inyecta estos datos dentro de un `System Prompt` oculto y envía todo al modelo `gpt-4o-mini` vía la SDK de OpenAI.
 4. El LLM devuelve una respuesta en el tono corporativo basándose *únicamente* en los datos inyectados, evitando alucinaciones sobre clases inexistentes.
+
+---
+
+## 6. Historial de Cambios
+Consultar el archivo [`CHANGELOG.md`](./CHANGELOG.md) para el registro completo de versiones y cambios del proyecto.

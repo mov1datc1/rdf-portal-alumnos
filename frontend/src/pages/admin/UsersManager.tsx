@@ -126,7 +126,7 @@ export function UsersManager() {
             <tr>
               <th className="p-4">Nombre / Correo</th>
               <th className="p-4">Rol</th>
-              <th className="p-4">Nivel (Grupo)</th>
+              <th className="p-4">Grupo</th>
               <th className="p-4">Estado</th>
               <th className="p-4 text-right">Acciones</th>
             </tr>
@@ -157,7 +157,7 @@ export function UsersManager() {
                       >
                         <option value="">Sin Asignar</option>
                         {levels.map(l => (
-                          <option key={l.id} value={l.id}>{l.name}</option>
+                          <option key={l.id} value={l.id}>{l.name}{l.levelCode ? ` (${l.levelCode})` : ''}</option>
                         ))}
                       </select>
                     ) : (
@@ -228,7 +228,7 @@ export function UsersManager() {
                 <select value={formData.currentLevelId} onChange={e => setFormData({...formData, currentLevelId: e.target.value})} className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50">
                   <option value="">Sin Asignar</option>
                   {levels.map(l => (
-                    <option key={l.id} value={l.id}>{l.name}</option>
+                    <option key={l.id} value={l.id}>{l.name}{l.levelCode ? ` (${l.levelCode})` : ''}</option>
                   ))}
                 </select>
               </div>

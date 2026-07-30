@@ -45,7 +45,9 @@ model User {
 
 model Level {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String   // e.g., "B1 - Intermedio"
+  name             String   // Nombre del grupo, e.g., "Grupo París"
+  levelCode        String   @default("A1") // Nivel académico: A1, A2, B1, B2, C1, C2
+  schedule         String?  // Horario, e.g., "Lun, Mier, Vier · 10:00-12:00"
   totalScoreTarget Int      @default(100)
   modules          Module[]
   users            User[]
