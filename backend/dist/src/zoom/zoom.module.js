@@ -6,20 +6,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdminModule = void 0;
+exports.ZoomModule = void 0;
 const common_1 = require("@nestjs/common");
-const admin_controller_1 = require("./admin.controller");
-const admin_service_1 = require("./admin.service");
+const zoom_controller_1 = require("./zoom.controller");
+const zoom_service_1 = require("./zoom.service");
 const prisma_service_1 = require("../prisma.service");
-const zoom_module_1 = require("../zoom/zoom.module");
-let AdminModule = class AdminModule {
+let ZoomModule = class ZoomModule {
 };
-exports.AdminModule = AdminModule;
-exports.AdminModule = AdminModule = __decorate([
+exports.ZoomModule = ZoomModule;
+exports.ZoomModule = ZoomModule = __decorate([
     (0, common_1.Module)({
-        imports: [zoom_module_1.ZoomModule],
-        controllers: [admin_controller_1.AdminController],
-        providers: [admin_service_1.AdminService, prisma_service_1.PrismaService],
+        controllers: [zoom_controller_1.ZoomController],
+        providers: [zoom_service_1.ZoomService, prisma_service_1.PrismaService],
+        exports: [zoom_service_1.ZoomService],
     })
-], AdminModule);
-//# sourceMappingURL=admin.module.js.map
+], ZoomModule);
+//# sourceMappingURL=zoom.module.js.map

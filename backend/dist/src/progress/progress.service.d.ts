@@ -10,6 +10,8 @@ export declare class ProgressService {
                     createdAt: Date;
                     updatedAt: Date;
                     name: string;
+                    levelCode: string;
+                    schedule: string | null;
                     totalScoreTarget: number;
                 };
             } & {
@@ -28,9 +30,11 @@ export declare class ProgressService {
             title: string;
             type: import("@prisma/client").$Enums.ResourceType;
             description: string | null;
+            zoomMeetingId: string | null;
             scheduledAt: Date | null;
             durationExpected: number;
             moduleId: string;
+            zoomHostId: string | null;
         };
     } & {
         id: string;

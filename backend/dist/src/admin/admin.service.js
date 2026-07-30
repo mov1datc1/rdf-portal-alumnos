@@ -8,16 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
+const zoom_service_1 = require("../zoom/zoom.service");
 const supabase_js_1 = require("@supabase/supabase-js");
 let AdminService = class AdminService {
     prisma;
+    zoomService;
     supabase;
-    constructor(prisma) {
+    constructor(prisma, zoomService) {
         this.prisma = prisma;
+        this.zoomService = zoomService;
         this.supabase = (0, supabase_js_1.createClient)(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
     }
     async getUsers() {
@@ -87,14 +93,25 @@ let AdminService = class AdminService {
         });
     }
     async scheduleClass(data) {
+        let zoomMeetingId = null;
+        let zoomJoinUrl = data.url || null;
+        const zoomHostId = data.zoomHostId || null;
+        if (zoomHostId && this.zoomService) {
+            const durationMinutes = Math.round((data.durationExpected || 3600) / 60);
+            const result = await this.zoomService.createMeeting(zoomHostId, data.title, new Date(data.scheduledAt), durationMinutes);
+            zoomMeetingId = result.meetingId;
+            zoomJoinUrl = result.joinUrl;
+        }
         return this.prisma.resource.create({
             data: {
                 title: data.title,
-                url: data.url,
+                url: zoomJoinUrl,
                 type: 'LIVE_CLASS',
                 moduleId: data.moduleId,
                 scheduledAt: new Date(data.scheduledAt),
                 durationExpected: data.durationExpected || 3600,
+                zoomMeetingId,
+                zoomHostId,
             },
         });
     }
@@ -104,12 +121,19 @@ let AdminService = class AdminService {
             include: {
                 module: {
                     include: { level: true }
-                }
+                },
+                zoomHost: {
+                    select: { id: true, displayName: true, email: true }
+                },
             },
             orderBy: { scheduledAt: 'desc' }
         });
     }
     async deleteScheduledClass(id) {
+        const resource = await this.prisma.resource.findUnique({ where: { id } });
+        if (resource?.zoomMeetingId && resource?.zoomHostId && this.zoomService) {
+            await this.zoomService.deleteMeeting(resource.zoomHostId, resource.zoomMeetingId);
+        }
         await this.prisma.userProgress.deleteMany({ where: { resourceId: id } });
         return this.prisma.resource.delete({ where: { id } });
     }
@@ -128,6 +152,8 @@ let AdminService = class AdminService {
         const level = await this.prisma.level.create({
             data: {
                 name: data.name,
+                levelCode: data.levelCode || 'A1',
+                schedule: data.schedule || null,
                 totalScoreTarget: 100,
             }
         });
@@ -141,9 +167,16 @@ let AdminService = class AdminService {
         return level;
     }
     async updateLevel(id, data) {
+        const updateData = {};
+        if (data.name !== undefined)
+            updateData.name = data.name;
+        if (data.levelCode !== undefined)
+            updateData.levelCode = data.levelCode;
+        if (data.schedule !== undefined)
+            updateData.schedule = data.schedule;
         return this.prisma.level.update({
             where: { id },
-            data: { name: data.name }
+            data: updateData,
         });
     }
     async deleteLevel(id) {
@@ -161,6 +194,9 @@ let AdminService = class AdminService {
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __param(1, (0, common_1.Optional)()),
+    __param(1, (0, common_1.Inject)(zoom_service_1.ZoomService)),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        zoom_service_1.ZoomService])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

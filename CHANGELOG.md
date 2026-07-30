@@ -13,9 +13,15 @@ y este proyecto se adhiere al [Versionado Semántico](https://semver.org/lang/es
 - **Módulo de Grupos (Niveles):** El modelo `Level` ahora soporta 3 campos separados:
   - `name` — Nombre del grupo (ej. "Grupo París", "Grupo Burdeos").
   - `levelCode` — Nivel académico (A1, A2, B1, B2, C1, C2).
-  - `schedule` — Horario del grupo (ej. "Lun, Mier, Vier · 10:00-12:00").
-- **GroupsManager (Admin):** Formulario rediseñado con selector visual de días, selector de nivel y campos de hora inicio/fin.
-- **Tabla de Grupos:** Ahora muestra nombre, nivel, horario y acciones.
+  - `schedule` — Horario del grupo con soporte para:
+    - **Horario uniforme:** "Lun, Mier, Vier · 10:00-12:00" (misma hora todos los días).
+    - **Horario por día:** "Lun 08:00-09:00, Mier 14:00-16:00" (hora independiente por día).
+- **GroupsManager (Admin):** Formulario rediseñado con:
+  - Selector visual de días (badges toggleables).
+  - Toggle rápido "Misma hora todos" para horario uniforme.
+  - Campos de hora individuales por día cuando se desactiva el toggle.
+  - Prefill inteligente al cambiar entre modos.
+- **Tabla de Grupos:** Ahora muestra nombre, nivel, horario (con formato stacked para per-day) y acciones.
 - **UsersManager (Admin):** El dropdown de asignación de grupo ahora muestra formato: `"Grupo París (B1)"`.
 - **Documentación Técnica** actualizada a v1.1.
 

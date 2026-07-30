@@ -8,11 +8,13 @@ import { AiModule } from './ai/ai.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { ResourcesModule } from './resources/resources.module';
+import { ZoomModule } from './zoom/zoom.module';
 
 @Module({
-  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule],
+  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule, ZoomModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],
 })
 export class AppModule {}
+

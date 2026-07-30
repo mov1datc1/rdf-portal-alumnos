@@ -19,6 +19,7 @@ import { UsersManager } from './pages/admin/UsersManager';
 import { GroupsManager } from './pages/admin/GroupsManager';
 import { ResourcesManager } from './pages/admin/ResourcesManager';
 import { ScheduleManager } from './pages/admin/ScheduleManager';
+import { ZoomHostsManager } from './pages/admin/ZoomHostsManager';
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
@@ -73,6 +74,7 @@ function App() {
             <Route path="groups" element={<GroupsManager />} />
             <Route path="resources" element={<ResourcesManager />} />
             <Route path="schedule" element={<ScheduleManager />} />
+            <Route path="zoom" element={<ZoomHostsManager />} />
           </Route>
         </Route>
 
