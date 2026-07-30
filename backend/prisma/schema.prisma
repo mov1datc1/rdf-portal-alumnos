@@ -73,7 +73,10 @@ model Resource {
   type             ResourceType
   title            String
   description      String?
-  url              String?        // Link de Zoom, YouTube ID, o URL del PDF
+  url              String?        // Link de Zoom (auto-generado), YouTube ID, o URL del PDF
+  zoomMeetingId    String?        // Zoom meeting ID para tracking y cancelación
+  zoomHostId       String?        @db.Uuid
+  zoomHost         ZoomHost?      @relation(fields: [zoomHostId], references: [id])
   scheduledAt      DateTime?      // Para clases en vivo
   durationExpected Int            // Tiempo estimado en segundos
   userProgress     UserProgress[]
@@ -93,4 +96,18 @@ model UserProgress {
   lastAccessedAt   DateTime       @default(now())
 
   @@unique([userId, resourceId])
+}
+
+// Cada ZoomHost representa una cuenta Zoom Pro independiente con sus propias credenciales S2S OAuth
+model ZoomHost {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String     @unique  // Email de la cuenta Zoom
+  displayName   String              // "Zoom Cuenta 1", "Profesora Marie", etc.
+  accountId     String              // Zoom S2S OAuth Account ID
+  clientId      String              // Zoom S2S OAuth Client ID
+  clientSecret  String              // Zoom S2S OAuth Client Secret (stored encrypted in production)
+  isActive      Boolean    @default(true)
+  meetings      Resource[]          // Meetings creados por este host
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }

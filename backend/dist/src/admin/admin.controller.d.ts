@@ -46,9 +46,11 @@ export declare class AdminController {
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
+        zoomMeetingId: string | null;
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
+        zoomHostId: string | null;
     }>;
     getLevelsWithModules(): Promise<({
         modules: {
@@ -64,6 +66,8 @@ export declare class AdminController {
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        levelCode: string;
+        schedule: string | null;
         totalScoreTarget: number;
     })[]>;
     scheduleClass(body: any): Promise<{
@@ -74,9 +78,11 @@ export declare class AdminController {
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
+        zoomMeetingId: string | null;
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
+        zoomHostId: string | null;
     }>;
     getScheduledClasses(): Promise<({
         module: {
@@ -85,6 +91,8 @@ export declare class AdminController {
                 createdAt: Date;
                 updatedAt: Date;
                 name: string;
+                levelCode: string;
+                schedule: string | null;
                 totalScoreTarget: number;
             };
         } & {
@@ -95,6 +103,11 @@ export declare class AdminController {
             title: string;
             levelId: string;
         };
+        zoomHost: {
+            id: string;
+            email: string;
+            displayName: string;
+        } | null;
     } & {
         url: string | null;
         id: string;
@@ -103,9 +116,11 @@ export declare class AdminController {
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
+        zoomMeetingId: string | null;
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
+        zoomHostId: string | null;
     })[]>;
     deleteScheduledClass(id: string): Promise<{
         url: string | null;
@@ -115,9 +130,11 @@ export declare class AdminController {
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
+        zoomMeetingId: string | null;
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
+        zoomHostId: string | null;
     }>;
     updateScheduledClass(id: string, body: any): Promise<{
         url: string | null;
@@ -127,15 +144,19 @@ export declare class AdminController {
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
+        zoomMeetingId: string | null;
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
+        zoomHostId: string | null;
     }>;
     createLevel(body: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        levelCode: string;
+        schedule: string | null;
         totalScoreTarget: number;
     }>;
     updateLevel(id: string, body: any): Promise<{
@@ -143,6 +164,8 @@ export declare class AdminController {
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        levelCode: string;
+        schedule: string | null;
         totalScoreTarget: number;
     }>;
     deleteLevel(id: string): Promise<{
@@ -150,6 +173,8 @@ export declare class AdminController {
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        levelCode: string;
+        schedule: string | null;
         totalScoreTarget: number;
     }>;
 }

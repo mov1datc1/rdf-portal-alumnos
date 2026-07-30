@@ -1,12 +1,16 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { ZoomService } from '../zoom/zoom.service';
 import { createClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class AdminService {
   private supabase;
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    @Optional() @Inject(ZoomService) private zoomService?: ZoomService,
+  ) {
     this.supabase = createClient(
       process.env.SUPABASE_URL as string,
       process.env.SUPABASE_SERVICE_ROLE_KEY as string
@@ -92,14 +96,33 @@ export class AdminService {
   }
 
   async scheduleClass(data: any) {
+    let zoomMeetingId: string | null = null;
+    let zoomJoinUrl: string | null = data.url || null;
+    const zoomHostId: string | null = data.zoomHostId || null;
+
+    // If a Zoom host is selected, auto-create the meeting
+    if (zoomHostId && this.zoomService) {
+      const durationMinutes = Math.round((data.durationExpected || 3600) / 60);
+      const result = await this.zoomService.createMeeting(
+        zoomHostId,
+        data.title,
+        new Date(data.scheduledAt),
+        durationMinutes,
+      );
+      zoomMeetingId = result.meetingId;
+      zoomJoinUrl = result.joinUrl;
+    }
+
     return this.prisma.resource.create({
       data: {
         title: data.title,
-        url: data.url,
+        url: zoomJoinUrl,
         type: 'LIVE_CLASS',
         moduleId: data.moduleId,
         scheduledAt: new Date(data.scheduledAt),
         durationExpected: data.durationExpected || 3600,
+        zoomMeetingId,
+        zoomHostId,
       },
     });
   }
@@ -110,13 +133,22 @@ export class AdminService {
       include: {
         module: {
           include: { level: true }
-        }
+        },
+        zoomHost: {
+          select: { id: true, displayName: true, email: true }
+        },
       },
       orderBy: { scheduledAt: 'desc' }
     });
   }
 
   async deleteScheduledClass(id: string) {
+    // Cancel Zoom meeting if one exists
+    const resource = await this.prisma.resource.findUnique({ where: { id } });
+    if (resource?.zoomMeetingId && resource?.zoomHostId && this.zoomService) {
+      await this.zoomService.deleteMeeting(resource.zoomHostId, resource.zoomMeetingId);
+    }
+
     // Eliminar progresos asociados para evitar error de foreign key
     await this.prisma.userProgress.deleteMany({ where: { resourceId: id } });
     return this.prisma.resource.delete({ where: { id } });

@@ -10,8 +10,10 @@ export declare class ClassesController {
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
+        zoomMeetingId: string | null;
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
+        zoomHostId: string | null;
     }[]>;
 }
