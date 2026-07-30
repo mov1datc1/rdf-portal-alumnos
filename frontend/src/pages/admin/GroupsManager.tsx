@@ -13,26 +13,123 @@ const DAYS = [
   { key: 'Sáb', label: 'S' },
 ];
 
-function parseSchedule(schedule: string | null): { days: string[]; startTime: string; endTime: string } {
-  if (!schedule) return { days: [], startTime: '', endTime: '' };
-  // Format: "Lun, Mier, Vier · 10:00-12:00"
-  const parts = schedule.split(' · ');
-  const days = parts[0]?.split(', ').map(d => d.trim()) || [];
-  const times = parts[1]?.split('-') || [];
-  return {
-    days,
-    startTime: times[0]?.trim() || '',
-    endTime: times[1]?.trim() || '',
-  };
+type DaySchedule = { startTime: string; endTime: string };
+
+/**
+ * Parse schedule string into structured data.
+ * Supports two formats:
+ *   Uniform:   "Lun, Mier, Vier · 10:00-12:00"
+ *   Per-day:   "Lun 10:00-12:00, Mier 14:00-16:00, Vier 08:00-09:00"
+ */
+function parseSchedule(schedule: string | null): {
+  days: string[];
+  sameTime: boolean;
+  uniformStart: string;
+  uniformEnd: string;
+  perDay: Record<string, DaySchedule>;
+} {
+  const empty = { days: [], sameTime: true, uniformStart: '', uniformEnd: '', perDay: {} as Record<string, DaySchedule> };
+  if (!schedule) return empty;
+
+  // Uniform format: "Lun, Mier, Vier · 10:00-12:00"
+  if (schedule.includes(' · ')) {
+    const [daysPart, timePart] = schedule.split(' · ');
+    const days = daysPart.split(', ').map(d => d.trim());
+    const [start, end] = (timePart || '').split('-').map(t => t.trim());
+    return { days, sameTime: true, uniformStart: start || '', uniformEnd: end || '', perDay: {} };
+  }
+
+  // Per-day format: "Lun 10:00-12:00, Mier 14:00-16:00"
+  const parts = schedule.split(', ').map(p => p.trim());
+  const days: string[] = [];
+  const perDay: Record<string, DaySchedule> = {};
+  let allSame = true;
+  let firstTime = '';
+
+  for (const part of parts) {
+    const match = part.match(/^(\S+)\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$/);
+    if (match) {
+      const [, day, start, end] = match;
+      days.push(day);
+      perDay[day] = { startTime: start, endTime: end };
+      const timeStr = `${start}-${end}`;
+      if (!firstTime) firstTime = timeStr;
+      else if (timeStr !== firstTime) allSame = false;
+    } else {
+      // Day without time
+      days.push(part);
+    }
+  }
+
+  if (allSame && days.length > 0 && firstTime) {
+    const [start, end] = firstTime.split('-');
+    return { days, sameTime: true, uniformStart: start, uniformEnd: end, perDay: {} };
+  }
+
+  return { days, sameTime: false, uniformStart: '', uniformEnd: '', perDay };
 }
 
-function buildSchedule(days: string[], startTime: string, endTime: string): string | null {
+/**
+ * Build schedule string from structured data.
+ */
+function buildSchedule(
+  days: string[],
+  sameTime: boolean,
+  uniformStart: string,
+  uniformEnd: string,
+  perDay: Record<string, DaySchedule>
+): string | null {
   if (days.length === 0) return null;
-  const dayStr = days.join(', ');
-  if (startTime && endTime) {
-    return `${dayStr} · ${startTime}-${endTime}`;
+
+  if (sameTime) {
+    const dayStr = days.join(', ');
+    if (uniformStart && uniformEnd) {
+      return `${dayStr} · ${uniformStart}-${uniformEnd}`;
+    }
+    return dayStr;
   }
-  return dayStr;
+
+  // Per-day format
+  const parts = days.map(day => {
+    const ds = perDay[day];
+    if (ds?.startTime && ds?.endTime) {
+      return `${day} ${ds.startTime}-${ds.endTime}`;
+    }
+    return day;
+  });
+  return parts.join(', ');
+}
+
+/**
+ * Formats a schedule string for display in the table.
+ * Makes per-day schedules more readable.
+ */
+function formatScheduleDisplay(schedule: string | null): React.ReactNode {
+  if (!schedule) return <span className="text-slate-400 text-xs">Sin horario</span>;
+
+  // Uniform format — show as-is
+  if (schedule.includes(' · ')) {
+    return schedule;
+  }
+
+  // Per-day format — show as stacked lines
+  const parts = schedule.split(', ').map(p => p.trim());
+  return (
+    <div className="flex flex-col gap-0.5">
+      {parts.map((part, i) => {
+        const match = part.match(/^(\S+)\s+(.+)$/);
+        if (match) {
+          return (
+            <span key={i} className="text-xs">
+              <span className="font-semibold text-slate-700">{match[1]}</span>{' '}
+              <span className="text-slate-500">{match[2]}</span>
+            </span>
+          );
+        }
+        return <span key={i} className="text-xs">{part}</span>;
+      })}
+    </div>
+  );
 }
 
 export function GroupsManager() {
@@ -45,8 +142,10 @@ export function GroupsManager() {
   const [groupName, setGroupName] = useState('');
   const [levelCode, setLevelCode] = useState('A1');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  const [sameTime, setSameTime] = useState(true);
+  const [uniformStart, setUniformStart] = useState('');
+  const [uniformEnd, setUniformEnd] = useState('');
+  const [perDaySchedule, setPerDaySchedule] = useState<Record<string, DaySchedule>>({});
 
   const session = useAuthStore(state => state.session);
 
@@ -72,15 +171,52 @@ export function GroupsManager() {
     setGroupName('');
     setLevelCode('A1');
     setSelectedDays([]);
-    setStartTime('');
-    setEndTime('');
+    setSameTime(true);
+    setUniformStart('');
+    setUniformEnd('');
+    setPerDaySchedule({});
     setEditingId(null);
   };
 
   const toggleDay = (dayKey: string) => {
-    setSelectedDays(prev =>
-      prev.includes(dayKey) ? prev.filter(d => d !== dayKey) : [...prev, dayKey]
-    );
+    setSelectedDays(prev => {
+      if (prev.includes(dayKey)) {
+        // Remove day and its per-day schedule
+        const newPerDay = { ...perDaySchedule };
+        delete newPerDay[dayKey];
+        setPerDaySchedule(newPerDay);
+        return prev.filter(d => d !== dayKey);
+      }
+      // Add day with empty schedule
+      setPerDaySchedule(pd => ({ ...pd, [dayKey]: { startTime: '', endTime: '' } }));
+      return [...prev, dayKey];
+    });
+  };
+
+  const updatePerDay = (day: string, field: 'startTime' | 'endTime', value: string) => {
+    setPerDaySchedule(prev => ({
+      ...prev,
+      [day]: { ...prev[day], [field]: value }
+    }));
+  };
+
+  // When toggling to sameTime, pre-fill uniform from first per-day entry if available
+  const handleToggleSameTime = () => {
+    if (!sameTime) {
+      // Switching TO sameTime: copy first day's times as uniform
+      const firstDay = selectedDays[0];
+      const firstSchedule = perDaySchedule[firstDay];
+      if (firstSchedule?.startTime) setUniformStart(firstSchedule.startTime);
+      if (firstSchedule?.endTime) setUniformEnd(firstSchedule.endTime);
+    } else {
+      // Switching TO perDay: prefill all days with uniform times
+      const newPerDay: Record<string, DaySchedule> = {};
+      for (const day of selectedDays) {
+        newPerDay[day] = { startTime: uniformStart, endTime: uniformEnd };
+      }
+      setPerDaySchedule(newPerDay);
+    }
+    setSameTime(!sameTime);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,7 +224,7 @@ export function GroupsManager() {
     if (!groupName.trim()) return;
     setIsSubmitting(true);
 
-    const schedule = buildSchedule(selectedDays, startTime, endTime);
+    const schedule = buildSchedule(selectedDays, sameTime, uniformStart, uniformEnd, perDaySchedule);
 
     try {
       const url = editingId
@@ -146,14 +282,19 @@ export function GroupsManager() {
     setLevelCode(level.levelCode || 'A1');
     const parsed = parseSchedule(level.schedule);
     setSelectedDays(parsed.days);
-    setStartTime(parsed.startTime);
-    setEndTime(parsed.endTime);
+    setSameTime(parsed.sameTime);
+    setUniformStart(parsed.uniformStart);
+    setUniformEnd(parsed.uniformEnd);
+    setPerDaySchedule(parsed.perDay);
     setEditingId(level.id);
   };
 
   const cancelEdit = () => {
     resetForm();
   };
+
+  // Ordered selected days based on DAYS constant order
+  const orderedSelectedDays = DAYS.filter(d => selectedDays.includes(d.key)).map(d => d.key);
 
   return (
     <div className="space-y-6">
@@ -234,37 +375,95 @@ export function GroupsManager() {
                 })}
               </div>
               {selectedDays.length > 0 && (
-                <p className="text-xs text-slate-400 mt-1.5">{selectedDays.join(', ')}</p>
+                <p className="text-xs text-slate-400 mt-1.5">{orderedSelectedDays.join(', ')}</p>
               )}
             </div>
 
-            {/* Horario — Hora */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-[#1D3A8A]" />
-                Horario
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Inicio</label>
-                  <input
-                    type="time"
-                    value={startTime}
-                    onChange={e => setStartTime(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm"
-                  />
+            {/* Horario — Tiempos (solo si hay días seleccionados) */}
+            {selectedDays.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-[#1D3A8A]" />
+                    Horario
+                  </label>
+                  {selectedDays.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={handleToggleSameTime}
+                      className={`
+                        text-xs px-3 py-1 rounded-lg font-medium transition-all duration-200
+                        ${sameTime
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200'
+                        }
+                      `}
+                    >
+                      {sameTime ? '✓ Misma hora todos' : 'Usar misma hora'}
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Fin</label>
-                  <input
-                    type="time"
-                    value={endTime}
-                    onChange={e => setEndTime(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm"
-                  />
-                </div>
+
+                {sameTime ? (
+                  /* ── Uniform time for all days ── */
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p className="text-xs text-slate-400 mb-2">
+                      {orderedSelectedDays.join(', ')} — misma hora
+                    </p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Inicio</label>
+                        <input
+                          type="time"
+                          value={uniformStart}
+                          onChange={e => setUniformStart(e.target.value)}
+                          className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-white text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Fin</label>
+                        <input
+                          type="time"
+                          value={uniformEnd}
+                          onChange={e => setUniformEnd(e.target.value)}
+                          className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-white text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── Per-day individual times ── */
+                  <div className="space-y-2">
+                    {orderedSelectedDays.map(dayKey => {
+                      const dayLabel = DAYS.find(d => d.key === dayKey)?.key || dayKey;
+                      const ds = perDaySchedule[dayKey] || { startTime: '', endTime: '' };
+                      return (
+                        <div
+                          key={dayKey}
+                          className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center gap-3"
+                        >
+                          <span className="text-sm font-bold text-[#1D3A8A] w-10 shrink-0">{dayLabel}</span>
+                          <div className="flex-1 grid grid-cols-2 gap-2">
+                            <input
+                              type="time"
+                              value={ds.startTime}
+                              onChange={e => updatePerDay(dayKey, 'startTime', e.target.value)}
+                              className="w-full border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-white text-xs"
+                            />
+                            <input
+                              type="time"
+                              value={ds.endTime}
+                              onChange={e => updatePerDay(dayKey, 'endTime', e.target.value)}
+                              className="w-full border border-slate-200 rounded-lg py-1.5 px-2 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-white text-xs"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             <button
               type="submit"
@@ -313,9 +512,9 @@ export function GroupsManager() {
                       </td>
                       <td className="p-4 text-slate-600 text-sm">
                         {level.schedule ? (
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-slate-400" />
-                            {level.schedule}
+                          <span className="flex items-start gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+                            {formatScheduleDisplay(level.schedule)}
                           </span>
                         ) : (
                           <span className="text-slate-400 text-xs">Sin horario</span>
