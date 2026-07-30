@@ -7,6 +7,22 @@ y este proyecto se adhiere al [Versionado Semántico](https://semver.org/lang/es
 
 ---
 
+## [1.2.0] — 2026-07-30
+
+### Agregado
+- **Integración Zoom Multi-Cuenta:** Soporte para 6 cuentas Zoom Pro independientes con credenciales S2S OAuth individuales.
+- **Modelo `ZoomHost`:** Almacena email, displayName, accountId, clientId, clientSecret por cuenta.
+- **ZoomService:** Token caching por host (55 min), auto-creación de meetings vía Zoom API, cancelación automática al eliminar clase.
+- **ZoomHostsManager (Admin):** CRUD completo de cuentas Zoom con test de conectividad y toggle de activación.
+- **ScheduleManager (Admin):** Dropdown para seleccionar host de Zoom — el meeting se crea automáticamente. Fallback a URL manual si no se selecciona host.
+- **Sidebar:** Nuevo enlace "Zoom Hosts" en el menú de administración.
+
+### Cambiado
+- **AdminService:** `scheduleClass` ahora integra ZoomService para auto-crear meetings. `deleteScheduledClass` cancela meetings en Zoom.
+- **Schema:** `Resource` ahora tiene `zoomMeetingId` y `zoomHostId` para tracking.
+
+---
+
 ## [1.1.0] — 2026-07-29
 
 ### Cambiado
