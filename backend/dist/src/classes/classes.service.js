@@ -22,6 +22,8 @@ let ClassesService = class ClassesService {
         if (!user || !user.currentLevelId) {
             return [];
         }
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         return this.prisma.resource.findMany({
             where: {
                 type: 'LIVE_CLASS',
@@ -29,13 +31,13 @@ let ClassesService = class ClassesService {
                     levelId: user.currentLevelId
                 },
                 scheduledAt: {
-                    gte: new Date()
+                    gte: thirtyDaysAgo
                 }
             },
             orderBy: {
                 scheduledAt: 'asc'
             },
-            take: 5
+            take: 50
         });
     }
 };

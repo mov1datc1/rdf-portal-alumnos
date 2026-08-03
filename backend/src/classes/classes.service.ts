@@ -11,6 +11,10 @@ export class ClassesService {
       return [];
     }
 
+    // Return upcoming classes + recent past classes (last 30 days) for calendar display
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     return this.prisma.resource.findMany({
       where: {
         type: 'LIVE_CLASS',
@@ -18,13 +22,13 @@ export class ClassesService {
           levelId: user.currentLevelId
         },
         scheduledAt: {
-          gte: new Date()
+          gte: thirtyDaysAgo
         }
       },
       orderBy: {
         scheduledAt: 'asc'
       },
-      take: 5
+      take: 50
     });
   }
 }

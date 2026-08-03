@@ -3,6 +3,9 @@ export declare class TeacherService {
     private prisma;
     constructor(prisma: PrismaService);
     getMyGroups(teacherId: string): Promise<({
+        _count: {
+            users: number;
+        };
         modules: {
             id: string;
             createdAt: Date;
@@ -11,9 +14,6 @@ export declare class TeacherService {
             title: string;
             levelId: string;
         }[];
-        _count: {
-            users: number;
-        };
     } & {
         id: string;
         createdAt: Date;
@@ -152,6 +152,7 @@ export declare class TeacherService {
     createEvaluation(evaluatorId: string, data: any): Promise<{
         id: string;
         createdAt: Date;
+        notes: string | null;
         levelId: string;
         userId: string;
         oralScore: number | null;
@@ -159,7 +160,6 @@ export declare class TeacherService {
         passed: boolean;
         evaluatedById: string | null;
         certificateUrl: string | null;
-        notes: string | null;
     }>;
     getMyEvaluations(teacherId: string): Promise<({
         user: {
@@ -175,6 +175,7 @@ export declare class TeacherService {
     } & {
         id: string;
         createdAt: Date;
+        notes: string | null;
         levelId: string;
         userId: string;
         oralScore: number | null;
@@ -182,6 +183,5 @@ export declare class TeacherService {
         passed: boolean;
         evaluatedById: string | null;
         certificateUrl: string | null;
-        notes: string | null;
     })[]>;
 }

@@ -47,6 +47,9 @@ export declare class TeacherController {
         }) | null;
     }>;
     getMyGroups(req: any): Promise<({
+        _count: {
+            users: number;
+        };
         modules: {
             id: string;
             createdAt: Date;
@@ -55,9 +58,6 @@ export declare class TeacherController {
             title: string;
             levelId: string;
         }[];
-        _count: {
-            users: number;
-        };
     } & {
         id: string;
         createdAt: Date;
@@ -163,6 +163,7 @@ export declare class TeacherController {
     } & {
         id: string;
         createdAt: Date;
+        notes: string | null;
         levelId: string;
         userId: string;
         oralScore: number | null;
@@ -170,11 +171,11 @@ export declare class TeacherController {
         passed: boolean;
         evaluatedById: string | null;
         certificateUrl: string | null;
-        notes: string | null;
     })[]>;
     createEvaluation(req: any, body: any): Promise<{
         id: string;
         createdAt: Date;
+        notes: string | null;
         levelId: string;
         userId: string;
         oralScore: number | null;
@@ -182,6 +183,5 @@ export declare class TeacherController {
         passed: boolean;
         evaluatedById: string | null;
         certificateUrl: string | null;
-        notes: string | null;
     }>;
 }

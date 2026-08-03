@@ -18,24 +18,24 @@ export declare class ZoomService {
     getHosts(): Promise<{
         id: string;
         email: string;
-        displayName: string;
-        permanentLink: string | null;
-        accountId: string | null;
         isActive: boolean;
         createdAt: Date;
         _count: {
             meetings: number;
             assignedGroups: number;
         };
+        displayName: string;
+        permanentLink: string | null;
+        accountId: string | null;
     }[]>;
     getHostsWithPermanentLinks(): Promise<{
         id: string;
         email: string;
-        displayName: string;
-        permanentLink: string | null;
         _count: {
             assignedGroups: number;
         };
+        displayName: string;
+        permanentLink: string | null;
     }[]>;
     createHost(data: {
         email: string;
@@ -47,38 +47,38 @@ export declare class ZoomService {
     }): Promise<{
         id: string;
         email: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         displayName: string;
         permanentLink: string | null;
         accountId: string | null;
         clientId: string | null;
         clientSecret: string | null;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     updateHost(id: string, data: any): Promise<{
         id: string;
         email: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         displayName: string;
         permanentLink: string | null;
         accountId: string | null;
         clientId: string | null;
         clientSecret: string | null;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     deleteHost(id: string): Promise<{
         id: string;
         email: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         displayName: string;
         permanentLink: string | null;
         accountId: string | null;
         clientId: string | null;
         clientSecret: string | null;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     testHost(id: string): Promise<{
         success: boolean;

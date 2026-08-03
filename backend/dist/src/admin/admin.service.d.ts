@@ -8,11 +8,11 @@ export declare class AdminService {
     getUsers(): Promise<{
         id: string;
         email: string;
-        isActive: boolean;
         role: import("@prisma/client").$Enums.Role;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
+        isActive: boolean;
         currentLevelId: string | null;
         currentLevel: {
             name: string;
@@ -40,26 +40,26 @@ export declare class AdminService {
     createUser(data: any): Promise<{
         id: string;
         email: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         role: import("@prisma/client").$Enums.Role;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
+        isActive: boolean;
         currentLevelId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     updateUser(id: string, data: any): Promise<{
         id: string;
         email: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         role: import("@prisma/client").$Enums.Role;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
+        isActive: boolean;
         currentLevelId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     resetPassword(userId: string, newPassword: string): Promise<{
         success: boolean;
@@ -80,6 +80,9 @@ export declare class AdminService {
         moduleId: string;
     }>;
     getLevelsWithModules(): Promise<({
+        _count: {
+            users: number;
+        };
         zoomHostGroup: {
             id: string;
             email: string;
@@ -100,9 +103,6 @@ export declare class AdminService {
             title: string;
             levelId: string;
         }[];
-        _count: {
-            users: number;
-        };
     } & {
         id: string;
         createdAt: Date;
@@ -269,6 +269,7 @@ export declare class AdminService {
     } & {
         id: string;
         createdAt: Date;
+        notes: string | null;
         levelId: string;
         userId: string;
         oralScore: number | null;
@@ -276,11 +277,11 @@ export declare class AdminService {
         passed: boolean;
         evaluatedById: string | null;
         certificateUrl: string | null;
-        notes: string | null;
     })[]>;
     createEvaluation(data: any): Promise<{
         id: string;
         createdAt: Date;
+        notes: string | null;
         levelId: string;
         userId: string;
         oralScore: number | null;
@@ -288,7 +289,6 @@ export declare class AdminService {
         passed: boolean;
         evaluatedById: string | null;
         certificateUrl: string | null;
-        notes: string | null;
     }>;
     getSettings(): Promise<{
         id: string;

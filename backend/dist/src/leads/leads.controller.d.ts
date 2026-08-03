@@ -5,14 +5,14 @@ export declare class LeadsController {
     getAll(): Promise<{
         id: string;
         email: string | null;
+        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
-        phone: string;
-        status: import("@prisma/client").$Enums.LeadStatus;
-        notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
         sourceDetail: string | null;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        notes: string | null;
         interestedIn: string | null;
         assignedTo: string | null;
         convertedToUserId: string | null;
@@ -21,8 +21,8 @@ export declare class LeadsController {
     getEnrolledLeads(): Promise<{
         id: string;
         email: string | null;
-        name: string;
         phone: string;
+        name: string;
         interestedIn: string | null;
         convertedToUserId: string | null;
     }[]>;
@@ -53,14 +53,14 @@ export declare class LeadsController {
     getById(id: string): Promise<{
         id: string;
         email: string | null;
+        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
-        phone: string;
-        status: import("@prisma/client").$Enums.LeadStatus;
-        notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
         sourceDetail: string | null;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        notes: string | null;
         interestedIn: string | null;
         assignedTo: string | null;
         convertedToUserId: string | null;
@@ -69,14 +69,14 @@ export declare class LeadsController {
     create(body: any): Promise<{
         id: string;
         email: string | null;
+        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
-        phone: string;
-        status: import("@prisma/client").$Enums.LeadStatus;
-        notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
         sourceDetail: string | null;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        notes: string | null;
         interestedIn: string | null;
         assignedTo: string | null;
         convertedToUserId: string | null;
@@ -85,14 +85,14 @@ export declare class LeadsController {
     update(id: string, body: any): Promise<{
         id: string;
         email: string | null;
+        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
-        phone: string;
-        status: import("@prisma/client").$Enums.LeadStatus;
-        notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
         sourceDetail: string | null;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        notes: string | null;
         interestedIn: string | null;
         assignedTo: string | null;
         convertedToUserId: string | null;
@@ -103,14 +103,14 @@ export declare class LeadsController {
     }): Promise<{
         id: string;
         email: string | null;
+        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
-        phone: string;
-        status: import("@prisma/client").$Enums.LeadStatus;
-        notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
         sourceDetail: string | null;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        notes: string | null;
         interestedIn: string | null;
         assignedTo: string | null;
         convertedToUserId: string | null;
@@ -119,14 +119,14 @@ export declare class LeadsController {
     delete(id: string): Promise<{
         id: string;
         email: string | null;
+        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
-        phone: string;
-        status: import("@prisma/client").$Enums.LeadStatus;
-        notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
         sourceDetail: string | null;
+        status: import("@prisma/client").$Enums.LeadStatus;
+        notes: string | null;
         interestedIn: string | null;
         assignedTo: string | null;
         convertedToUserId: string | null;
