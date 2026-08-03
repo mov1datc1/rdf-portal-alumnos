@@ -22,6 +22,8 @@ import { ScheduleManager } from './pages/admin/ScheduleManager';
 import { ZoomHostsManager } from './pages/admin/ZoomHostsManager';
 import { CRMManager } from './pages/admin/CRMManager';
 import { SettingsManager } from './pages/admin/SettingsManager';
+import { PaymentsManager } from './pages/admin/PaymentsManager';
+import { Analytics360 } from './pages/admin/Analytics360';
 
 import { TeacherLayout } from './components/teacher/TeacherLayout';
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
@@ -86,6 +88,8 @@ function App() {
             <Route path="schedule" element={<ScheduleManager />} />
             <Route path="zoom" element={<ZoomHostsManager />} />
             <Route path="crm" element={<CRMManager />} />
+            <Route path="payments" element={<PaymentsManager />} />
+            <Route path="analytics" element={<Analytics360 />} />
             <Route path="settings" element={<SettingsManager />} />
           </Route>
         </Route>

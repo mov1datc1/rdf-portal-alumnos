@@ -11,9 +11,10 @@ import { ResourcesModule } from './resources/resources.module';
 import { ZoomModule } from './zoom/zoom.module';
 import { TeacherModule } from './teacher/teacher.module';
 import { LeadsModule } from './leads/leads.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
-  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule, ZoomModule, TeacherModule, LeadsModule],
+  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule, ZoomModule, TeacherModule, LeadsModule, PaymentsModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],
