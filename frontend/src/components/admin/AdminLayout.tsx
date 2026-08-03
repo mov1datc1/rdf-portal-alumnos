@@ -30,38 +30,37 @@ export function AdminLayout() {
             <BarChart3 className="w-5 h-5" />
             Analytics 360°
           </NavLink>
-          <NavLink to="/admin/users" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
-            <Users className="w-5 h-5" />
-            Usuarios
+          <NavLink to="/admin/crm" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
+            <UserPlus className="w-5 h-5" />
+            CRM Prospectos
           </NavLink>
           <NavLink to="/admin/groups" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <Layers className="w-5 h-5" />
             Grupos
           </NavLink>
-          <NavLink to="/admin/resources" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
-            <FileText className="w-5 h-5" />
-            Recursos
+          <NavLink to="/admin/users" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
+            <Users className="w-5 h-5" />
+            Usuarios
           </NavLink>
           <NavLink to="/admin/schedule" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <Calendar className="w-5 h-5" />
             Programación
           </NavLink>
-          <NavLink to="/admin/zoom" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
-            <Video className="w-5 h-5" />
-            Zoom Hosts
-          </NavLink>
 
           <div className="border-t border-white/10 my-3" />
 
-          <NavLink to="/admin/crm" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
-            <UserPlus className="w-5 h-5" />
-            CRM Prospectos
-          </NavLink>
           <NavLink to="/admin/payments" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <DollarSign className="w-5 h-5" />
             Facturación
           </NavLink>
-
+          <NavLink to="/admin/resources" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
+            <FileText className="w-5 h-5" />
+            Recursos
+          </NavLink>
+          <NavLink to="/admin/zoom" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
+            <Video className="w-5 h-5" />
+            Zoom Hosts
+          </NavLink>
           <NavLink to="/admin/settings" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <Settings className="w-5 h-5" />
             Configuración
