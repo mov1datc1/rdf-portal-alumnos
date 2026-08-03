@@ -82,11 +82,17 @@ export function ScheduleManager() {
         durationExpected: Number(formData.durationExpected),
       };
 
-      // Include either zoomHostId (for auto-create) or manual URL
-      if (formData.zoomHostId) {
+      // Include either zoomHostId (for auto-create), group's permanent link, or manual URL
+      const selectedLevelData = levels.find((l: any) => l.id === formData.levelId);
+      const groupZoomLink = selectedLevelData?.zoomLink || selectedLevelData?.zoomHostGroup?.permanentLink || null;
+      
+      if (formData.zoomHostId && formData.zoomHostId !== '__override__') {
         body.zoomHostId = formData.zoomHostId;
       } else if (formData.url) {
         body.url = formData.url;
+      } else if (groupZoomLink && formData.zoomHostId !== '__override__') {
+        // Auto-use the group's permanent link
+        body.url = groupZoomLink;
       }
 
       const res = await fetch(url, {
@@ -269,50 +275,105 @@ export function ScheduleManager() {
                 </div>
               </div>
 
-              {/* ── Zoom Host Selector ── */}
-              <div className="border-t border-dashed border-slate-200 pt-4">
-                <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-                  <Video className="w-4 h-4 text-[#2D8CFF]" />
-                  Cuenta Zoom (Reunión Automática)
-                </label>
-                <select
-                  value={formData.zoomHostId}
-                  onChange={e => setFormData({...formData, zoomHostId: e.target.value, url: e.target.value ? '' : formData.url})}
-                  className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#2D8CFF]/20 bg-slate-50"
-                >
-                  <option value="">Sin Zoom — usar enlace manual</option>
-                  {activeHosts.map((h: any) => (
-                    <option key={h.id} value={h.id}>
-                      {h.displayName} ({h.email}) — {h._count?.meetings || 0} clases
-                    </option>
-                  ))}
-                </select>
+              {/* ── Zoom: Auto-detect from Group or Manual ── */}
+              {(() => {
+                // Check if the selected group has a Zoom link already assigned
+                const groupZoomLink = selectedLevel?.zoomLink || selectedLevel?.zoomHostGroup?.permanentLink || null;
+                const groupZoomName = selectedLevel?.zoomHostGroup?.displayName || null;
+                const hasGroupZoom = !!groupZoomLink;
+                // If the admin hasn't explicitly chosen to override, use the group's link
+                const [overrideZoom, setOverrideZoom] = [
+                  formData.zoomHostId === '__override__',
+                  (v: boolean) => setFormData({...formData, zoomHostId: v ? '__override__' : '', url: v ? '' : groupZoomLink || ''})
+                ];
 
-                {isZoomMode && (
-                  <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1">
-                    ✓ El link de Zoom se generará automáticamente al crear la clase.
-                  </p>
-                )}
-              </div>
-
-              {/* Manual URL — only if no Zoom host selected */}
-              {!isZoomMode && (
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Enlace manual (Zoom/Meet)</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <LinkIcon className="w-4 h-4 text-slate-400" />
+                if (hasGroupZoom && !overrideZoom && !editingId) {
+                  return (
+                    <div className="border-t border-dashed border-slate-200 pt-4">
+                      <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <Video className="w-4 h-4 text-[#2D8CFF]" />
+                        Enlace Zoom del Grupo
+                      </label>
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                        <p className="text-sm text-emerald-700 font-medium flex items-center gap-2">
+                          <Check className="w-4 h-4" />
+                          Este grupo ya tiene un enlace Zoom asignado:
+                        </p>
+                        <a href={groupZoomLink} target="_blank" rel="noopener noreferrer" 
+                           className="text-xs text-blue-600 hover:underline mt-1 block truncate">
+                          {groupZoomName ? `${groupZoomName} — ` : ''}{groupZoomLink}
+                        </a>
+                        <p className="text-xs text-emerald-600 mt-1">Se usará automáticamente para esta clase.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({...formData, zoomHostId: '__override__', url: ''})}
+                        className="text-xs text-slate-500 hover:text-slate-700 mt-2 underline"
+                      >
+                        ¿Usar otro enlace para esta clase?
+                      </button>
                     </div>
-                    <input 
-                      type="url" 
-                      placeholder="https://zoom.us/j/..."
-                      value={formData.url} 
-                      onChange={e => setFormData({...formData, url: e.target.value})}
-                      className="w-full border border-slate-200 rounded-xl py-2 pl-10 pr-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50" 
-                    />
-                  </div>
-                </div>
-              )}
+                  );
+                }
+
+                // Fallback: show the full zoom host selector + manual URL (no group zoom or overriding)
+                return (
+                  <>
+                    <div className="border-t border-dashed border-slate-200 pt-4">
+                      <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                        <Video className="w-4 h-4 text-[#2D8CFF]" />
+                        Cuenta Zoom (Reunión Automática)
+                      </label>
+                      {hasGroupZoom && overrideZoom && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({...formData, zoomHostId: '', url: ''})}
+                          className="text-xs text-blue-600 hover:text-blue-800 mb-2 underline"
+                        >
+                          ← Volver al enlace del grupo
+                        </button>
+                      )}
+                      <select
+                        value={formData.zoomHostId === '__override__' ? '' : formData.zoomHostId}
+                        onChange={e => setFormData({...formData, zoomHostId: e.target.value, url: e.target.value ? '' : formData.url})}
+                        className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#2D8CFF]/20 bg-slate-50"
+                      >
+                        <option value="">Sin Zoom — usar enlace manual</option>
+                        {activeHosts.map((h: any) => (
+                          <option key={h.id} value={h.id}>
+                            {h.displayName} ({h.email}) — {h._count?.meetings || 0} clases
+                          </option>
+                        ))}
+                      </select>
+
+                      {isZoomMode && formData.zoomHostId !== '__override__' && (
+                        <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1">
+                          ✓ El link de Zoom se generará automáticamente al crear la clase.
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Manual URL — only if no Zoom host selected */}
+                    {!isZoomMode && (
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1">Enlace manual (Zoom/Meet)</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <LinkIcon className="w-4 h-4 text-slate-400" />
+                          </div>
+                          <input 
+                            type="url" 
+                            placeholder="https://zoom.us/j/..."
+                            value={formData.url} 
+                            onChange={e => setFormData({...formData, url: e.target.value})}
+                            className="w-full border border-slate-200 rounded-xl py-2 pl-10 pr-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50" 
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               <button 
                 type="submit" 
