@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Users, FileText, LayoutDashboard, LogOut, Calendar, Layers, Video, UserPlus, Settings, DollarSign, BarChart3 } from 'lucide-react';
+import { Users, FileText, LogOut, Calendar, Layers, Video, UserPlus, Settings, DollarSign, BarChart3 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
 
@@ -27,8 +27,8 @@ export function AdminLayout() {
 
         <nav className="flex-1 space-y-2">
           <NavLink to="/admin" end className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
-            <LayoutDashboard className="w-5 h-5" />
-            Dashboard
+            <BarChart3 className="w-5 h-5" />
+            Analytics 360°
           </NavLink>
           <NavLink to="/admin/users" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <Users className="w-5 h-5" />
@@ -61,10 +61,7 @@ export function AdminLayout() {
             <DollarSign className="w-5 h-5" />
             Facturación
           </NavLink>
-          <NavLink to="/admin/analytics" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
-            <BarChart3 className="w-5 h-5" />
-            Analytics 360°
-          </NavLink>
+
           <NavLink to="/admin/settings" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <Settings className="w-5 h-5" />
             Configuración

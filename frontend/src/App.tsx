@@ -15,7 +15,6 @@ import { VideoFrances } from './pages/VideoFrances';
 import { Perfil } from './pages/Perfil';
 
 import { AdminLayout } from './components/admin/AdminLayout';
-import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UsersManager } from './pages/admin/UsersManager';
 import { GroupsManager } from './pages/admin/GroupsManager';
 import { ResourcesManager } from './pages/admin/ResourcesManager';
@@ -83,7 +82,7 @@ function App() {
         {/* Rutas Protegidas para Administradores */}
         <Route element={<ProtectedRoute requireAdmin={true} />}>
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<Analytics360 />} />
             <Route path="users" element={<UsersManager />} />
             <Route path="groups" element={<GroupsManager />} />
             <Route path="resources" element={<ResourcesManager />} />
@@ -91,7 +90,6 @@ function App() {
             <Route path="zoom" element={<ZoomHostsManager />} />
             <Route path="crm" element={<CRMManager />} />
             <Route path="payments" element={<PaymentsManager />} />
-            <Route path="analytics" element={<Analytics360 />} />
             <Route path="settings" element={<SettingsManager />} />
           </Route>
         </Route>
