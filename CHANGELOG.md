@@ -7,6 +7,30 @@ y este proyecto se adhiere al [Versionado Semántico](https://semver.org/lang/es
 
 ---
 
+## [2.0.0] — 2026-08-03
+
+### Agregado
+- **Estructura Académica Completa:** Modalidades (Grupal, Individual, Part Duo), ritmos (Regular, Sabatino, Intensivo), capacidad máxima, enlace Zoom fijo por grupo.
+- **Asignación de Profesor:** Campo `teacherId` en Level, dropdown en GroupsManager, endpoint `/admin/teachers`.
+- **6 Niveles Académicos:** Básico 1/2, Intermedio 1/2, Avanzado 1/2 con auto-creación de 4 Unidades al crear grupo.
+- **Portal del Profesor (6 páginas):**
+  - Dashboard con métricas y próxima clase.
+  - Mis Grupos, Mi Horario, Mis Alumnos, Asistencia, Evaluaciones.
+  - Layout con sidebar verde y navegación independiente.
+- **Evaluaciones:** Registro de scores orales y escritos, aprobación automática (≥60), historial.
+- **Asistencia:** Registro por clase con toggle Presente/Ausente por alumno.
+- **Schema CRM (preparado):** Modelos Lead, Enrollment, Payment, Attendance, AppSettings para Fase 3.
+- **Multi-Role Routing:** ADMIN → `/admin`, TEACHER → `/teacher`, STUDENT → `/`.
+- **AppSettings:** Presupuesto editable de Google Ads y Meta Ads.
+
+### Cambiado
+- **Schema:** Level refactorizado con `modality`, `rhythm`, `maxStudents`, `zoomLink`, `teacherId`.
+- **AdminService:** Dashboard con 7 métricas, Level CRUD con campos nuevos, evaluaciones, settings.
+- **ProtectedRoute:** Soporte `requireTeacher` + auto-redirect por rol.
+- **AuthStore:** Campos `isTeacher`, `role` para routing dinámico.
+
+---
+
 ## [1.2.0] — 2026-07-30
 
 ### Agregado
