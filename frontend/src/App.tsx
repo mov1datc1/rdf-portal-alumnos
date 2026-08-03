@@ -20,6 +20,8 @@ import { GroupsManager } from './pages/admin/GroupsManager';
 import { ResourcesManager } from './pages/admin/ResourcesManager';
 import { ScheduleManager } from './pages/admin/ScheduleManager';
 import { ZoomHostsManager } from './pages/admin/ZoomHostsManager';
+import { CRMManager } from './pages/admin/CRMManager';
+import { SettingsManager } from './pages/admin/SettingsManager';
 
 import { TeacherLayout } from './components/teacher/TeacherLayout';
 import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
@@ -83,6 +85,8 @@ function App() {
             <Route path="resources" element={<ResourcesManager />} />
             <Route path="schedule" element={<ScheduleManager />} />
             <Route path="zoom" element={<ZoomHostsManager />} />
+            <Route path="crm" element={<CRMManager />} />
+            <Route path="settings" element={<SettingsManager />} />
           </Route>
         </Route>
 
