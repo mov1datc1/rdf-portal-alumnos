@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyRound, Loader2, Check, User, Mail, Shield, AlertCircle } from 'lucide-react';
+import { KeyRound, Loader2, User, Mail, Shield, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export function Perfil() {
