@@ -7,6 +7,16 @@ y este proyecto se adhiere al [Versionado Semántico](https://semver.org/lang/es
 
 ---
 
+## [2.2.0] — 2026-08-03
+
+### Agregado
+- **Facturación y Pagos:** Inscripciones con plan, mensualidad, fecha inicio. Registro de pagos con método (PayPal, Transferencia, Efectivo, Tarjeta) y referencia.
+- **PaymentsModule:** Backend CRUD completo para Enrollment + Payment + Analytics360.
+- **Analytics 360°:** Dashboard ejecutivo con revenue MoM, tasa de conversión, costo por alumno, distribuciones (modalidad, ritmo, plan, método de pago), ocupación de grupos con barras de progreso, y actividad reciente.
+- **Admin Sidebar:** "Facturación" y "Analytics 360°" con íconos.
+
+---
+
 ## [2.1.0] — 2026-08-03
 
 ### Agregado
