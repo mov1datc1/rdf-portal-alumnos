@@ -21,6 +21,14 @@ import { ResourcesManager } from './pages/admin/ResourcesManager';
 import { ScheduleManager } from './pages/admin/ScheduleManager';
 import { ZoomHostsManager } from './pages/admin/ZoomHostsManager';
 
+import { TeacherLayout } from './components/teacher/TeacherLayout';
+import { TeacherDashboard } from './pages/teacher/TeacherDashboard';
+import { TeacherGroups } from './pages/teacher/TeacherGroups';
+import { TeacherSchedule } from './pages/teacher/TeacherSchedule';
+import { TeacherStudents } from './pages/teacher/TeacherStudents';
+import { TeacherAttendance } from './pages/teacher/TeacherAttendance';
+import { TeacherEvaluations } from './pages/teacher/TeacherEvaluations';
+
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
   const setUser = useAuthStore((state) => state.setUser);
@@ -75,6 +83,18 @@ function App() {
             <Route path="resources" element={<ResourcesManager />} />
             <Route path="schedule" element={<ScheduleManager />} />
             <Route path="zoom" element={<ZoomHostsManager />} />
+          </Route>
+        </Route>
+
+        {/* Rutas Protegidas para Profesores */}
+        <Route element={<ProtectedRoute requireTeacher={true} />}>
+          <Route path="/teacher" element={<TeacherLayout />}>
+            <Route index element={<TeacherDashboard />} />
+            <Route path="groups" element={<TeacherGroups />} />
+            <Route path="schedule" element={<TeacherSchedule />} />
+            <Route path="students" element={<TeacherStudents />} />
+            <Route path="attendance" element={<TeacherAttendance />} />
+            <Route path="evaluations" element={<TeacherEvaluations />} />
           </Route>
         </Route>
 

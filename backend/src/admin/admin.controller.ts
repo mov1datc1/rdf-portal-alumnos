@@ -15,6 +15,8 @@ export class AdminController {
     return this.adminService.getDashboardMetrics();
   }
 
+  // ── Users ──
+
   @Get('users')
   getUsers() {
     return this.adminService.getUsers();
@@ -30,15 +32,41 @@ export class AdminController {
     return this.adminService.updateUser(id, body);
   }
 
+  @Get('teachers')
+  getTeachers() {
+    return this.adminService.getTeachers();
+  }
+
+  // ── Resources ──
+
   @Post('resources')
   createResource(@Body() body: any) {
     return this.adminService.createResource(body);
   }
 
+  // ── Levels / Groups ──
+
   @Get('levels')
   getLevelsWithModules() {
     return this.adminService.getLevelsWithModules();
   }
+
+  @Post('levels')
+  createLevel(@Body() body: any) {
+    return this.adminService.createLevel(body);
+  }
+
+  @Patch('levels/:id')
+  updateLevel(@Param('id') id: string, @Body() body: any) {
+    return this.adminService.updateLevel(id, body);
+  }
+
+  @Delete('levels/:id')
+  deleteLevel(@Param('id') id: string) {
+    return this.adminService.deleteLevel(id);
+  }
+
+  // ── Schedule ──
 
   @Post('schedule')
   scheduleClass(@Body() body: any) {
@@ -60,18 +88,27 @@ export class AdminController {
     return this.adminService.updateScheduledClass(id, body);
   }
 
-  @Post('levels')
-  createLevel(@Body() body: any) {
-    return this.adminService.createLevel(body);
+  // ── Evaluations ──
+
+  @Get('evaluations')
+  getEvaluations() {
+    return this.adminService.getEvaluations();
   }
 
-  @Patch('levels/:id')
-  updateLevel(@Param('id') id: string, @Body() body: any) {
-    return this.adminService.updateLevel(id, body);
+  @Post('evaluations')
+  createEvaluation(@Body() body: any) {
+    return this.adminService.createEvaluation(body);
   }
 
-  @Delete('levels/:id')
-  deleteLevel(@Param('id') id: string) {
-    return this.adminService.deleteLevel(id);
+  // ── Settings ──
+
+  @Get('settings')
+  getSettings() {
+    return this.adminService.getSettings();
+  }
+
+  @Patch('settings')
+  updateSettings(@Body() body: any) {
+    return this.adminService.updateSettings(body);
   }
 }

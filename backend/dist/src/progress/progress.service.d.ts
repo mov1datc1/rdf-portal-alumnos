@@ -11,8 +11,13 @@ export declare class ProgressService {
                     updatedAt: Date;
                     name: string;
                     levelCode: string;
+                    modality: import("@prisma/client").$Enums.ClassModality;
+                    rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
                     schedule: string | null;
+                    maxStudents: number;
+                    zoomLink: string | null;
                     totalScoreTarget: number;
+                    teacherId: string | null;
                 };
             } & {
                 id: string;

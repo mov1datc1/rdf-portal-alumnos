@@ -9,6 +9,8 @@ datasource db {
   provider = "postgresql"
 }
 
+// ── Enums ──
+
 enum Role {
   STUDENT
   ADMIN
@@ -29,30 +31,86 @@ enum ProgressStatus {
   COMPLETED
 }
 
+enum ClassModality {
+  GROUP       // Grupal (máx 8 alumnos)
+  INDIVIDUAL  // Individual (1 alumno)
+  PART_DUO    // Par (2 alumnos)
+}
+
+enum StudyRhythm {
+  REGULAR     // 3x/sem, 50min (L-Mi-V o Mi-J-V)
+  SATURDAY    // Sabatino: 1x/sem sábado, 2h50
+  INTENSIVE   // 5x/sem, 50min (L-V)
+}
+
+enum LeadSource {
+  GOOGLE_ADS
+  META_ADS
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP_ORGANIC
+  REFERRAL
+  WEBSITE
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  TRIAL_CLASS
+  ENROLLED
+  LOST
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// ── Models ──
+
 model User {
   id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email          String         @unique
   role           Role           @default(STUDENT)
   firstName      String?
   lastName       String?
+  phone          String?
   isActive       Boolean        @default(true)
   currentLevelId String?        @db.Uuid
-  currentLevel   Level?         @relation(fields: [currentLevelId], references: [id])
+  currentLevel   Level?         @relation("StudentLevel", fields: [currentLevelId], references: [id])
   progress       UserProgress[]
+  // Teacher relations
+  teacherGroups  Level[]        @relation("TeacherGroups")
+  evaluationsGiven Evaluation[] @relation("Evaluator")
+  // Student relations
+  evaluations    Evaluation[]   @relation("StudentEvals")
+  enrollments    Enrollment[]
+  attendances    Attendance[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
 
 model Level {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String   // Nombre del grupo, e.g., "Grupo París"
-  levelCode        String   @default("A1") // Nivel académico: A1, A2, B1, B2, C1, C2
-  schedule         String?  // Horario, e.g., "Lun, Mier, Vier · 10:00-12:00"
-  totalScoreTarget Int      @default(100)
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String         // Nombre del grupo, e.g., "Grupo París", "Grupo Lyon"
+  levelCode        String         @default("A1") // Nivel académico: Basico1, Basico2, Inter1, Inter2, Avanz1, Avanz2
+  modality         ClassModality  @default(GROUP)
+  rhythm           StudyRhythm?   // null para Individual/PartDuo (horario libre)
+  schedule         String?        // Horario, e.g., "Lun, Mier, Vier · 10:00-12:00"
+  maxStudents      Int            @default(8)
+  zoomLink         String?        // Enlace FIJO permanente de Zoom para este grupo
+  teacherId        String?        @db.Uuid
+  teacher          User?          @relation("TeacherGroups", fields: [teacherId], references: [id])
+  totalScoreTarget Int            @default(100)
   modules          Module[]
-  users            User[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  users            User[]         @relation("StudentLevel")
+  evaluations      Evaluation[]
+  enrollments      Enrollment[]
+  attendances      Attendance[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
 model Module {
@@ -80,6 +138,7 @@ model Resource {
   scheduledAt      DateTime?      // Para clases en vivo
   durationExpected Int            // Tiempo estimado en segundos
   userProgress     UserProgress[]
+  attendances      Attendance[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 }
@@ -110,4 +169,99 @@ model ZoomHost {
   meetings      Resource[]          // Meetings creados por este host
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+}
+
+// ── Evaluaciones (Examen oral + escrito al final de cada nivel) ──
+
+model Evaluation {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @db.Uuid
+  user           User     @relation("StudentEvals", fields: [userId], references: [id])
+  levelId        String   @db.Uuid
+  level          Level    @relation(fields: [levelId], references: [id])
+  oralScore      Float?   // 0-100
+  writtenScore   Float?   // 0-100 (optional, exams are mostly oral)
+  passed         Boolean  @default(false)
+  evaluatedById  String?  @db.Uuid
+  evaluatedBy    User?    @relation("Evaluator", fields: [evaluatedById], references: [id])
+  certificateUrl String?  // URL del certificado PDF generado
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  @@unique([userId, levelId])
+}
+
+// ── Inscripciones y Pagos ──
+
+model Enrollment {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String        @db.Uuid
+  user        User          @relation(fields: [userId], references: [id])
+  levelId     String        @db.Uuid
+  level       Level         @relation(fields: [levelId], references: [id])
+  planType    String        // "Grupal Regular", "Individual 3x/sem", etc.
+  monthlyFee  Float
+  startDate   DateTime
+  endDate     DateTime?
+  isActive    Boolean       @default(true)
+  payments    Payment[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Payment {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  enrollmentId String   @db.Uuid
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  amount       Float
+  paidAt       DateTime?
+  method       String?  // "PayPal", "Transferencia", "Efectivo"
+  reference    String?  // Referencia o transaction ID de PayPal
+  status       PaymentStatus @default(PENDING)
+  createdAt    DateTime @default(now())
+}
+
+// ── Asistencia ──
+
+model Attendance {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id])
+  resourceId String   @db.Uuid
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  levelId    String   @db.Uuid
+  level      Level    @relation(fields: [levelId], references: [id])
+  attended   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, resourceId])
+}
+
+// ── CRM: Prospectos / Leads ──
+
+model Lead {
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  phone            String     // WhatsApp number
+  email            String?
+  source           LeadSource @default(WHATSAPP_ORGANIC)
+  sourceDetail     String?    // UTM campaign, ad set, keyword, etc.
+  status           LeadStatus @default(NEW)
+  notes            String?
+  interestedIn     String?    // "Grupal Regular", "Individual", etc.
+  assignedTo       String?    @db.Uuid  // Admin que atiende
+  convertedToUserId String?   @db.Uuid  // User ID si se inscribió
+  trialClassDate   DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+// ── Configuración Global ──
+
+model AppSettings {
+  id              String   @id @default("global")
+  googleAdsBudget Float    @default(10000) // MXN mensual
+  metaAdsBudget   Float    @default(3000)  // MXN mensual
+  schoolName      String   @default("Les Rois du Français")
+  updatedAt       DateTime @updatedAt
 }

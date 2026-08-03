@@ -18,12 +18,13 @@ const auth_module_1 = require("./auth/auth.module");
 const admin_module_1 = require("./admin/admin.module");
 const resources_module_1 = require("./resources/resources.module");
 const zoom_module_1 = require("./zoom/zoom.module");
+const teacher_module_1 = require("./teacher/teacher.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [progress_module_1.ProgressModule, classes_module_1.ClassesModule, ai_module_1.AiModule, auth_module_1.AuthModule, admin_module_1.AdminModule, resources_module_1.ResourcesModule, zoom_module_1.ZoomModule],
+        imports: [progress_module_1.ProgressModule, classes_module_1.ClassesModule, ai_module_1.AiModule, auth_module_1.AuthModule, admin_module_1.AdminModule, resources_module_1.ResourcesModule, zoom_module_1.ZoomModule, teacher_module_1.TeacherModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, prisma_service_1.PrismaService],
         exports: [prisma_service_1.PrismaService],

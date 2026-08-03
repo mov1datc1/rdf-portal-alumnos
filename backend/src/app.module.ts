@@ -9,9 +9,10 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { ResourcesModule } from './resources/resources.module';
 import { ZoomModule } from './zoom/zoom.module';
+import { TeacherModule } from './teacher/teacher.module';
 
 @Module({
-  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule, ZoomModule],
+  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule, ZoomModule, TeacherModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],

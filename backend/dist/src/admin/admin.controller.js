@@ -35,11 +35,23 @@ let AdminController = class AdminController {
     updateUser(id, body) {
         return this.adminService.updateUser(id, body);
     }
+    getTeachers() {
+        return this.adminService.getTeachers();
+    }
     createResource(body) {
         return this.adminService.createResource(body);
     }
     getLevelsWithModules() {
         return this.adminService.getLevelsWithModules();
+    }
+    createLevel(body) {
+        return this.adminService.createLevel(body);
+    }
+    updateLevel(id, body) {
+        return this.adminService.updateLevel(id, body);
+    }
+    deleteLevel(id) {
+        return this.adminService.deleteLevel(id);
     }
     scheduleClass(body) {
         return this.adminService.scheduleClass(body);
@@ -53,14 +65,17 @@ let AdminController = class AdminController {
     updateScheduledClass(id, body) {
         return this.adminService.updateScheduledClass(id, body);
     }
-    createLevel(body) {
-        return this.adminService.createLevel(body);
+    getEvaluations() {
+        return this.adminService.getEvaluations();
     }
-    updateLevel(id, body) {
-        return this.adminService.updateLevel(id, body);
+    createEvaluation(body) {
+        return this.adminService.createEvaluation(body);
     }
-    deleteLevel(id) {
-        return this.adminService.deleteLevel(id);
+    getSettings() {
+        return this.adminService.getSettings();
+    }
+    updateSettings(body) {
+        return this.adminService.updateSettings(body);
     }
 };
 exports.AdminController = AdminController;
@@ -92,6 +107,12 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateUser", null);
 __decorate([
+    (0, common_1.Get)('teachers'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getTeachers", null);
+__decorate([
     (0, common_1.Post)('resources'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -104,6 +125,28 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getLevelsWithModules", null);
+__decorate([
+    (0, common_1.Post)('levels'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "createLevel", null);
+__decorate([
+    (0, common_1.Patch)('levels/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "updateLevel", null);
+__decorate([
+    (0, common_1.Delete)('levels/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "deleteLevel", null);
 __decorate([
     (0, common_1.Post)('schedule'),
     __param(0, (0, common_1.Body)()),
@@ -133,27 +176,31 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateScheduledClass", null);
 __decorate([
-    (0, common_1.Post)('levels'),
+    (0, common_1.Get)('evaluations'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "getEvaluations", null);
+__decorate([
+    (0, common_1.Post)('evaluations'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], AdminController.prototype, "createLevel", null);
+], AdminController.prototype, "createEvaluation", null);
 __decorate([
-    (0, common_1.Patch)('levels/:id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    (0, common_1.Get)('settings'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], AdminController.prototype, "updateLevel", null);
+], AdminController.prototype, "getSettings", null);
 __decorate([
-    (0, common_1.Delete)('levels/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)('settings'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], AdminController.prototype, "deleteLevel", null);
+], AdminController.prototype, "updateSettings", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
