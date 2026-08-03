@@ -282,10 +282,7 @@ export function ScheduleManager() {
                 const groupZoomName = selectedLevel?.zoomHostGroup?.displayName || null;
                 const hasGroupZoom = !!groupZoomLink;
                 // If the admin hasn't explicitly chosen to override, use the group's link
-                const [overrideZoom, setOverrideZoom] = [
-                  formData.zoomHostId === '__override__',
-                  (v: boolean) => setFormData({...formData, zoomHostId: v ? '__override__' : '', url: v ? '' : groupZoomLink || ''})
-                ];
+                const overrideZoom = formData.zoomHostId === '__override__';
 
                 if (hasGroupZoom && !overrideZoom && !editingId) {
                   return (
