@@ -7,6 +7,18 @@ y este proyecto se adhiere al [Versionado Semántico](https://semver.org/lang/es
 
 ---
 
+## [2.1.0] — 2026-08-03
+
+### Agregado
+- **CRM de Prospectos:** Pipeline Kanban con drag & drop (5 etapas: Nuevo → Contactado → Clase Prueba → Inscrito / No Inscrito).
+- **Analytics CRM:** Leads por canal (Google, Meta, WhatsApp, etc.), tasa de conversión, costo por lead calculado con presupuesto editable.
+- **LeadsModule:** Backend CRUD completo + analytics endpoint con groupBy por source/status.
+- **Configuración Global:** Presupuesto editable de Google Ads ($10,000 MXN) y Meta Ads ($3,000 MXN).
+- **Admin Sidebar:** Enlaces "CRM Prospectos" y "Configuración" con separador visual.
+- **DB Push Exitoso:** Schema v2.0 sincronizado a Supabase (Attendance, Evaluation, Enrollment, Payment, Lead, AppSettings).
+
+---
+
 ## [2.0.0] — 2026-08-03
 
 ### Agregado
