@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Plus, X, Phone, Mail, MessageSquare, TrendingUp, Search, Edit2, Trash2 } from 'lucide-react';
+import { Loader2, Plus, X, Phone, Mail, MessageSquare, TrendingUp, Search, Edit2, Trash2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 const SOURCES = [
@@ -36,6 +36,10 @@ export function CRMManager() {
   const [tab, setTab] = useState<'kanban' | 'analytics'>('kanban');
   const session = useAuthStore(state => state.session);
   const dragRef = useRef<string | null>(null);
+
+  // Enrollment confirmation modal
+  const [enrollConfirm, setEnrollConfirm] = useState<{ leadId: string; leadName: string; leadEmail: string | null } | null>(null);
+  const [enrolling, setEnrolling] = useState(false);
 
   const [form, setForm] = useState({
     name: '', phone: '', email: '', source: 'WHATSAPP_ORGANIC',
@@ -97,11 +101,45 @@ export function CRMManager() {
 
   const handleDrop = async (newStatus: string) => {
     if (!dragRef.current) return;
-    await fetch(`${apiUrl}/admin/leads/${dragRef.current}/status`, {
+    const leadId = dragRef.current;
+    dragRef.current = null;
+
+    // Intercept drops to ENROLLED — show confirmation modal
+    if (newStatus === 'ENROLLED') {
+      const lead = leads.find(l => l.id === leadId);
+      if (lead && lead.status !== 'ENROLLED') {
+        setEnrollConfirm({ leadId, leadName: lead.name, leadEmail: lead.email });
+        return;
+      }
+    }
+
+    // All other status changes: apply immediately
+    await fetch(`${apiUrl}/admin/leads/${leadId}/status`, {
       method: 'PATCH', headers, body: JSON.stringify({ status: newStatus }),
     });
-    dragRef.current = null;
     fetchData();
+  };
+
+  const confirmEnrollment = async () => {
+    if (!enrollConfirm) return;
+    setEnrolling(true);
+    try {
+      const res = await fetch(`${apiUrl}/admin/leads/${enrollConfirm.leadId}/status`, {
+        method: 'PATCH', headers, body: JSON.stringify({ status: 'ENROLLED' }),
+      });
+      if (res.ok) {
+        setEnrollConfirm(null);
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.message}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error de conexión');
+    } finally {
+      setEnrolling(false);
+    }
   };
 
   const filtered = leads.filter(l => {
@@ -414,6 +452,55 @@ export function CRMManager() {
                 {editingLead ? 'Guardar Cambios' : 'Crear Prospecto'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ── Modal: Confirm Enrollment ── */}
+      {enrollConfirm && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-[scaleIn_0.15s_ease]">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-800">Confirmar Inscripción</h2>
+                <p className="text-xs text-slate-500">Esta acción genera acceso automático</p>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4">
+              <p className="text-sm text-amber-800 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span>
+                  Al confirmar, se creará <strong>automáticamente</strong> una cuenta de acceso al portal para <strong>{enrollConfirm.leadName}</strong>
+                  {enrollConfirm.leadEmail && <> con el correo <strong>{enrollConfirm.leadEmail}</strong></>}.
+                </span>
+              </p>
+            </div>
+
+            <div className="space-y-2 mb-4 text-xs text-slate-500">
+              <p>• Se generará usuario y contraseña temporal <code className="bg-slate-100 px-1 py-0.5 rounded">LesRois2026!</code></p>
+              <p>• El alumno podrá acceder al portal inmediatamente</p>
+              <p>• Podrás asignarle un grupo después en "Usuarios"</p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setEnrollConfirm(null)}
+                className="flex-1 py-2.5 rounded-xl font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmEnrollment}
+                disabled={enrolling}
+                className="flex-1 py-2.5 rounded-xl font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {enrolling ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                Confirmar Inscripción
+              </button>
+            </div>
           </div>
         </div>
       )}

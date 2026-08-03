@@ -1,14 +1,16 @@
 import { PrismaService } from '../prisma.service';
 export declare class LeadsService {
     private prisma;
+    private readonly logger;
+    private supabase;
     constructor(prisma: PrismaService);
     getAll(): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -21,10 +23,10 @@ export declare class LeadsService {
     getById(id: string): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -34,13 +36,21 @@ export declare class LeadsService {
         convertedToUserId: string | null;
         trialClassDate: Date | null;
     } | null>;
+    getEnrolledLeads(): Promise<{
+        id: string;
+        email: string | null;
+        name: string;
+        phone: string;
+        interestedIn: string | null;
+        convertedToUserId: string | null;
+    }[]>;
     create(data: any): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -53,10 +63,10 @@ export declare class LeadsService {
     update(id: string, data: any): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -69,10 +79,10 @@ export declare class LeadsService {
     updateStatus(id: string, status: string): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -82,13 +92,14 @@ export declare class LeadsService {
         convertedToUserId: string | null;
         trialClassDate: Date | null;
     }>;
+    private convertLeadToUser;
     delete(id: string): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;

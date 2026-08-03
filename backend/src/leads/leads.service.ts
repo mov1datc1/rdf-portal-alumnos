@@ -1,9 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { createClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class LeadsService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(LeadsService.name);
+  private supabase;
+
+  constructor(private prisma: PrismaService) {
+    this.supabase = createClient(
+      process.env.SUPABASE_URL as string,
+      process.env.SUPABASE_SERVICE_ROLE_KEY as string
+    );
+  }
 
   async getAll() {
     return this.prisma.lead.findMany({
@@ -13,6 +22,24 @@ export class LeadsService {
 
   async getById(id: string) {
     return this.prisma.lead.findUnique({ where: { id } });
+  }
+
+  /**
+   * Get only leads with status ENROLLED (for Group assignment dropdowns).
+   */
+  async getEnrolledLeads() {
+    return this.prisma.lead.findMany({
+      where: { status: 'ENROLLED' },
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        email: true,
+        interestedIn: true,
+        convertedToUserId: true,
+      },
+      orderBy: { name: 'asc' },
+    });
   }
 
   async create(data: any) {
@@ -48,11 +75,78 @@ export class LeadsService {
     return this.prisma.lead.update({ where: { id }, data: updateData });
   }
 
+  /**
+   * Update lead status. When status changes to ENROLLED, auto-creates a User account.
+   */
   async updateStatus(id: string, status: string) {
+    const lead = await this.prisma.lead.findUnique({ where: { id } });
+    if (!lead) throw new Error('Lead not found');
+
+    // Auto-create user when status becomes ENROLLED
+    if (status === 'ENROLLED' && lead.status !== 'ENROLLED' && !lead.convertedToUserId) {
+      try {
+        const userId = await this.convertLeadToUser(lead);
+        return this.prisma.lead.update({
+          where: { id },
+          data: { status: status as any, convertedToUserId: userId },
+        });
+      } catch (error) {
+        this.logger.error(`Failed to auto-create user for lead ${lead.name}: ${error.message}`);
+        // Still update status even if user creation fails
+      }
+    }
+
     return this.prisma.lead.update({
       where: { id },
       data: { status: status as any },
     });
+  }
+
+  /**
+   * Convert a lead to a User account (creates Supabase Auth + Prisma User).
+   */
+  private async convertLeadToUser(lead: any): Promise<string> {
+    // Need an email for Supabase Auth
+    const email = lead.email || `${lead.phone.replace(/\D/g, '')}@lesroisdufrancais.temp`;
+    const nameParts = lead.name.trim().split(/\s+/);
+    const firstName = nameParts[0] || lead.name;
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    // Check if user with this email already exists
+    const existingUser = await this.prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      this.logger.log(`User already exists for ${email}, linking lead`);
+      return existingUser.id;
+    }
+
+    // Create in Supabase Auth
+    const tempPassword = `LesRois${new Date().getFullYear()}!`;
+    const { data: authData, error: authError } = await this.supabase.auth.admin.createUser({
+      email,
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: { firstName, lastName },
+    });
+
+    if (authError) {
+      this.logger.error(`Supabase auth error for ${email}: ${authError.message}`);
+      throw authError;
+    }
+
+    // Create in Prisma
+    const user = await this.prisma.user.create({
+      data: {
+        id: authData.user.id,
+        email,
+        firstName,
+        lastName,
+        phone: lead.phone || null,
+        role: 'STUDENT',
+      },
+    });
+
+    this.logger.log(`✅ Auto-created student account: ${firstName} ${lastName} (${email})`);
+    return user.id;
   }
 
   async delete(id: string) {

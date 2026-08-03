@@ -12,9 +12,11 @@ import { ZoomModule } from './zoom/zoom.module';
 import { TeacherModule } from './teacher/teacher.module';
 import { LeadsModule } from './leads/leads.module';
 import { PaymentsModule } from './payments/payments.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
-  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule, ZoomModule, TeacherModule, LeadsModule, PaymentsModule],
+  imports: [ProgressModule, ClassesModule, AiModule, AuthModule, AdminModule, ResourcesModule, ZoomModule, TeacherModule, LeadsModule, PaymentsModule, WhatsappModule, ProfileModule],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],

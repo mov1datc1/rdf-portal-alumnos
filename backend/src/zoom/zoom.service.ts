@@ -16,9 +16,13 @@ export class ZoomService {
 
   /**
    * Get an access token for a specific ZoomHost using S2S OAuth.
-   * Each host has its own accountId, clientId, clientSecret.
+   * Only works for hosts with S2S credentials configured.
    */
-  async getAccessToken(host: { accountId: string; clientId: string; clientSecret: string; id: string }): Promise<string> {
+  async getAccessToken(host: { accountId: string | null; clientId: string | null; clientSecret: string | null; id: string }): Promise<string> {
+    if (!host.accountId || !host.clientId || !host.clientSecret) {
+      throw new HttpException('Este host de Zoom no tiene credenciales S2S configuradas', HttpStatus.BAD_REQUEST);
+    }
+
     // Check cache
     const cached = this.tokenCache.get(host.id);
     if (cached && cached.expiresAt > Date.now()) {
@@ -141,24 +145,53 @@ export class ZoomService {
         id: true,
         email: true,
         displayName: true,
+        permanentLink: true,
         isActive: true,
         createdAt: true,
-        _count: { select: { meetings: true } },
+        accountId: true,  // to show if S2S is configured
+        _count: { select: { meetings: true, assignedGroups: true } },
       },
     });
   }
 
-  async createHost(data: { email: string; displayName: string; accountId: string; clientId: string; clientSecret: string }) {
-    return this.prisma.zoomHost.create({ data });
+  /**
+   * Get only hosts that have a permanent link (for Groups dropdown).
+   */
+  async getHostsWithPermanentLinks() {
+    return this.prisma.zoomHost.findMany({
+      where: { permanentLink: { not: null }, isActive: true },
+      orderBy: { displayName: 'asc' },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        permanentLink: true,
+        _count: { select: { assignedGroups: true } },
+      },
+    });
+  }
+
+  async createHost(data: { email: string; displayName: string; permanentLink?: string; accountId?: string; clientId?: string; clientSecret?: string }) {
+    return this.prisma.zoomHost.create({
+      data: {
+        email: data.email,
+        displayName: data.displayName,
+        permanentLink: data.permanentLink || null,
+        accountId: data.accountId || null,
+        clientId: data.clientId || null,
+        clientSecret: data.clientSecret || null,
+      },
+    });
   }
 
   async updateHost(id: string, data: any) {
     const updateData: any = {};
     if (data.email !== undefined) updateData.email = data.email;
     if (data.displayName !== undefined) updateData.displayName = data.displayName;
-    if (data.accountId !== undefined) updateData.accountId = data.accountId;
-    if (data.clientId !== undefined) updateData.clientId = data.clientId;
-    if (data.clientSecret !== undefined) updateData.clientSecret = data.clientSecret;
+    if (data.permanentLink !== undefined) updateData.permanentLink = data.permanentLink || null;
+    if (data.accountId !== undefined) updateData.accountId = data.accountId || null;
+    if (data.clientId !== undefined) updateData.clientId = data.clientId || null;
+    if (data.clientSecret !== undefined) updateData.clientSecret = data.clientSecret || null;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
     // Clear token cache if credentials changed
@@ -185,9 +218,17 @@ export class ZoomService {
     const host = await this.prisma.zoomHost.findUnique({ where: { id } });
     if (!host) throw new HttpException('Host no encontrado', HttpStatus.NOT_FOUND);
 
+    // If no S2S credentials, just check permanent link
+    if (!host.accountId || !host.clientId || !host.clientSecret) {
+      return {
+        success: !!host.permanentLink,
+        message: host.permanentLink ? 'Link permanente configurado (sin API S2S)' : 'Sin link ni credenciales S2S',
+      };
+    }
+
     try {
       await this.getAccessToken(host);
-      return { success: true, message: 'Conexión exitosa con Zoom' };
+      return { success: true, message: 'Conexión exitosa con Zoom API' };
     } catch (error) {
       return { success: false, message: error.message || 'Error de conexión' };
     }

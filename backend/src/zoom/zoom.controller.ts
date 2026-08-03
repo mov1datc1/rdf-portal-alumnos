@@ -15,8 +15,13 @@ export class ZoomController {
     return this.zoomService.getHosts();
   }
 
+  @Get('permanent-links')
+  getHostsWithPermanentLinks() {
+    return this.zoomService.getHostsWithPermanentLinks();
+  }
+
   @Post('hosts')
-  createHost(@Body() body: { email: string; displayName: string; accountId: string; clientId: string; clientSecret: string }) {
+  createHost(@Body() body: { email: string; displayName: string; permanentLink?: string; accountId?: string; clientId?: string; clientSecret?: string }) {
     return this.zoomService.createHost(body);
   }
 

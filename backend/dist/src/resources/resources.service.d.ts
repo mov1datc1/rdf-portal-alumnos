@@ -7,6 +7,7 @@ export declare class ResourcesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -14,6 +15,5 @@ export declare class ResourcesService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     }[]>;
 }

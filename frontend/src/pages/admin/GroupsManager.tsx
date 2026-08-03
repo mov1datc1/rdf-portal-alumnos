@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Plus, Edit2, Trash2, Check, X, Layers, Clock, Calendar, Users, Video, User } from 'lucide-react';
+import { Loader2, Plus, Edit2, Trash2, Check, X, Layers, Clock, Calendar, Users, Video, User, Link as LinkIcon } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 const LEVEL_CODES = ['Basico1', 'Basico2', 'Inter1', 'Inter2', 'Avanz1', 'Avanz2'];
@@ -81,9 +81,13 @@ function buildScheduleString(days: string[], sameTime: boolean, uniformStart: st
 export function GroupsManager() {
   const [levels, setLevels] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
+  const [zoomHosts, setZoomHosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAddZoom, setShowAddZoom] = useState(false);
+  const [addingZoom, setAddingZoom] = useState(false);
+  const [newZoom, setNewZoom] = useState({ displayName: '', email: '', permanentLink: '' });
   const session = useAuthStore(state => state.session);
 
   // Form state
@@ -93,7 +97,9 @@ export function GroupsManager() {
   const [rhythm, setRhythm] = useState<string>('REGULAR');
   const [maxStudents, setMaxStudents] = useState(8);
   const [teacherId, setTeacherId] = useState('');
+  const [zoomHostId, setZoomHostId] = useState('');
   const [zoomLink, setZoomLink] = useState('');
+  const [zoomMode, setZoomMode] = useState<'host' | 'manual'>('host');
 
   // Schedule
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -105,16 +111,20 @@ export function GroupsManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [levelsRes, teachersRes] = await Promise.all([
+      const [levelsRes, teachersRes, zoomRes] = await Promise.all([
         fetch(`${import.meta.env.VITE_API_URL}/admin/levels`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
         }),
         fetch(`${import.meta.env.VITE_API_URL}/admin/teachers`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
         }),
+        fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/permanent-links`, {
+          headers: { 'Authorization': `Bearer ${session?.access_token}` }
+        }),
       ]);
       if (levelsRes.ok) setLevels(await levelsRes.json());
       if (teachersRes.ok) setTeachers(await teachersRes.json());
+      if (zoomRes.ok) setZoomHosts(await zoomRes.json());
     } catch (e) {
       console.error(e);
     } finally {
@@ -128,7 +138,7 @@ export function GroupsManager() {
 
   const resetForm = () => {
     setName(''); setLevelCode('Basico1'); setModality('GROUP'); setRhythm('REGULAR');
-    setMaxStudents(8); setTeacherId(''); setZoomLink('');
+    setMaxStudents(8); setTeacherId(''); setZoomHostId(''); setZoomLink(''); setZoomMode('host');
     setSelectedDays([]); setSameTime(true); setUniformStart(''); setUniformEnd('');
     setPerDay({}); setEditingId(null);
   };
@@ -145,20 +155,34 @@ export function GroupsManager() {
         : `${import.meta.env.VITE_API_URL}/admin/levels`;
       const method = editingId ? 'PATCH' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+      const body: any = {
           name, levelCode, modality, schedule: schedule || null,
           rhythm: modality === 'GROUP' ? rhythm : null,
           maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
           teacherId: teacherId || null,
-          zoomLink: zoomLink || null,
-        }),
-      });
+        };
+
+        // Zoom: if using a host, send zoomHostId and sync the link; if manual, just send zoomLink
+        if (zoomMode === 'host' && zoomHostId) {
+          const selectedHost = zoomHosts.find(h => h.id === zoomHostId);
+          body.zoomHostId = zoomHostId;
+          body.zoomLink = selectedHost?.permanentLink || null;
+        } else if (zoomMode === 'manual' && zoomLink) {
+          body.zoomLink = zoomLink;
+          body.zoomHostId = null;
+        } else {
+          body.zoomLink = null;
+          body.zoomHostId = null;
+        }
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body),
+        });
 
       if (res.ok) { resetForm(); fetchData(); }
       else {
@@ -176,7 +200,9 @@ export function GroupsManager() {
     setRhythm(level.rhythm || 'REGULAR');
     setMaxStudents(level.maxStudents || 8);
     setTeacherId(level.teacherId || '');
+    setZoomHostId(level.zoomHostId || '');
     setZoomLink(level.zoomLink || '');
+    setZoomMode(level.zoomHostId ? 'host' : (level.zoomLink ? 'manual' : 'host'));
     setEditingId(level.id);
 
     const parsed = parseSchedule(level.schedule);
@@ -327,17 +353,102 @@ export function GroupsManager() {
               </select>
             </div>
 
-            {/* Zoom Link */}
+            {/* Zoom Link - Dropdown with Add inline */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
                 <Video className="w-3.5 h-3.5 text-[#2D8CFF]" /> Enlace Fijo de Zoom
               </label>
-              <input
-                type="url" placeholder="https://zoom.us/j/..."
-                value={zoomLink} onChange={e => setZoomLink(e.target.value)}
-                className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm"
-              />
-              <p className="text-xs text-slate-400 mt-1">Enlace permanente para este grupo.</p>
+
+              {/* Mode toggle */}
+              <div className="flex gap-1 mb-2">
+                <button type="button" onClick={() => setZoomMode('host')}
+                  className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all ${zoomMode === 'host' ? 'bg-[#2D8CFF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                  Seleccionar Cuenta
+                </button>
+                <button type="button" onClick={() => setZoomMode('manual')}
+                  className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all ${zoomMode === 'manual' ? 'bg-[#2D8CFF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                  Link Manual
+                </button>
+              </div>
+
+              {zoomMode === 'host' ? (
+                <>
+                  <select value={zoomHostId} onChange={e => setZoomHostId(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm">
+                    <option value="">Sin enlace de Zoom</option>
+                    {zoomHosts.map((h: any) => (
+                      <option key={h.id} value={h.id}>
+                        🟢 {h.displayName} ({h.email.split('@')[0]})
+                        {h._count?.assignedGroups > 0 ? ` · ${h._count.assignedGroups} grupo(s)` : ''}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Add new zoom link inline */}
+                  {!showAddZoom ? (
+                    <button type="button" onClick={() => setShowAddZoom(true)}
+                      className="mt-2 text-xs text-[#2D8CFF] hover:text-blue-700 flex items-center gap-1 font-semibold">
+                      <Plus className="w-3 h-3" /> Agregar nuevo enlace Zoom
+                    </button>
+                  ) : (
+                    <div className="mt-2 p-3 border border-[#2D8CFF]/30 rounded-xl bg-blue-50/50 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs font-bold text-[#2D8CFF]">Nuevo Enlace Zoom</p>
+                        <button type="button" onClick={() => { setShowAddZoom(false); setNewZoom({ displayName: '', email: '', permanentLink: '' }); }}
+                          className="text-slate-400 hover:text-slate-600">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <input type="text" placeholder="Nombre (Ej. Zoom 7)" value={newZoom.displayName}
+                        onChange={e => setNewZoom({ ...newZoom, displayName: e.target.value })}
+                        className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white" />
+                      <input type="email" placeholder="Email de Zoom" value={newZoom.email}
+                        onChange={e => setNewZoom({ ...newZoom, email: e.target.value })}
+                        className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white" />
+                      <input type="url" placeholder="https://zoom.us/j/..." value={newZoom.permanentLink}
+                        onChange={e => setNewZoom({ ...newZoom, permanentLink: e.target.value })}
+                        className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white font-mono" />
+                      <button type="button" disabled={addingZoom || !newZoom.displayName || !newZoom.email || !newZoom.permanentLink}
+                        onClick={async () => {
+                          setAddingZoom(true);
+                          try {
+                            const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/hosts`, {
+                              method: 'POST',
+                              headers: { 'Authorization': `Bearer ${session?.access_token}`, 'Content-Type': 'application/json' },
+                              body: JSON.stringify(newZoom),
+                            });
+                            if (res.ok) {
+                              const created = await res.json();
+                              setZoomHostId(created.id);
+                              setShowAddZoom(false);
+                              setNewZoom({ displayName: '', email: '', permanentLink: '' });
+                              // Refresh zoom hosts
+                              const zoomRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/permanent-links`, {
+                                headers: { 'Authorization': `Bearer ${session?.access_token}` }
+                              });
+                              if (zoomRes.ok) setZoomHosts(await zoomRes.json());
+                            } else {
+                              const err = await res.json();
+                              alert(`Error: ${err.message}`);
+                            }
+                          } catch { alert('Error de conexión'); }
+                          finally { setAddingZoom(false); }
+                        }}
+                        className="w-full py-1.5 rounded-lg text-xs font-bold bg-[#2D8CFF] text-white hover:bg-blue-600 transition-colors flex items-center justify-center gap-1 disabled:opacity-50">
+                        {addingZoom ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                        Guardar Enlace
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <input type="url" placeholder="https://zoom.us/j/..."
+                    value={zoomLink} onChange={e => setZoomLink(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm" />
+                  <p className="text-xs text-slate-400 mt-1">Pega un enlace de Zoom manualmente.</p>
+                </>
+              )}
             </div>
 
             {/* Schedule */}
@@ -496,10 +607,15 @@ export function GroupsManager() {
                           )}
                         </td>
                         <td className="p-3">
-                          {level.zoomLink ? (
+                          {level.zoomHostGroup ? (
+                            <a href={level.zoomHostGroup.permanentLink || level.zoomLink} target="_blank" rel="noopener noreferrer"
+                              className="text-xs text-[#2D8CFF] hover:underline flex items-center gap-1" title={level.zoomHostGroup.permanentLink}>
+                              <Video className="w-3.5 h-3.5" /> {level.zoomHostGroup.displayName}
+                            </a>
+                          ) : level.zoomLink ? (
                             <a href={level.zoomLink} target="_blank" rel="noopener noreferrer"
                               className="text-xs text-[#2D8CFF] hover:underline flex items-center gap-1">
-                              <Video className="w-3.5 h-3.5" /> Link
+                              <LinkIcon className="w-3.5 h-3.5" /> Manual
                             </a>
                           ) : (
                             <span className="text-xs text-slate-400">—</span>

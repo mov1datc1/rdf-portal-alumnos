@@ -37,6 +37,11 @@ export class AdminController {
     return this.adminService.getTeachers();
   }
 
+  @Post('users/:id/reset-password')
+  resetPassword(@Param('id') id: string, @Body() body: { newPassword: string }) {
+    return this.adminService.resetPassword(id, body.newPassword);
+  }
+
   // ── Resources ──
 
   @Post('resources')

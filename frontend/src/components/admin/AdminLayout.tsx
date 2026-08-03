@@ -32,7 +32,7 @@ export function AdminLayout() {
           </NavLink>
           <NavLink to="/admin/users" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <Users className="w-5 h-5" />
-            Alumnos
+            Usuarios
           </NavLink>
           <NavLink to="/admin/groups" className={({isActive}) => `flex items-center gap-3 p-3 rounded-xl transition-colors ${isActive ? 'bg-white/10 font-bold' : 'hover:bg-white/5'}`}>
             <Layers className="w-5 h-5" />

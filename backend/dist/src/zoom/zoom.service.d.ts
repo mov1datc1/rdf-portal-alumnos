@@ -5,9 +5,9 @@ export declare class ZoomService {
     private tokenCache;
     constructor(prisma: PrismaService);
     getAccessToken(host: {
-        accountId: string;
-        clientId: string;
-        clientSecret: string;
+        accountId: string | null;
+        clientId: string | null;
+        clientSecret: string | null;
         id: string;
     }): Promise<string>;
     createMeeting(hostId: string, topic: string, startTime: Date, durationMinutes?: number): Promise<{
@@ -18,51 +18,67 @@ export declare class ZoomService {
     getHosts(): Promise<{
         id: string;
         email: string;
+        displayName: string;
+        permanentLink: string | null;
+        accountId: string | null;
         isActive: boolean;
         createdAt: Date;
         _count: {
             meetings: number;
+            assignedGroups: number;
         };
+    }[]>;
+    getHostsWithPermanentLinks(): Promise<{
+        id: string;
+        email: string;
         displayName: string;
+        permanentLink: string | null;
+        _count: {
+            assignedGroups: number;
+        };
     }[]>;
     createHost(data: {
         email: string;
         displayName: string;
-        accountId: string;
-        clientId: string;
-        clientSecret: string;
+        permanentLink?: string;
+        accountId?: string;
+        clientId?: string;
+        clientSecret?: string;
     }): Promise<{
         id: string;
         email: string;
+        displayName: string;
+        permanentLink: string | null;
+        accountId: string | null;
+        clientId: string | null;
+        clientSecret: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        displayName: string;
-        accountId: string;
-        clientId: string;
-        clientSecret: string;
     }>;
     updateHost(id: string, data: any): Promise<{
         id: string;
         email: string;
+        displayName: string;
+        permanentLink: string | null;
+        accountId: string | null;
+        clientId: string | null;
+        clientSecret: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        displayName: string;
-        accountId: string;
-        clientId: string;
-        clientSecret: string;
     }>;
     deleteHost(id: string): Promise<{
         id: string;
         email: string;
+        displayName: string;
+        permanentLink: string | null;
+        accountId: string | null;
+        clientId: string | null;
+        clientSecret: string | null;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
-        displayName: string;
-        accountId: string;
-        clientId: string;
-        clientSecret: string;
     }>;
     testHost(id: string): Promise<{
         success: boolean;

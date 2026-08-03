@@ -12,6 +12,7 @@ import { Progreso } from './pages/Progreso';
 import { Estadisticas } from './pages/Estadisticas';
 import { Recursos } from './pages/Recursos';
 import { VideoFrances } from './pages/VideoFrances';
+import { Perfil } from './pages/Perfil';
 
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
@@ -75,6 +76,7 @@ function App() {
             <Route path="estadisticas" element={<Estadisticas />} />
             <Route path="recursos" element={<Recursos />} />
             <Route path="video" element={<VideoFrances />} />
+            <Route path="perfil" element={<Perfil />} />
           </Route>
         </Route>
 

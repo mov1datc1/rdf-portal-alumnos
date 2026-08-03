@@ -5,10 +5,10 @@ export declare class LeadsController {
     getAll(): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -17,6 +17,14 @@ export declare class LeadsController {
         assignedTo: string | null;
         convertedToUserId: string | null;
         trialClassDate: Date | null;
+    }[]>;
+    getEnrolledLeads(): Promise<{
+        id: string;
+        email: string | null;
+        name: string;
+        phone: string;
+        interestedIn: string | null;
+        convertedToUserId: string | null;
     }[]>;
     getAnalytics(): Promise<{
         total: number;
@@ -45,10 +53,10 @@ export declare class LeadsController {
     getById(id: string): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -61,10 +69,10 @@ export declare class LeadsController {
     create(body: any): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -77,10 +85,10 @@ export declare class LeadsController {
     update(id: string, body: any): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -95,10 +103,10 @@ export declare class LeadsController {
     }): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;
@@ -111,10 +119,10 @@ export declare class LeadsController {
     delete(id: string): Promise<{
         id: string;
         email: string | null;
-        phone: string;
         createdAt: Date;
         updatedAt: Date;
         name: string;
+        phone: string;
         status: import("@prisma/client").$Enums.LeadStatus;
         notes: string | null;
         source: import("@prisma/client").$Enums.LeadSource;

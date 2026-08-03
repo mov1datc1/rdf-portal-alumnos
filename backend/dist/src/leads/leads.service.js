@@ -8,14 +8,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var LeadsService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LeadsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma.service");
-let LeadsService = class LeadsService {
+const supabase_js_1 = require("@supabase/supabase-js");
+let LeadsService = LeadsService_1 = class LeadsService {
     prisma;
+    logger = new common_1.Logger(LeadsService_1.name);
+    supabase;
     constructor(prisma) {
         this.prisma = prisma;
+        this.supabase = (0, supabase_js_1.createClient)(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
     }
     async getAll() {
         return this.prisma.lead.findMany({
@@ -24,6 +29,20 @@ let LeadsService = class LeadsService {
     }
     async getById(id) {
         return this.prisma.lead.findUnique({ where: { id } });
+    }
+    async getEnrolledLeads() {
+        return this.prisma.lead.findMany({
+            where: { status: 'ENROLLED' },
+            select: {
+                id: true,
+                name: true,
+                phone: true,
+                email: true,
+                interestedIn: true,
+                convertedToUserId: true,
+            },
+            orderBy: { name: 'asc' },
+        });
     }
     async create(data) {
         return this.prisma.lead.create({
@@ -67,10 +86,59 @@ let LeadsService = class LeadsService {
         return this.prisma.lead.update({ where: { id }, data: updateData });
     }
     async updateStatus(id, status) {
+        const lead = await this.prisma.lead.findUnique({ where: { id } });
+        if (!lead)
+            throw new Error('Lead not found');
+        if (status === 'ENROLLED' && lead.status !== 'ENROLLED' && !lead.convertedToUserId) {
+            try {
+                const userId = await this.convertLeadToUser(lead);
+                return this.prisma.lead.update({
+                    where: { id },
+                    data: { status: status, convertedToUserId: userId },
+                });
+            }
+            catch (error) {
+                this.logger.error(`Failed to auto-create user for lead ${lead.name}: ${error.message}`);
+            }
+        }
         return this.prisma.lead.update({
             where: { id },
             data: { status: status },
         });
+    }
+    async convertLeadToUser(lead) {
+        const email = lead.email || `${lead.phone.replace(/\D/g, '')}@lesroisdufrancais.temp`;
+        const nameParts = lead.name.trim().split(/\s+/);
+        const firstName = nameParts[0] || lead.name;
+        const lastName = nameParts.slice(1).join(' ') || '';
+        const existingUser = await this.prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            this.logger.log(`User already exists for ${email}, linking lead`);
+            return existingUser.id;
+        }
+        const tempPassword = `LesRois${new Date().getFullYear()}!`;
+        const { data: authData, error: authError } = await this.supabase.auth.admin.createUser({
+            email,
+            password: tempPassword,
+            email_confirm: true,
+            user_metadata: { firstName, lastName },
+        });
+        if (authError) {
+            this.logger.error(`Supabase auth error for ${email}: ${authError.message}`);
+            throw authError;
+        }
+        const user = await this.prisma.user.create({
+            data: {
+                id: authData.user.id,
+                email,
+                firstName,
+                lastName,
+                phone: lead.phone || null,
+                role: 'STUDENT',
+            },
+        });
+        this.logger.log(`✅ Auto-created student account: ${firstName} ${lastName} (${email})`);
+        return user.id;
     }
     async delete(id) {
         return this.prisma.lead.delete({ where: { id } });
@@ -131,7 +199,7 @@ let LeadsService = class LeadsService {
     }
 };
 exports.LeadsService = LeadsService;
-exports.LeadsService = LeadsService = __decorate([
+exports.LeadsService = LeadsService = LeadsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], LeadsService);

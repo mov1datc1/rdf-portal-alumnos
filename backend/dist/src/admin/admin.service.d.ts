@@ -8,11 +8,11 @@ export declare class AdminService {
     getUsers(): Promise<{
         id: string;
         email: string;
+        isActive: boolean;
         role: import("@prisma/client").$Enums.Role;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
-        isActive: boolean;
         currentLevelId: string | null;
         currentLevel: {
             name: string;
@@ -40,32 +40,37 @@ export declare class AdminService {
     createUser(data: any): Promise<{
         id: string;
         email: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         role: import("@prisma/client").$Enums.Role;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
-        isActive: boolean;
         currentLevelId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     updateUser(id: string, data: any): Promise<{
         id: string;
         email: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         role: import("@prisma/client").$Enums.Role;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
-        isActive: boolean;
         currentLevelId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
+    }>;
+    resetPassword(userId: string, newPassword: string): Promise<{
+        success: boolean;
+        message: string;
     }>;
     createResource(data: any): Promise<{
         url: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -73,9 +78,14 @@ export declare class AdminService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     }>;
     getLevelsWithModules(): Promise<({
+        zoomHostGroup: {
+            id: string;
+            email: string;
+            displayName: string;
+            permanentLink: string | null;
+        } | null;
         teacher: {
             id: string;
             email: string;
@@ -105,6 +115,7 @@ export declare class AdminService {
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
+        zoomHostId: string | null;
         teacherId: string | null;
     })[]>;
     createLevel(data: any): Promise<{
@@ -119,6 +130,7 @@ export declare class AdminService {
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
+        zoomHostId: string | null;
         teacherId: string | null;
     }>;
     updateLevel(id: string, data: any): Promise<{
@@ -133,6 +145,7 @@ export declare class AdminService {
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
+        zoomHostId: string | null;
         teacherId: string | null;
     }>;
     deleteLevel(id: string): Promise<{
@@ -147,6 +160,7 @@ export declare class AdminService {
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
+        zoomHostId: string | null;
         teacherId: string | null;
     }>;
     scheduleClass(data: any): Promise<{
@@ -154,6 +168,7 @@ export declare class AdminService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -161,9 +176,13 @@ export declare class AdminService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     }>;
     getScheduledClasses(): Promise<({
+        zoomHost: {
+            id: string;
+            email: string;
+            displayName: string;
+        } | null;
         module: {
             level: {
                 id: string;
@@ -177,6 +196,7 @@ export declare class AdminService {
                 maxStudents: number;
                 zoomLink: string | null;
                 totalScoreTarget: number;
+                zoomHostId: string | null;
                 teacherId: string | null;
             };
         } & {
@@ -187,16 +207,12 @@ export declare class AdminService {
             title: string;
             levelId: string;
         };
-        zoomHost: {
-            id: string;
-            email: string;
-            displayName: string;
-        } | null;
     } & {
         url: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -204,13 +220,13 @@ export declare class AdminService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     })[]>;
     deleteScheduledClass(id: string): Promise<{
         url: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -218,13 +234,13 @@ export declare class AdminService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     }>;
     updateScheduledClass(id: string, data: any): Promise<{
         url: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -232,7 +248,6 @@ export declare class AdminService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     }>;
     getEvaluations(): Promise<({
         user: {

@@ -213,10 +213,10 @@ export declare class PaymentsService {
             leads: {
                 id: string;
                 email: string | null;
-                phone: string;
                 createdAt: Date;
                 updatedAt: Date;
                 name: string;
+                phone: string;
                 status: import("@prisma/client").$Enums.LeadStatus;
                 notes: string | null;
                 source: import("@prisma/client").$Enums.LeadSource;

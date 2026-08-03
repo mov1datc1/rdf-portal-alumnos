@@ -101,6 +101,18 @@ let AdminService = class AdminService {
             updateData.currentLevelId = data.currentLevelId || null;
         return this.prisma.user.update({ where: { id }, data: updateData });
     }
+    async resetPassword(userId, newPassword) {
+        if (!newPassword || newPassword.length < 6) {
+            throw new common_1.HttpException('La contraseña debe tener al menos 6 caracteres', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const { error } = await this.supabase.auth.admin.updateUserById(userId, {
+            password: newPassword,
+        });
+        if (error) {
+            throw new common_1.HttpException(`Error al resetear contraseña: ${error.message}`, common_1.HttpStatus.BAD_REQUEST);
+        }
+        return { success: true, message: 'Contraseña actualizada exitosamente' };
+    }
     async createResource(data) {
         return this.prisma.resource.create({
             data: {
@@ -117,6 +129,7 @@ let AdminService = class AdminService {
             include: {
                 modules: { orderBy: { orderIndex: 'asc' } },
                 teacher: { select: { id: true, firstName: true, lastName: true, email: true } },
+                zoomHostGroup: { select: { id: true, displayName: true, email: true, permanentLink: true } },
                 _count: { select: { users: true } },
             },
             orderBy: { createdAt: 'desc' },
@@ -132,6 +145,7 @@ let AdminService = class AdminService {
                 schedule: data.schedule || null,
                 maxStudents: data.maxStudents || 8,
                 zoomLink: data.zoomLink || null,
+                zoomHostId: data.zoomHostId || null,
                 teacherId: data.teacherId || null,
                 totalScoreTarget: 100,
             }
@@ -174,6 +188,8 @@ let AdminService = class AdminService {
             updateData.maxStudents = data.maxStudents;
         if (data.zoomLink !== undefined)
             updateData.zoomLink = data.zoomLink;
+        if (data.zoomHostId !== undefined)
+            updateData.zoomHostId = data.zoomHostId || null;
         if (data.teacherId !== undefined)
             updateData.teacherId = data.teacherId || null;
         return this.prisma.level.update({ where: { id }, data: updateData });

@@ -7,6 +7,24 @@ y este proyecto se adhiere al [Versionado Semántico](https://semver.org/lang/es
 
 ---
 
+## [2.3.0] — 2026-08-03
+
+### Agregado
+- **WhatsApp Cloud API Integration:** WhatsappModule con Meta Graph API v21.
+  - Templates: `bienvenida_lead`, `clase_recordatorio`, `pago_confirmado`, `clase_prueba`, `nivel_completado`.
+  - Webhook verification (GET/POST) para recibir mensajes entrantes.
+  - Admin endpoints: enviar texto, bienvenida a lead, recordatorio de clase, confirmación de pago.
+  - Normalización de números mexicanos (+52).
+- **DOCUMENTACION_TECNICA v2.0:** Reescritura completa con 13 secciones (12 módulos, 23 páginas, esquema completo, RBAC, WhatsApp, Zoom, CRM, Pagos, Analytics 360°, despliegue).
+
+### Configuración Requerida
+- `WHATSAPP_TOKEN` — Permanent System User token de Meta
+- `WHATSAPP_PHONE_ID` — Phone Number ID del WhatsApp Business
+- `WHATSAPP_VERIFY_TOKEN` — Token de verificación de webhook
+- Crear 5 templates en Meta Business Suite (ver DOCUMENTACION_TECNICA.md §4.2)
+
+---
+
 ## [2.2.0] — 2026-08-03
 
 ### Agregado

@@ -26,6 +26,9 @@ let ZoomController = class ZoomController {
     getHosts() {
         return this.zoomService.getHosts();
     }
+    getHostsWithPermanentLinks() {
+        return this.zoomService.getHostsWithPermanentLinks();
+    }
     createHost(body) {
         return this.zoomService.createHost(body);
     }
@@ -46,6 +49,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ZoomController.prototype, "getHosts", null);
+__decorate([
+    (0, common_1.Get)('permanent-links'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ZoomController.prototype, "getHostsWithPermanentLinks", null);
 __decorate([
     (0, common_1.Post)('hosts'),
     __param(0, (0, common_1.Body)()),

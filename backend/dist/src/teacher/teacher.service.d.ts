@@ -26,6 +26,7 @@ export declare class TeacherService {
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
+        zoomHostId: string | null;
         teacherId: string | null;
     })[]>;
     getMyStudents(teacherId: string): Promise<{
@@ -57,6 +58,7 @@ export declare class TeacherService {
                 maxStudents: number;
                 zoomLink: string | null;
                 totalScoreTarget: number;
+                zoomHostId: string | null;
                 teacherId: string | null;
             };
         } & {
@@ -72,6 +74,7 @@ export declare class TeacherService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -79,7 +82,6 @@ export declare class TeacherService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     })[]>;
     getDashboard(teacherId: string): Promise<{
         totalGroups: number;
@@ -99,6 +101,7 @@ export declare class TeacherService {
                     maxStudents: number;
                     zoomLink: string | null;
                     totalScoreTarget: number;
+                    zoomHostId: string | null;
                     teacherId: string | null;
                 };
             } & {
@@ -114,6 +117,7 @@ export declare class TeacherService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            zoomHostId: string | null;
             title: string;
             type: import("@prisma/client").$Enums.ResourceType;
             description: string | null;
@@ -121,7 +125,6 @@ export declare class TeacherService {
             scheduledAt: Date | null;
             durationExpected: number;
             moduleId: string;
-            zoomHostId: string | null;
         }) | null;
     }>;
     recordAttendance(data: {

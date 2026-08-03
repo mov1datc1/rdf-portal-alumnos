@@ -21,6 +21,9 @@ let ZoomService = ZoomService_1 = class ZoomService {
         this.prisma = prisma;
     }
     async getAccessToken(host) {
+        if (!host.accountId || !host.clientId || !host.clientSecret) {
+            throw new common_1.HttpException('Este host de Zoom no tiene credenciales S2S configuradas', common_1.HttpStatus.BAD_REQUEST);
+        }
         const cached = this.tokenCache.get(host.id);
         if (cached && cached.expiresAt > Date.now()) {
             return cached.token;
@@ -117,14 +120,38 @@ let ZoomService = ZoomService_1 = class ZoomService {
                 id: true,
                 email: true,
                 displayName: true,
+                permanentLink: true,
                 isActive: true,
                 createdAt: true,
-                _count: { select: { meetings: true } },
+                accountId: true,
+                _count: { select: { meetings: true, assignedGroups: true } },
+            },
+        });
+    }
+    async getHostsWithPermanentLinks() {
+        return this.prisma.zoomHost.findMany({
+            where: { permanentLink: { not: null }, isActive: true },
+            orderBy: { displayName: 'asc' },
+            select: {
+                id: true,
+                email: true,
+                displayName: true,
+                permanentLink: true,
+                _count: { select: { assignedGroups: true } },
             },
         });
     }
     async createHost(data) {
-        return this.prisma.zoomHost.create({ data });
+        return this.prisma.zoomHost.create({
+            data: {
+                email: data.email,
+                displayName: data.displayName,
+                permanentLink: data.permanentLink || null,
+                accountId: data.accountId || null,
+                clientId: data.clientId || null,
+                clientSecret: data.clientSecret || null,
+            },
+        });
     }
     async updateHost(id, data) {
         const updateData = {};
@@ -132,12 +159,14 @@ let ZoomService = ZoomService_1 = class ZoomService {
             updateData.email = data.email;
         if (data.displayName !== undefined)
             updateData.displayName = data.displayName;
+        if (data.permanentLink !== undefined)
+            updateData.permanentLink = data.permanentLink || null;
         if (data.accountId !== undefined)
-            updateData.accountId = data.accountId;
+            updateData.accountId = data.accountId || null;
         if (data.clientId !== undefined)
-            updateData.clientId = data.clientId;
+            updateData.clientId = data.clientId || null;
         if (data.clientSecret !== undefined)
-            updateData.clientSecret = data.clientSecret;
+            updateData.clientSecret = data.clientSecret || null;
         if (data.isActive !== undefined)
             updateData.isActive = data.isActive;
         if (data.accountId || data.clientId || data.clientSecret) {
@@ -156,9 +185,15 @@ let ZoomService = ZoomService_1 = class ZoomService {
         const host = await this.prisma.zoomHost.findUnique({ where: { id } });
         if (!host)
             throw new common_1.HttpException('Host no encontrado', common_1.HttpStatus.NOT_FOUND);
+        if (!host.accountId || !host.clientId || !host.clientSecret) {
+            return {
+                success: !!host.permanentLink,
+                message: host.permanentLink ? 'Link permanente configurado (sin API S2S)' : 'Sin link ni credenciales S2S',
+            };
+        }
         try {
             await this.getAccessToken(host);
-            return { success: true, message: 'Conexión exitosa con Zoom' };
+            return { success: true, message: 'Conexión exitosa con Zoom API' };
         }
         catch (error) {
             return { success: false, message: error.message || 'Error de conexión' };

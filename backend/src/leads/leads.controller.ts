@@ -15,6 +15,11 @@ export class LeadsController {
     return this.leadsService.getAll();
   }
 
+  @Get('enrolled')
+  getEnrolledLeads() {
+    return this.leadsService.getEnrolledLeads();
+  }
+
   @Get('analytics')
   getAnalytics() {
     return this.leadsService.getAnalytics();

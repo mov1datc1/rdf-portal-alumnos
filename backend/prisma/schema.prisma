@@ -100,7 +100,9 @@ model Level {
   rhythm           StudyRhythm?   // null para Individual/PartDuo (horario libre)
   schedule         String?        // Horario, e.g., "Lun, Mier, Vier · 10:00-12:00"
   maxStudents      Int            @default(8)
-  zoomLink         String?        // Enlace FIJO permanente de Zoom para este grupo
+  zoomLink         String?        // Enlace FIJO permanente de Zoom (legacy, preferir zoomHostId)
+  zoomHostId       String?        @db.Uuid
+  zoomHostGroup    ZoomHost?      @relation("ZoomHostGroup", fields: [zoomHostId], references: [id])
   teacherId        String?        @db.Uuid
   teacher          User?          @relation("TeacherGroups", fields: [teacherId], references: [id])
   totalScoreTarget Int            @default(100)
@@ -157,18 +159,21 @@ model UserProgress {
   @@unique([userId, resourceId])
 }
 
-// Cada ZoomHost representa una cuenta Zoom Pro independiente con sus propias credenciales S2S OAuth
+// Cada ZoomHost representa una cuenta Zoom Pro independiente.
+// Puede tener solo un permanentLink (Modo A) o también credentials S2S OAuth (Modo B).
 model ZoomHost {
-  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email         String     @unique  // Email de la cuenta Zoom
-  displayName   String              // "Zoom Cuenta 1", "Profesora Marie", etc.
-  accountId     String              // Zoom S2S OAuth Account ID
-  clientId      String              // Zoom S2S OAuth Client ID
-  clientSecret  String              // Zoom S2S OAuth Client Secret (stored encrypted in production)
-  isActive      Boolean    @default(true)
-  meetings      Resource[]          // Meetings creados por este host
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String     @unique  // Email de la cuenta Zoom
+  displayName    String              // "Zoom Cuenta 1", "Profesora Marie", etc.
+  permanentLink  String?             // Link fijo de Zoom (para Modo A: sin API)
+  accountId      String?             // Zoom S2S OAuth Account ID (null = solo link permanente)
+  clientId       String?             // Zoom S2S OAuth Client ID
+  clientSecret   String?             // Zoom S2S OAuth Client Secret
+  isActive       Boolean    @default(true)
+  meetings       Resource[]          // Meetings creados por este host (Modo B)
+  assignedGroups Level[]    @relation("ZoomHostGroup") // Grupos que usan este host
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 }
 
 // ── Evaluaciones (Examen oral + escrito al final de cada nivel) ──

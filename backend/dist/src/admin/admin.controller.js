@@ -38,6 +38,9 @@ let AdminController = class AdminController {
     getTeachers() {
         return this.adminService.getTeachers();
     }
+    resetPassword(id, body) {
+        return this.adminService.resetPassword(id, body.newPassword);
+    }
     createResource(body) {
         return this.adminService.createResource(body);
     }
@@ -112,6 +115,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "getTeachers", null);
+__decorate([
+    (0, common_1.Post)('users/:id/reset-password'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "resetPassword", null);
 __decorate([
     (0, common_1.Post)('resources'),
     __param(0, (0, common_1.Body)()),

@@ -26,6 +26,9 @@ let LeadsController = class LeadsController {
     getAll() {
         return this.leadsService.getAll();
     }
+    getEnrolledLeads() {
+        return this.leadsService.getEnrolledLeads();
+    }
     getAnalytics() {
         return this.leadsService.getAnalytics();
     }
@@ -52,6 +55,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], LeadsController.prototype, "getAll", null);
+__decorate([
+    (0, common_1.Get)('enrolled'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], LeadsController.prototype, "getEnrolledLeads", null);
 __decorate([
     (0, common_1.Get)('analytics'),
     __metadata("design:type", Function),

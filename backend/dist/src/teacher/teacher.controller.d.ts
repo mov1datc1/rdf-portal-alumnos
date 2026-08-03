@@ -20,6 +20,7 @@ export declare class TeacherController {
                     maxStudents: number;
                     zoomLink: string | null;
                     totalScoreTarget: number;
+                    zoomHostId: string | null;
                     teacherId: string | null;
                 };
             } & {
@@ -35,6 +36,7 @@ export declare class TeacherController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            zoomHostId: string | null;
             title: string;
             type: import("@prisma/client").$Enums.ResourceType;
             description: string | null;
@@ -42,7 +44,6 @@ export declare class TeacherController {
             scheduledAt: Date | null;
             durationExpected: number;
             moduleId: string;
-            zoomHostId: string | null;
         }) | null;
     }>;
     getMyGroups(req: any): Promise<({
@@ -69,6 +70,7 @@ export declare class TeacherController {
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
+        zoomHostId: string | null;
         teacherId: string | null;
     })[]>;
     getMyStudents(req: any): Promise<{
@@ -100,6 +102,7 @@ export declare class TeacherController {
                 maxStudents: number;
                 zoomLink: string | null;
                 totalScoreTarget: number;
+                zoomHostId: string | null;
                 teacherId: string | null;
             };
         } & {
@@ -115,6 +118,7 @@ export declare class TeacherController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        zoomHostId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -122,7 +126,6 @@ export declare class TeacherController {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
-        zoomHostId: string | null;
     })[]>;
     recordAttendance(body: {
         resourceId: string;

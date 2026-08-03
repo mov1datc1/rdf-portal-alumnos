@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Calendar, Clock, BarChart2, Headphones, Video, LogOut } from 'lucide-react';
+import { Home, Calendar, Clock, BarChart2, Headphones, Video, LogOut, Settings } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
@@ -11,6 +11,7 @@ const navItems = [
   { icon: BarChart2, label: 'Estadísticas', path: '/estadisticas' },
   { icon: Headphones, label: 'Recursos', path: '/recursos' },
   { icon: Video, label: 'Video Francés', path: '/video' },
+  { icon: Settings, label: 'Mi Perfil', path: '/perfil' },
 ];
 
 export function Sidebar() {

@@ -17,6 +17,7 @@ export declare class ProgressController {
                     maxStudents: number;
                     zoomLink: string | null;
                     totalScoreTarget: number;
+                    zoomHostId: string | null;
                     teacherId: string | null;
                 };
             } & {
@@ -32,6 +33,7 @@ export declare class ProgressController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            zoomHostId: string | null;
             title: string;
             type: import("@prisma/client").$Enums.ResourceType;
             description: string | null;
@@ -39,7 +41,6 @@ export declare class ProgressController {
             scheduledAt: Date | null;
             durationExpected: number;
             moduleId: string;
-            zoomHostId: string | null;
         };
     } & {
         id: string;
