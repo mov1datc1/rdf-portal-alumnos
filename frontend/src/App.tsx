@@ -32,6 +32,7 @@ import { TeacherSchedule } from './pages/teacher/TeacherSchedule';
 import { TeacherStudents } from './pages/teacher/TeacherStudents';
 import { TeacherAttendance } from './pages/teacher/TeacherAttendance';
 import { TeacherEvaluations } from './pages/teacher/TeacherEvaluations';
+import { TeacherLogs } from './pages/teacher/TeacherLogs';
 
 function App() {
   const setSession = useAuthStore((state) => state.setSession);
@@ -103,6 +104,7 @@ function App() {
             <Route path="students" element={<TeacherStudents />} />
             <Route path="attendance" element={<TeacherAttendance />} />
             <Route path="evaluations" element={<TeacherEvaluations />} />
+            <Route path="logs" element={<TeacherLogs />} />
           </Route>
         </Route>
 

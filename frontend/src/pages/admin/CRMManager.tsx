@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Loader2, Plus, X, Phone, Mail, MessageSquare, TrendingUp, Search, Edit2, Trash2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
 
 const SOURCES = [
   { value: 'GOOGLE_ADS', label: 'Google Ads', color: '#4285F4', icon: '🔵' },
@@ -76,9 +77,9 @@ export function CRMManager() {
       const url = editingLead ? `${apiUrl}/admin/leads/${editingLead.id}` : `${apiUrl}/admin/leads`;
       const method = editingLead ? 'PATCH' : 'POST';
       const res = await fetch(url, { method, headers, body: JSON.stringify(form) });
-      if (res.ok) { resetForm(); fetchData(); }
-      else alert(`Error: ${(await res.json()).message}`);
-    } catch (e) { console.error(e); alert('Error de conexión'); }
+      if (res.ok) { showSuccess('Prospecto guardado'); resetForm(); fetchData(); }
+      else showError('Error al guardar', (await res.json()).message);
+    } catch (e) { console.error(e); showError('Error de conexión'); }
   };
 
   const handleEdit = (lead: any) => {
@@ -92,7 +93,7 @@ export function CRMManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este prospecto?')) return;
+    if (!(await confirmDelete('¿Eliminar este prospecto?'))) return;
     await fetch(`${apiUrl}/admin/leads/${id}`, { method: 'DELETE', headers });
     fetchData();
   };
@@ -132,11 +133,11 @@ export function CRMManager() {
         fetchData();
       } else {
         const err = await res.json();
-        alert(`Error: ${err.message}`);
+        showError('Error al inscribir', err.message);
       }
     } catch (e) {
       console.error(e);
-      alert('Error de conexión');
+      showError('Error de conexión');
     } finally {
       setEnrolling(false);
     }

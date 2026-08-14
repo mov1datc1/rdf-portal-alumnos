@@ -17,15 +17,26 @@ export function Analytics360() {
     })
       .then(r => r.json())
       .then(setData)
-      .catch(console.error)
+      .catch(e => {
+        console.error(e);
+        setData({ statusCode: 503, message: 'No se pudo conectar con el servidor (backend apagado o red fallando).' });
+      })
       .finally(() => setLoading(false));
   }, [session]);
 
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-[#1D3A8A]" /></div>;
-  if (!data) return <p className="text-slate-500 text-center py-8">Error cargando analytics.</p>;
+  if (!data) return null;
 
   const { summary, revenue, distribution, occupancy, recent, adBudgets } = data;
 
+  if (data.statusCode || !summary) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <p className="text-red-500 font-bold text-lg mb-2">Error cargando analytics.</p>
+        <p className="text-slate-500 text-sm">{data.message || 'Respuesta inválida del servidor.'}</p>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       <div>

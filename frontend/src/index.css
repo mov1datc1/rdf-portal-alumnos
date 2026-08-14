@@ -11,3 +11,5 @@ body {
   color: #1E293B;
   font-family: 'Inter', system-ui, sans-serif;
 }
+
+@plugin "@tailwindcss/typography";

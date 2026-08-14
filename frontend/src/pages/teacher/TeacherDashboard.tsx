@@ -19,7 +19,7 @@ export function TeacherDashboard() {
   }, [session]);
 
   if (loading) {
-    return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-[#2E7D32]" /></div>;
+    return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-[#b91c1c]" /></div>;
   }
 
   return (
@@ -33,8 +33,8 @@ export function TeacherDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-[#2E7D32]/10 flex items-center justify-center">
-              <Layers className="w-5 h-5 text-[#2E7D32]" />
+            <div className="w-10 h-10 rounded-xl bg-[#b91c1c]/10 flex items-center justify-center">
+              <Layers className="w-5 h-5 text-[#b91c1c]" />
             </div>
             <p className="text-sm text-slate-500">Mis Grupos</p>
           </div>
@@ -64,10 +64,10 @@ export function TeacherDashboard() {
 
       {/* Next Class Card */}
       {data?.nextClass && (
-        <div className="bg-gradient-to-r from-[#2E7D32] to-[#388E3C] rounded-2xl p-6 text-white shadow-lg">
-          <p className="text-sm text-green-200 mb-1">Tu próxima clase</p>
+        <div className="bg-gradient-to-r from-[#b91c1c] to-[#7f1d1d] rounded-2xl p-6 text-white shadow-lg">
+          <p className="text-sm text-red-200 mb-1">Tu próxima clase</p>
           <h3 className="text-xl font-bold mb-2">{data.nextClass.title}</h3>
-          <div className="flex items-center gap-4 text-green-100 text-sm">
+          <div className="flex items-center gap-4 text-red-100 text-sm">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
               {new Date(data.nextClass.scheduledAt).toLocaleDateString()}

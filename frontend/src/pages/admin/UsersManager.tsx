@@ -15,6 +15,12 @@ export function UsersManager() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [resettingId, setResettingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string, type: 'error' | 'success' } | null>(null);
+
+  const showToast = (message: string, type: 'error' | 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 5000);
+  };
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -101,14 +107,14 @@ export function UsersManager() {
         body: JSON.stringify({ newPassword })
       });
       if (res.ok) {
-        alert(`✅ Contraseña actualizada para ${email}`);
+        showToast(`Contraseña actualizada para ${email}`, 'success');
       } else {
         const err = await res.json();
-        alert(`Error: ${err.message}`);
+        showToast(`Error: ${err.message}`, 'error');
       }
     } catch (e) {
       console.error('Error resetting password', e);
-      alert('Error de conexión');
+      showToast('Error de conexión', 'error');
     } finally {
       setResettingId(null);
     }
@@ -133,9 +139,14 @@ export function UsersManager() {
         setIsModalOpen(false);
         setFormData({ firstName: '', lastName: '', email: '', password: '', role: 'STUDENT', currentLevelId: '' });
         fetchUsersAndLevels();
+        showToast('Usuario creado exitosamente', 'success');
       } else {
         const error = await res.json();
-        alert(`Error: ${error.message}`);
+        if (error.message && (error.message.includes('already') || error.message.includes('existe'))) {
+          showToast(`El correo ${formData.email} ya está registrado en el sistema.`, 'error');
+        } else {
+          showToast(`Error al crear usuario: ${error.message}`, 'error');
+        }
       }
     } catch (e) {
       console.error('Error creating user', e);
@@ -148,6 +159,18 @@ export function UsersManager() {
 
   return (
     <div className="space-y-6">
+      {toast && (
+        <div className={`fixed top-6 right-6 p-4 rounded-xl shadow-2xl border text-sm font-semibold flex items-center gap-3 z-[60] animate-in slide-in-from-top-5 duration-300 ${
+          toast.type === 'error' ? 'bg-[#b91c1c] text-white border-red-800' : 'bg-[#1D3A8A] text-white border-blue-900'
+        }`}>
+          {toast.type === 'error' ? <X className="w-5 h-5 opacity-90" /> : <Check className="w-5 h-5 opacity-90" />}
+          {toast.message}
+          <button onClick={() => setToast(null)} className="ml-2 p-1 hover:bg-white/20 rounded-md transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Gestión de Usuarios</h1>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Settings, Save } from 'lucide-react';
+import { Loader2, Save, Settings } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { showSuccess, showError } from '../../utils/alerts';
 
 export function SettingsManager() {
   const [settings, setSettings] = useState<any>(null);
@@ -31,9 +32,9 @@ export function SettingsManager() {
           schoolName: settings.schoolName,
         }),
       });
-      if (res.ok) alert('Configuración guardada ✅');
-      else alert('Error al guardar');
-    } catch (e) { alert('Error de conexión'); }
+      if (res.ok) showSuccess('Configuración guardada');
+      else showError('Error al guardar');
+    } catch (e) { showError('Error de conexión'); }
     finally { setSaving(false); }
   };
 

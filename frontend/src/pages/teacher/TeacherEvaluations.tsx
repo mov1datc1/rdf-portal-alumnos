@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Award, Check, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { showSuccess, showError } from '../../utils/alerts';
 
 export function TeacherEvaluations() {
   const [groups, setGroups] = useState<any[]>([]);
@@ -41,13 +42,14 @@ export function TeacherEvaluations() {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
         }).then(r => r.json());
         setEvaluations(updated);
+        showSuccess('Evaluación guardada exitosamente');
       } else {
         const error = await res.json();
-        alert(`Error: ${error.message}`);
+        showError('Error al guardar', error.message);
       }
     } catch (err) {
       console.error(err);
-      alert('Error de conexión');
+      showError('Error de conexión');
     } finally {
       setIsSubmitting(false);
     }

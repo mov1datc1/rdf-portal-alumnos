@@ -83,6 +83,7 @@ model User {
   progress       UserProgress[]
   // Teacher relations
   teacherGroups  Level[]        @relation("TeacherGroups")
+  teacherResources Resource[]   @relation("ResourceTeacher")
   evaluationsGiven Evaluation[] @relation("Evaluator")
   // Student relations
   evaluations    Evaluation[]   @relation("StudentEvals")
@@ -137,6 +138,8 @@ model Resource {
   zoomMeetingId    String?        // Zoom meeting ID para tracking y cancelación
   zoomHostId       String?        @db.Uuid
   zoomHost         ZoomHost?      @relation(fields: [zoomHostId], references: [id])
+  teacherId        String?        @db.Uuid
+  teacher          User?          @relation(fields: [teacherId], references: [id], name: "ResourceTeacher")
   scheduledAt      DateTime?      // Para clases en vivo
   durationExpected Int            // Tiempo estimado en segundos
   userProgress     UserProgress[]

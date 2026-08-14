@@ -66,6 +66,7 @@ export class AdminService {
       user_metadata: {
         firstName: data.firstName,
         lastName: data.lastName,
+        role: data.role || 'STUDENT',
       }
     });
 
@@ -95,6 +96,19 @@ export class AdminService {
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
     if (data.currentLevelId !== undefined) updateData.currentLevelId = data.currentLevelId || null;
 
+    // Sincronizar metadata con Supabase
+    if (data.role !== undefined || data.firstName !== undefined || data.lastName !== undefined) {
+      const user_metadata: any = {};
+      if (data.role !== undefined) user_metadata.role = data.role;
+      if (data.firstName !== undefined) user_metadata.firstName = data.firstName;
+      if (data.lastName !== undefined) user_metadata.lastName = data.lastName;
+
+      const { error } = await this.supabase.auth.admin.updateUserById(id, { user_metadata });
+      if (error) {
+        console.error('Error actualizando metadata en Supabase:', error);
+      }
+    }
+
     return this.prisma.user.update({ where: { id }, data: updateData });
   }
 
@@ -116,7 +130,59 @@ export class AdminService {
 
   // ── Resources ──
 
+  async getResources() {
+    return this.prisma.resource.findMany({
+      include: {
+        module: {
+          include: {
+            level: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async deleteResource(id: string) {
+    return this.prisma.resource.delete({ where: { id } });
+  }
+
+  async batchDeleteResources(ids: string[]) {
+    return this.prisma.resource.deleteMany({
+      where: {
+        id: { in: ids }
+      }
+    });
+  }
+
+  async updateResource(id: string, data: any) {
+    return this.prisma.resource.update({
+      where: { id },
+      data: {
+        title: data.title,
+        url: data.url
+      }
+    });
+  }
+
   async createResource(data: any) {
+    // Si viene un array de moduleIds (publicación masiva)
+    if (data.moduleIds && Array.isArray(data.moduleIds)) {
+      const created = await Promise.all(data.moduleIds.map((modId: string) => 
+        this.prisma.resource.create({
+          data: {
+            title: data.title,
+            url: data.url,
+            type: data.type || 'RECORDED_VIDEO',
+            moduleId: modId,
+            durationExpected: data.durationExpected || 0,
+          }
+        })
+      ));
+      return { success: true, count: created.length };
+    }
+
+    // Comportamiento normal (un solo grupo)
     return this.prisma.resource.create({
       data: {
         title: data.title,
@@ -124,7 +190,7 @@ export class AdminService {
         type: data.type || 'RECORDED_VIDEO',
         moduleId: data.moduleId,
         durationExpected: data.durationExpected || 0,
-      },
+      }
     });
   }
 
@@ -216,6 +282,56 @@ export class AdminService {
     return this.prisma.level.delete({ where: { id } });
   }
 
+  private async validateTeacherAvailability(teacherId: string, scheduledStart: Date, scheduledEnd: Date, excludeClassId?: string) {
+    if (!teacherId) return;
+
+    const overlappingClasses = await this.prisma.resource.findMany({
+      where: {
+        type: 'LIVE_CLASS',
+        id: excludeClassId ? { not: excludeClassId } : undefined,
+        OR: [
+          { teacherId: teacherId },
+          { module: { level: { teacherId: teacherId } } }
+        ]
+      },
+      include: { module: { include: { level: true } } }
+    });
+
+    for (const cls of overlappingClasses) {
+      if (!cls.scheduledAt) continue;
+      
+      const actualTeacherId = cls.teacherId || cls.module?.level?.teacherId;
+      if (actualTeacherId !== teacherId) continue;
+
+      const clsStart = new Date(cls.scheduledAt);
+      const clsEnd = new Date(clsStart.getTime() + (cls.durationExpected || 3600) * 1000);
+      if (scheduledStart < clsEnd && scheduledEnd > clsStart) {
+        // Find available teachers
+        const allTeachers = await this.prisma.user.findMany({ where: { role: 'TEACHER' } });
+        const allClasses = await this.prisma.resource.findMany({
+          where: { type: 'LIVE_CLASS', scheduledAt: { not: null } },
+          include: { module: { include: { level: true } } }
+        });
+
+        const availableTeachers = allTeachers.filter(t => {
+          return !allClasses.some(c => {
+            const cTid = c.teacherId || c.module?.level?.teacherId;
+            if (cTid !== t.id) return false;
+            const cStart = new Date(c.scheduledAt!);
+            const cEnd = new Date(cStart.getTime() + (c.durationExpected || 3600) * 1000);
+            return scheduledStart < cEnd && scheduledEnd > cStart;
+          });
+        });
+
+        const availNames = availableTeachers.map(t => `${t.firstName} ${t.lastName}`).join(', ');
+        throw new HttpException(
+          `El profesor ya tiene una clase programada en ese horario.\nProfesores disponibles: ${availNames || 'Ninguno'}`,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
+  }
+
   // ── Schedule ──
 
   async scheduleClass(data: any) {
@@ -235,12 +351,48 @@ export class AdminService {
       zoomJoinUrl = result.joinUrl;
     }
 
+    // Find or create the module by name
+    let moduleId = data.moduleId;
+    if (data.moduleName && data.levelId) {
+      const existingModule = await this.prisma.module.findFirst({
+        where: { levelId: data.levelId, title: data.moduleName }
+      });
+      if (existingModule) {
+        moduleId = existingModule.id;
+      } else {
+        const count = await this.prisma.module.count({ where: { levelId: data.levelId } });
+        const newModule = await this.prisma.module.create({
+          data: {
+            levelId: data.levelId,
+            title: data.moduleName,
+            orderIndex: count + 1
+          }
+        });
+        moduleId = newModule.id;
+      }
+    }
+
+    // Get level to get default teacher if not provided
+    let teacherId = data.teacherId;
+    if (!teacherId && data.levelId) {
+      const level = await this.prisma.level.findUnique({ where: { id: data.levelId } });
+      if (level?.teacherId) teacherId = level.teacherId;
+    }
+
+    // TEACHER OVERLAP CHECK
+    if (teacherId) {
+      const scheduledStart = new Date(data.scheduledAt);
+      const scheduledEnd = new Date(scheduledStart.getTime() + (data.durationExpected || 3600) * 1000);
+      await this.validateTeacherAvailability(teacherId, scheduledStart, scheduledEnd);
+    }
+
     return this.prisma.resource.create({
       data: {
         title: data.title,
         url: zoomJoinUrl,
         type: 'LIVE_CLASS',
-        moduleId: data.moduleId,
+        moduleId: moduleId,
+        teacherId: teacherId || null,
         scheduledAt: new Date(data.scheduledAt),
         durationExpected: data.durationExpected || 3600,
         zoomMeetingId,
@@ -255,6 +407,7 @@ export class AdminService {
       include: {
         module: { include: { level: true } },
         zoomHost: { select: { id: true, displayName: true, email: true } },
+        teacher: { select: { id: true, firstName: true, lastName: true } },
       },
       orderBy: { scheduledAt: 'desc' }
     });
@@ -271,6 +424,20 @@ export class AdminService {
   }
 
   async updateScheduledClass(id: string, data: any) {
+    // Get current class to know its teacher and duration if not provided
+    const currentClass = await this.prisma.resource.findUnique({ where: { id }, include: { module: { include: { level: true } } } });
+    if (!currentClass) throw new Error('Clase no encontrada');
+
+    const teacherId = data.teacherId !== undefined ? data.teacherId : (currentClass.teacherId || currentClass.module?.level?.teacherId);
+    const scheduledStart = data.scheduledAt ? new Date(data.scheduledAt) : (currentClass.scheduledAt ? new Date(currentClass.scheduledAt) : new Date());
+    const duration = data.durationExpected || currentClass.durationExpected || 3600;
+    const scheduledEnd = new Date(scheduledStart.getTime() + duration * 1000);
+
+    // TEACHER OVERLAP CHECK
+    if (teacherId) {
+      await this.validateTeacherAvailability(teacherId, scheduledStart, scheduledEnd, id);
+    }
+
     return this.prisma.resource.update({
       where: { id },
       data: {
@@ -278,6 +445,7 @@ export class AdminService {
         url: data.url,
         moduleId: data.moduleId,
         scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
+        teacherId: data.teacherId !== undefined ? data.teacherId : undefined,
       }
     });
   }

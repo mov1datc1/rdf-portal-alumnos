@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -74,6 +74,40 @@ export class TeacherService {
       },
       orderBy: { scheduledAt: 'asc' },
       take: 50,
+    });
+  }
+
+  /**
+   * Get upcoming and recent classes across teacher's groups for attendance.
+   * Includes classes from the last 7 days.
+   */
+  async getAttendanceSchedule(teacherId: string) {
+    const groups = await this.prisma.level.findMany({
+      where: { teacherId },
+      select: { id: true },
+    });
+    const groupIds = groups.map(g => g.id);
+
+    const modules = await this.prisma.module.findMany({
+      where: { levelId: { in: groupIds } },
+      select: { id: true },
+    });
+    const moduleIds = modules.map(m => m.id);
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    return this.prisma.resource.findMany({
+      where: {
+        type: 'LIVE_CLASS',
+        moduleId: { in: moduleIds },
+        scheduledAt: { gte: sevenDaysAgo },
+      },
+      include: {
+        module: { include: { level: true } },
+      },
+      orderBy: { scheduledAt: 'asc' },
+      take: 100, // Slightly higher limit to accommodate past classes
     });
   }
 
@@ -160,6 +194,84 @@ export class TeacherService {
   }
 
   /**
+   * Audit attendance for an entire group.
+   */
+  async getGroupAttendanceAudit(levelId: string) {
+    const students = await this.prisma.user.findMany({
+      where: { currentLevelId: levelId },
+      orderBy: { firstName: 'asc' }
+    });
+
+    const pastClasses = await this.prisma.resource.findMany({
+      where: {
+        type: 'LIVE_CLASS',
+        module: { levelId: levelId },
+        scheduledAt: { lte: new Date() }
+      },
+      orderBy: { scheduledAt: 'desc' },
+      include: { module: true }
+    });
+
+    const attendances = await this.prisma.attendance.findMany({
+      where: { levelId: levelId }
+    });
+
+    // Create a map: "userId-resourceId" => boolean
+    const attendanceMap = new Map();
+    for (const a of attendances) {
+      attendanceMap.set(`${a.userId}-${a.resourceId}`, a.attended);
+    }
+
+    return {
+      students,
+      classes: pastClasses,
+      attendanceMap: Object.fromEntries(attendanceMap)
+    };
+  }
+
+  /**
+   * Audit attendance for a specific student.
+   */
+  async getStudentAttendanceAudit(studentId: string) {
+    const student = await this.prisma.user.findUnique({
+      where: { id: studentId },
+      include: {
+        currentLevel: true
+      }
+    });
+
+    if (!student || !student.currentLevelId) {
+      throw new Error('Student not found or not in a group');
+    }
+
+    // Get all past classes for this group
+    const pastClasses = await this.prisma.resource.findMany({
+      where: {
+        type: 'LIVE_CLASS',
+        module: { levelId: student.currentLevelId },
+        scheduledAt: { lte: new Date() }
+      },
+      orderBy: { scheduledAt: 'desc' },
+      include: { module: true }
+    });
+
+    // Get all attendance records for this student
+    const attendances = await this.prisma.attendance.findMany({
+      where: { userId: studentId }
+    });
+
+    const attendanceMap = new Map(attendances.map(a => [a.resourceId, a.attended]));
+
+    return {
+      student,
+      audit: pastClasses.map(cls => ({
+        class: cls,
+        attended: attendanceMap.has(cls.id) ? attendanceMap.get(cls.id) : null // null means attendance was not taken yet
+      }))
+    };
+  }
+
+  /**
    * Teacher creates an evaluation for a student.
    */
   async createEvaluation(evaluatorId: string, data: any) {
@@ -199,6 +311,115 @@ export class TeacherService {
         level: { select: { id: true, name: true, levelCode: true } },
       },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Create a new class log (bitacora).
+   */
+  async createClassLog(teacherId: string, data: { levelId: string; title: string; description: string; date?: string }) {
+    const level = await this.prisma.level.findFirst({
+      where: { id: data.levelId, teacherId: teacherId },
+      include: { modules: { orderBy: { orderIndex: 'asc' }, take: 1 } },
+    });
+    
+    if (!level) throw new Error('Grupo no encontrado o no autorizado');
+    
+    const moduleId = level.modules[0]?.id;
+    if (!moduleId) throw new Error('El grupo no tiene módulos configurados para guardar la bitácora');
+
+    return this.prisma.resource.create({
+      data: {
+        moduleId,
+        type: 'LIVE_CLASS',
+        title: data.title,
+        description: data.description,
+        scheduledAt: data.date ? new Date(data.date) : new Date(),
+        durationExpected: 3600, // Default 1 hr
+      },
+      include: {
+        module: { include: { level: true } }
+      }
+    });
+  }
+
+  /**
+   * Get all class logs for a teacher.
+   */
+  async getClassLogs(teacherId: string) {
+    const groups = await this.prisma.level.findMany({
+      where: { teacherId },
+      select: { id: true },
+    });
+    const groupIds = groups.map(g => g.id);
+
+    const modules = await this.prisma.module.findMany({
+      where: { levelId: { in: groupIds } },
+      select: { id: true },
+    });
+    const moduleIds = modules.map(m => m.id);
+
+    return this.prisma.resource.findMany({
+      where: {
+        type: 'LIVE_CLASS',
+        moduleId: { in: moduleIds },
+        description: { not: null },
+      },
+      include: {
+        module: { include: { level: true } },
+      },
+      orderBy: { scheduledAt: 'desc' },
+    });
+  }
+
+  /**
+   * Update a class log (bitacora).
+   */
+  async updateClassLog(teacherId: string, logId: string, data: { title: string; description: string; date?: string }) {
+    // Verificar que el log pertenezca a un grupo de este profesor
+    const log = await this.prisma.resource.findUnique({
+      where: { id: logId },
+      include: { module: { include: { level: true } } },
+    });
+    if (!log || log.module?.level?.teacherId !== teacherId) {
+      throw new Error('Bitácora no encontrada o no autorizada');
+    }
+
+    return this.prisma.resource.update({
+      where: { id: logId },
+      data: {
+        title: data.title,
+        description: data.description,
+        ...(data.date ? { scheduledAt: new Date(data.date) } : {}),
+      },
+      include: {
+        module: { include: { level: true } }
+      }
+    });
+  }
+
+  /**
+   * Delete a class log (bitacora).
+   */
+  async deleteClassLog(teacherId: string, logId: string) {
+    const log = await this.prisma.resource.findUnique({
+      where: { id: logId },
+      include: { module: { include: { level: true } } },
+    });
+    
+    console.log('--- DELETE CLASS LOG DEBUG ---');
+    console.log('Passed teacherId:', teacherId);
+    console.log('Log found:', !!log);
+    if (log) {
+      console.log('Log level teacherId:', log.module?.level?.teacherId);
+    }
+    
+    if (!log || log.module?.level?.teacherId !== teacherId) {
+      throw new NotFoundException('Bitácora no encontrada o no autorizada');
+    }
+
+    return this.prisma.resource.delete({
+      where: { id: logId }
     });
   }
 }

@@ -11,7 +11,7 @@ export declare class ZoomService {
         id: string;
     }): Promise<string>;
     createMeeting(hostId: string, topic: string, startTime: Date, durationMinutes?: number): Promise<{
-        meetingId: string;
+        meetingId: string | null;
         joinUrl: string;
     }>;
     deleteMeeting(hostId: string, meetingId: string): Promise<void>;
@@ -27,6 +27,14 @@ export declare class ZoomService {
         displayName: string;
         permanentLink: string | null;
         accountId: string | null;
+        meetings: {
+            scheduledAt: Date | null;
+            durationExpected: number;
+        }[];
+        assignedGroups: {
+            id: string;
+            schedule: string | null;
+        }[];
     }[]>;
     getHostsWithPermanentLinks(): Promise<{
         id: string;
@@ -36,6 +44,14 @@ export declare class ZoomService {
         };
         displayName: string;
         permanentLink: string | null;
+        meetings: {
+            scheduledAt: Date | null;
+            durationExpected: number;
+        }[];
+        assignedGroups: {
+            id: string;
+            schedule: string | null;
+        }[];
     }[]>;
     createHost(data: {
         email: string;

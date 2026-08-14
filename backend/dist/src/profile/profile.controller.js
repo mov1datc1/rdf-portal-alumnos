@@ -16,10 +16,29 @@ exports.ProfileController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const supabase_js_1 = require("@supabase/supabase-js");
+const prisma_service_1 = require("../prisma.service");
 let ProfileController = class ProfileController {
+    prisma;
     supabase;
-    constructor() {
+    constructor(prisma) {
+        this.prisma = prisma;
         this.supabase = (0, supabase_js_1.createClient)(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    }
+    async getDashboardData(req) {
+        const userId = req.user.userId;
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                currentLevel: {
+                    include: { teacher: { select: { firstName: true, lastName: true } } }
+                }
+            }
+        });
+        return {
+            groupName: user?.currentLevel?.name || 'Sin grupo asignado',
+            levelCode: user?.currentLevel?.levelCode || 'N/A',
+            teacherName: user?.currentLevel?.teacher ? `${user.currentLevel.teacher.firstName} ${user.currentLevel.teacher.lastName}` : 'No asignado',
+        };
     }
     async changePassword(req, body) {
         const userId = req.user?.sub || req.user?.id;
@@ -40,6 +59,13 @@ let ProfileController = class ProfileController {
 };
 exports.ProfileController = ProfileController;
 __decorate([
+    (0, common_1.Get)('dashboard'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ProfileController.prototype, "getDashboardData", null);
+__decorate([
     (0, common_1.Post)('change-password'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -50,6 +76,6 @@ __decorate([
 exports.ProfileController = ProfileController = __decorate([
     (0, common_1.Controller)('profile'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], ProfileController);
 //# sourceMappingURL=profile.controller.js.map

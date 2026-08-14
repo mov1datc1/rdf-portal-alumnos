@@ -71,10 +71,17 @@ export class ZoomService {
     topic: string,
     startTime: Date,
     durationMinutes: number = 60,
-  ): Promise<{ meetingId: string; joinUrl: string }> {
+  ): Promise<{ meetingId: string | null; joinUrl: string }> {
     const host = await this.prisma.zoomHost.findUnique({ where: { id: hostId } });
     if (!host) throw new HttpException('Zoom host no encontrado', HttpStatus.NOT_FOUND);
     if (!host.isActive) throw new HttpException('Este host de Zoom está desactivado', HttpStatus.BAD_REQUEST);
+
+    if (!host.accountId || !host.clientId || !host.clientSecret) {
+      if (host.permanentLink) {
+        return { meetingId: null, joinUrl: host.permanentLink };
+      }
+      throw new HttpException('Este host de Zoom no tiene link permanente ni credenciales S2S', HttpStatus.BAD_REQUEST);
+    }
 
     const token = await this.getAccessToken(host);
 
@@ -149,6 +156,8 @@ export class ZoomService {
         isActive: true,
         createdAt: true,
         accountId: true,  // to show if S2S is configured
+        assignedGroups: { select: { id: true, schedule: true } },
+        meetings: { select: { scheduledAt: true, durationExpected: true }, where: { scheduledAt: { gte: new Date() } } },
         _count: { select: { meetings: true, assignedGroups: true } },
       },
     });
@@ -166,6 +175,8 @@ export class ZoomService {
         email: true,
         displayName: true,
         permanentLink: true,
+        assignedGroups: { select: { id: true, schedule: true } },
+        meetings: { select: { scheduledAt: true, durationExpected: true }, where: { scheduledAt: { gte: new Date() } } },
         _count: { select: { assignedGroups: true } },
       },
     });

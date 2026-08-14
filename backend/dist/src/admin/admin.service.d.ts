@@ -65,12 +65,38 @@ export declare class AdminService {
         success: boolean;
         message: string;
     }>;
-    createResource(data: any): Promise<{
+    getResources(): Promise<({
+        module: {
+            level: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                levelCode: string;
+                modality: import("@prisma/client").$Enums.ClassModality;
+                rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
+                schedule: string | null;
+                maxStudents: number;
+                zoomLink: string | null;
+                totalScoreTarget: number;
+                zoomHostId: string | null;
+                teacherId: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            orderIndex: number;
+            title: string;
+            levelId: string;
+        };
+    } & {
         url: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         zoomHostId: string | null;
+        teacherId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -78,6 +104,55 @@ export declare class AdminService {
         scheduledAt: Date | null;
         durationExpected: number;
         moduleId: string;
+    })[]>;
+    deleteResource(id: string): Promise<{
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    }>;
+    batchDeleteResources(ids: string[]): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    updateResource(id: string, data: any): Promise<{
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    }>;
+    createResource(data: any): Promise<{
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    } | {
+        success: boolean;
+        count: number;
     }>;
     getLevelsWithModules(): Promise<({
         _count: {
@@ -163,12 +238,14 @@ export declare class AdminService {
         zoomHostId: string | null;
         teacherId: string | null;
     }>;
+    private validateTeacherAvailability;
     scheduleClass(data: any): Promise<{
         url: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         zoomHostId: string | null;
+        teacherId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -182,6 +259,11 @@ export declare class AdminService {
             id: string;
             email: string;
             displayName: string;
+        } | null;
+        teacher: {
+            id: string;
+            firstName: string | null;
+            lastName: string | null;
         } | null;
         module: {
             level: {
@@ -213,6 +295,7 @@ export declare class AdminService {
         createdAt: Date;
         updatedAt: Date;
         zoomHostId: string | null;
+        teacherId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -227,6 +310,7 @@ export declare class AdminService {
         createdAt: Date;
         updatedAt: Date;
         zoomHostId: string | null;
+        teacherId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -241,6 +325,7 @@ export declare class AdminService {
         createdAt: Date;
         updatedAt: Date;
         zoomHostId: string | null;
+        teacherId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;

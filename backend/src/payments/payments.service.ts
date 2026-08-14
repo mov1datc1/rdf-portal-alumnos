@@ -19,7 +19,7 @@ export class PaymentsService {
   }
 
   async createEnrollment(data: any) {
-    return this.prisma.enrollment.create({
+    const enrollment = await this.prisma.enrollment.create({
       data: {
         userId: data.userId,
         levelId: data.levelId,
@@ -34,6 +34,14 @@ export class PaymentsService {
         level: { select: { name: true } },
       },
     });
+
+    // Sincronizar el nivel actual del usuario
+    await this.prisma.user.update({
+      where: { id: data.userId },
+      data: { currentLevelId: data.levelId },
+    });
+
+    return enrollment;
   }
 
   async updateEnrollment(id: string, data: any) {

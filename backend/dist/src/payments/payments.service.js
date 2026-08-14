@@ -28,7 +28,7 @@ let PaymentsService = class PaymentsService {
         });
     }
     async createEnrollment(data) {
-        return this.prisma.enrollment.create({
+        const enrollment = await this.prisma.enrollment.create({
             data: {
                 userId: data.userId,
                 levelId: data.levelId,
@@ -43,6 +43,11 @@ let PaymentsService = class PaymentsService {
                 level: { select: { name: true } },
             },
         });
+        await this.prisma.user.update({
+            where: { id: data.userId },
+            data: { currentLevelId: data.levelId },
+        });
+        return enrollment;
     }
     async updateEnrollment(id, data) {
         const update = {};

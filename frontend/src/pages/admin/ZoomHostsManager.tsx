@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Plus, Edit2, Trash2, Check, X, Video, Wifi, WifiOff, Link, ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { Video, Loader2, Plus, Edit2, Trash2, Link, Check, X, ChevronUp, ChevronDown, Users, Wifi, WifiOff } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
 
 export function ZoomHostsManager() {
   const [hosts, setHosts] = useState<any[]>([]);
@@ -73,22 +74,23 @@ export function ZoomHostsManager() {
       });
 
       if (res.ok) {
+        showSuccess('Zoom Host guardado');
         resetForm();
         fetchHosts();
       } else {
         const error = await res.json();
-        alert(`Error: ${error.message}`);
+        showError('Error al guardar', error.message);
       }
     } catch (e) {
       console.error(e);
-      alert('Error de conexión');
+      showError('Error de conexión');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este host de Zoom? Los meetings existentes no se cancelarán.')) return;
+    if (!(await confirmDelete('¿Eliminar host?', 'Los meetings existentes no se cancelarán.'))) return;
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/hosts/${id}`, {
         method: 'DELETE',

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Download, Search, Video, ClipboardList, Play, ArrowLeft, ExternalLink } from 'lucide-react';
+import { FileText, Search, Video, ClipboardList, Play, ArrowLeft, ExternalLink, X } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 type Category = 'Videos' | "PDF's" | 'Tareas' | null;
@@ -12,12 +12,36 @@ interface Resource {
   durationExpected: number;
 }
 
+// Utility to convert common URLs to embeddable formats
+const getEmbedUrl = (url: string) => {
+  if (!url) return '';
+  try {
+    // YouTube
+    if (url.includes('youtube.com/watch?v=')) {
+      return url.replace('watch?v=', 'embed/');
+    }
+    if (url.includes('youtu.be/')) {
+      return url.replace('youtu.be/', 'youtube.com/embed/');
+    }
+    // Google Drive PDF/Docs
+    if (url.includes('drive.google.com/file/d/')) {
+      return url.replace('/view', '/preview');
+    }
+    return url;
+  } catch (e) {
+    return url;
+  }
+};
+
 export function Recursos() {
   const session = useAuthStore(state => state.session);
   const [selectedCategory, setSelectedCategory] = useState<Category>(null);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // New state for viewing resource in modal
+  const [activeResource, setActiveResource] = useState<Resource | null>(null);
 
   useEffect(() => {
     fetchResources();
@@ -56,7 +80,7 @@ export function Recursos() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 relative">
       <div className="bg-[#1D3A8A] rounded-3xl p-8 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="relative z-10">
@@ -147,16 +171,14 @@ export function Recursos() {
                     
                     <h3 className="font-bold text-slate-800 mb-2 group-hover:text-[#1D3A8A] transition-colors flex-1">{item.title}</h3>
                     
-                    <a 
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button 
+                      onClick={() => setActiveResource(item)}
                       className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#1D3A8A] bg-blue-50 w-full justify-center py-3 rounded-xl hover:bg-[#1D3A8A] hover:text-white transition-colors"
                     >
-                      {item.type === 'RECORDED_VIDEO' && <><Play className="w-4 h-4" /> Ver Video</>}
-                      {item.type === 'PDF' && <><Download className="w-4 h-4" /> Descargar PDF</>}
-                      {(item.type === 'HOMEWORK' || item.type === 'TEST') && <><ExternalLink className="w-4 h-4" /> Abrir Tarea</>}
-                    </a>
+                      {item.type === 'RECORDED_VIDEO' && <><Play className="w-4 h-4" /> Ver Video Aquí</>}
+                      {item.type === 'PDF' && <><FileText className="w-4 h-4" /> Visualizar PDF</>}
+                      {(item.type === 'HOMEWORK' || item.type === 'TEST') && <><ExternalLink className="w-4 h-4" /> Abrir Tarea Aquí</>}
+                    </button>
                   </div>
                 ))}
               </div>
@@ -164,6 +186,60 @@ export function Recursos() {
           </>
         )}
       </div>
+
+      {/* ── Modal de Visualización Embebida ── */}
+      {activeResource && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/90 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[85vh] sm:h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            {/* Header del Modal */}
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center
+                  ${activeResource.type === 'RECORDED_VIDEO' ? 'bg-blue-50 text-blue-500' : 
+                    activeResource.type === 'PDF' ? 'bg-red-50 text-red-500' : 
+                    'bg-emerald-50 text-emerald-500'}`}
+                >
+                  {activeResource.type === 'RECORDED_VIDEO' && <Video className="w-5 h-5" />}
+                  {activeResource.type === 'PDF' && <FileText className="w-5 h-5" />}
+                  {(activeResource.type === 'HOMEWORK' || activeResource.type === 'TEST') && <ClipboardList className="w-5 h-5" />}
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 line-clamp-1">{activeResource.title}</h3>
+                  <p className="text-xs text-slate-500">Visualizador Interno</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <a 
+                  href={activeResource.url} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                  title="Abrir en otra pestaña"
+                >
+                  <ExternalLink className="w-4 h-4" /> <span className="hidden sm:inline">Abrir Externo</span>
+                </a>
+                <button 
+                  onClick={() => setActiveResource(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Contenedor del iFrame */}
+            <div className="flex-1 w-full h-full bg-slate-100 relative group">
+              <iframe 
+                src={getEmbedUrl(activeResource.url)}
+                className="w-full h-full border-0 absolute inset-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={activeResource.title}
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

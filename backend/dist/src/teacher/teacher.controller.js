@@ -24,16 +24,19 @@ let TeacherController = class TeacherController {
         this.teacherService = teacherService;
     }
     getDashboard(req) {
-        return this.teacherService.getDashboard(req.user.id);
+        return this.teacherService.getDashboard(req.user.userId);
     }
     getMyGroups(req) {
-        return this.teacherService.getMyGroups(req.user.id);
+        return this.teacherService.getMyGroups(req.user.userId);
     }
     getMyStudents(req) {
-        return this.teacherService.getMyStudents(req.user.id);
+        return this.teacherService.getMyStudents(req.user.userId);
     }
     getMySchedule(req) {
-        return this.teacherService.getMySchedule(req.user.id);
+        return this.teacherService.getMySchedule(req.user.userId);
+    }
+    getAttendanceSchedule(req) {
+        return this.teacherService.getAttendanceSchedule(req.user.userId);
     }
     recordAttendance(body) {
         return this.teacherService.recordAttendance(body);
@@ -41,11 +44,29 @@ let TeacherController = class TeacherController {
     getAttendance(resourceId) {
         return this.teacherService.getAttendance(resourceId);
     }
+    getStudentAttendanceAudit(studentId) {
+        return this.teacherService.getStudentAttendanceAudit(studentId);
+    }
+    getGroupAttendanceAudit(levelId) {
+        return this.teacherService.getGroupAttendanceAudit(levelId);
+    }
     getMyEvaluations(req) {
-        return this.teacherService.getMyEvaluations(req.user.id);
+        return this.teacherService.getMyEvaluations(req.user.userId);
     }
     createEvaluation(req, body) {
-        return this.teacherService.createEvaluation(req.user.id, body);
+        return this.teacherService.createEvaluation(req.user.userId, body);
+    }
+    getClassLogs(req) {
+        return this.teacherService.getClassLogs(req.user.userId);
+    }
+    createClassLog(req, body) {
+        return this.teacherService.createClassLog(req.user.userId, body);
+    }
+    updateClassLog(req, id, body) {
+        return this.teacherService.updateClassLog(req.user.userId, id, body);
+    }
+    deleteClassLog(req, id) {
+        return this.teacherService.deleteClassLog(req.user.userId, id);
     }
 };
 exports.TeacherController = TeacherController;
@@ -78,6 +99,13 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], TeacherController.prototype, "getMySchedule", null);
 __decorate([
+    (0, common_1.Get)('attendance/schedule'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "getAttendanceSchedule", null);
+__decorate([
     (0, common_1.Post)('attendance'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -91,6 +119,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TeacherController.prototype, "getAttendance", null);
+__decorate([
+    (0, common_1.Get)('attendance/audit/:studentId'),
+    __param(0, (0, common_1.Param)('studentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "getStudentAttendanceAudit", null);
+__decorate([
+    (0, common_1.Get)('attendance/audit/group/:levelId'),
+    __param(0, (0, common_1.Param)('levelId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "getGroupAttendanceAudit", null);
 __decorate([
     (0, common_1.Get)('evaluations'),
     __param(0, (0, common_1.Request)()),
@@ -106,6 +148,38 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], TeacherController.prototype, "createEvaluation", null);
+__decorate([
+    (0, common_1.Get)('logs'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "getClassLogs", null);
+__decorate([
+    (0, common_1.Post)('logs'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "createClassLog", null);
+__decorate([
+    (0, common_1.Patch)('logs/:id'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "updateClassLog", null);
+__decorate([
+    (0, common_1.Delete)('logs/:id'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "deleteClassLog", null);
 exports.TeacherController = TeacherController = __decorate([
     (0, common_1.Controller)('teacher'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

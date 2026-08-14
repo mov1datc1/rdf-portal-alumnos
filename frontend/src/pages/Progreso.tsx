@@ -1,6 +1,23 @@
 import { CheckCircle2, Circle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 
 export function Progreso() {
+  const session = useAuthStore(state => state.session);
+  const [levelCode, setLevelCode] = useState('N/A');
+
+  useEffect(() => {
+    if (!session?.access_token) return;
+    fetch(`${import.meta.env.VITE_API_URL}/profile/dashboard`, {
+      headers: { 'Authorization': `Bearer ${session.access_token}` }
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.levelCode) setLevelCode(data.levelCode);
+      })
+      .catch(console.error);
+  }, [session]);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="bg-gradient-to-r from-[#1D3A8A] to-blue-800 rounded-3xl p-8 text-white">
@@ -13,17 +30,8 @@ export function Progreso() {
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-[#1D3A8A]">Nivel B1 · Intermedio</h2>
-            <p className="text-sm text-slate-500 mt-1">Estás a un paso de dominar el nivel.</p>
-          </div>
-          <div className="text-right">
-            <span className="text-4xl font-extrabold text-[#EF4444]">60%</span>
-          </div>
-        </div>
-
-        <div className="w-full bg-slate-100 rounded-full h-3 mb-10">
-          <div className="bg-yellow-400 h-3 rounded-full relative" style={{ width: '60%' }}>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-4 border-yellow-400 rounded-full shadow-md"></div>
+            <h2 className="text-2xl font-bold text-[#1D3A8A]">Nivel {levelCode}</h2>
+            <p className="text-sm text-slate-500 mt-1">Sigue explorando los módulos de tu nivel actual.</p>
           </div>
         </div>
 

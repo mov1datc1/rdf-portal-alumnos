@@ -14,6 +14,14 @@ export declare class ZoomController {
         displayName: string;
         permanentLink: string | null;
         accountId: string | null;
+        meetings: {
+            scheduledAt: Date | null;
+            durationExpected: number;
+        }[];
+        assignedGroups: {
+            id: string;
+            schedule: string | null;
+        }[];
     }[]>;
     getHostsWithPermanentLinks(): Promise<{
         id: string;
@@ -23,6 +31,14 @@ export declare class ZoomController {
         };
         displayName: string;
         permanentLink: string | null;
+        meetings: {
+            scheduledAt: Date | null;
+            durationExpected: number;
+        }[];
+        assignedGroups: {
+            id: string;
+            schedule: string | null;
+        }[];
     }[]>;
     createHost(body: {
         email: string;

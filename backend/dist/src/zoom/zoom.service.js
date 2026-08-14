@@ -63,6 +63,12 @@ let ZoomService = ZoomService_1 = class ZoomService {
             throw new common_1.HttpException('Zoom host no encontrado', common_1.HttpStatus.NOT_FOUND);
         if (!host.isActive)
             throw new common_1.HttpException('Este host de Zoom está desactivado', common_1.HttpStatus.BAD_REQUEST);
+        if (!host.accountId || !host.clientId || !host.clientSecret) {
+            if (host.permanentLink) {
+                return { meetingId: null, joinUrl: host.permanentLink };
+            }
+            throw new common_1.HttpException('Este host de Zoom no tiene link permanente ni credenciales S2S', common_1.HttpStatus.BAD_REQUEST);
+        }
         const token = await this.getAccessToken(host);
         const response = await fetch(`https://api.zoom.us/v2/users/${host.email}/meetings`, {
             method: 'POST',
@@ -124,6 +130,8 @@ let ZoomService = ZoomService_1 = class ZoomService {
                 isActive: true,
                 createdAt: true,
                 accountId: true,
+                assignedGroups: { select: { id: true, schedule: true } },
+                meetings: { select: { scheduledAt: true, durationExpected: true }, where: { scheduledAt: { gte: new Date() } } },
                 _count: { select: { meetings: true, assignedGroups: true } },
             },
         });
@@ -137,6 +145,8 @@ let ZoomService = ZoomService_1 = class ZoomService {
                 email: true,
                 displayName: true,
                 permanentLink: true,
+                assignedGroups: { select: { id: true, schedule: true } },
+                meetings: { select: { scheduledAt: true, durationExpected: true }, where: { scheduledAt: { gte: new Date() } } },
                 _count: { select: { assignedGroups: true } },
             },
         });

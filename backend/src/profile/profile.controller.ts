@@ -1,17 +1,39 @@
-import { Controller, Post, Body, UseGuards, Req, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, HttpException, HttpStatus, Get } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { createClient } from '@supabase/supabase-js';
+import { PrismaService } from '../prisma.service';
 
 @Controller('profile')
 @UseGuards(JwtAuthGuard)
 export class ProfileController {
   private supabase;
 
-  constructor() {
+  constructor(private readonly prisma: PrismaService) {
     this.supabase = createClient(
       process.env.SUPABASE_URL as string,
       process.env.SUPABASE_SERVICE_ROLE_KEY as string
     );
+  }
+
+  @Get('dashboard')
+  async getDashboardData(@Req() req: any) {
+    const userId = req.user.userId;
+    
+    // Buscar nivel asignado directamente en el usuario
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        currentLevel: {
+          include: { teacher: { select: { firstName: true, lastName: true } } }
+        }
+      }
+    });
+
+    return {
+      groupName: user?.currentLevel?.name || 'Sin grupo asignado',
+      levelCode: user?.currentLevel?.levelCode || 'N/A',
+      teacherName: user?.currentLevel?.teacher ? `${user.currentLevel.teacher.firstName} ${user.currentLevel.teacher.lastName}` : 'No asignado',
+    };
   }
 
   @Post('change-password')

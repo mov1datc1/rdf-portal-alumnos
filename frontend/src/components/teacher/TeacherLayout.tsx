@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, LogOut, Calendar, Users, Layers, ClipboardCheck, Award } from 'lucide-react';
+import { LayoutDashboard, LogOut, Calendar, Users, Layers, ClipboardCheck, Award, BookOpen } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
 
@@ -18,14 +18,14 @@ export function TeacherLayout() {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <aside className="w-64 bg-gradient-to-b from-[#2E7D32] to-[#1B5E20] text-white p-6 flex flex-col">
+      <aside className="w-64 bg-gradient-to-b from-[#b91c1c] to-[#7f1d1d] text-white p-6 flex flex-col">
         <div className="mb-10">
           <img
             src="https://lesroisdufrancais.com/wp-content/uploads/2024/06/Copia-de-LogoFinal-01-scaled-1-2048x1151.webp"
             alt="Les Rois"
             className="w-32 object-contain filter brightness-0 invert mb-2"
           />
-          <p className="text-xs text-green-300">Portal del Profesor</p>
+          <p className="text-xs text-red-200">Portal del Profesor</p>
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -40,6 +40,10 @@ export function TeacherLayout() {
           <NavLink to="/teacher/schedule" className={linkClass}>
             <Calendar className="w-5 h-5" />
             Mi Horario
+          </NavLink>
+          <NavLink to="/teacher/logs" className={linkClass}>
+            <BookOpen className="w-5 h-5" />
+            Bitácora
           </NavLink>
           <NavLink to="/teacher/students" className={linkClass}>
             <Users className="w-5 h-5" />

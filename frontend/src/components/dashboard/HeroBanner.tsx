@@ -1,6 +1,7 @@
 import { useAuthStore } from '../../store/authStore';
+import { Users, UserCircle } from 'lucide-react';
 
-export function HeroBanner() {
+export function HeroBanner({ dashboardData }: { dashboardData?: any }) {
   const user = useAuthStore(state => state.user);
   const firstName = user?.user_metadata?.firstName || 'Alumno';
 
@@ -22,40 +23,34 @@ export function HeroBanner() {
             materiales en PDF, vea lecciones grabadas, hable con un asistente virtual y dé
             seguimiento real a su avance.
           </p>
-          <div className="flex gap-4">
-            <button className="bg-[#EF4444] hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-full transition-colors shadow-lg shadow-red-500/30 text-sm">
-              Ver alcance funcional
-            </button>
-            <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold py-3 px-6 rounded-full transition-colors text-sm">
-              Explorar visor PDF
-            </button>
+          <div className="flex gap-6 mt-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex items-center gap-4 min-w-[200px] border border-white/10">
+              <div className="bg-[#EF4444]/20 p-2.5 rounded-xl">
+                <Users className="w-6 h-6 text-[#EF4444]" />
+              </div>
+              <div>
+                <p className="text-xs text-white/60 font-medium uppercase tracking-wider">Tu Grupo</p>
+                <p className="font-bold text-white text-lg">{dashboardData?.groupName || 'Cargando...'}</p>
+              </div>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex items-center gap-4 min-w-[200px] border border-white/10">
+              <div className="bg-blue-400/20 p-2.5 rounded-xl">
+                <UserCircle className="w-6 h-6 text-blue-200" />
+              </div>
+              <div>
+                <p className="text-xs text-white/60 font-medium uppercase tracking-wider">Profesor(a)</p>
+                <p className="font-bold text-white text-lg">{dashboardData?.teacherName || 'Cargando...'}</p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Glassmorphism Progress Card */}
-        <div className="bg-white/20 backdrop-blur-xl border border-white/20 rounded-2xl p-6 w-[320px] shadow-2xl">
-          <h3 className="text-sm font-semibold text-white/80 mb-1">Nivel actual</h3>
-          <div className="flex justify-between items-end mb-3">
-            <p className="font-bold text-lg">B1 · Intermedio</p>
-            <p className="font-bold text-sm">60%</p>
-          </div>
-          <div className="w-full bg-white/20 rounded-full h-2 mb-6">
-            <div className="bg-yellow-400 h-2 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]" style={{ width: '60%' }} />
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-black/20 rounded-xl p-3 text-center">
-              <p className="font-bold text-xl">12</p>
-              <p className="text-[10px] text-white/70 uppercase tracking-wider mt-1">Lecciones</p>
-            </div>
-            <div className="bg-black/20 rounded-xl p-3 text-center">
-              <p className="font-bold text-xl">8</p>
-              <p className="text-[10px] text-white/70 uppercase tracking-wider mt-1">Tests</p>
-            </div>
-            <div className="bg-black/20 rounded-xl p-3 text-center">
-              <p className="font-bold text-xl">24h</p>
-              <p className="text-[10px] text-white/70 uppercase tracking-wider mt-1">Estudio</p>
-            </div>
+        <div className="bg-white/20 backdrop-blur-xl border border-white/20 rounded-2xl p-6 w-[320px] shadow-2xl flex flex-col justify-center items-center h-[160px]">
+          <h3 className="text-sm font-semibold text-white/80 mb-2 uppercase tracking-widest">Nivel actual</h3>
+          <div>
+            <p className="font-extrabold text-4xl text-white">{dashboardData?.levelCode || '...'}</p>
           </div>
         </div>
       </div>

@@ -44,9 +44,29 @@ export class AdminController {
 
   // ── Resources ──
 
+  @Get('resources')
+  getResources() {
+    return this.adminService.getResources();
+  }
+
   @Post('resources')
   createResource(@Body() body: any) {
     return this.adminService.createResource(body);
+  }
+
+  @Delete('resources/:id')
+  deleteResource(@Param('id') id: string) {
+    return this.adminService.deleteResource(id);
+  }
+
+  @Post('resources/batch-delete')
+  batchDeleteResources(@Body() body: { ids: string[] }) {
+    return this.adminService.batchDeleteResources(body.ids);
+  }
+
+  @Patch('resources/:id')
+  updateResource(@Param('id') id: string, @Body() body: any) {
+    return this.adminService.updateResource(id, body);
   }
 
   // ── Levels / Groups ──

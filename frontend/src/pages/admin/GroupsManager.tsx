@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Loader2, Plus, Edit2, Trash2, Check, X, Layers, Clock, Calendar, Users, Video, User, Link as LinkIcon } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
+import { buildScheduleString, parseSchedule } from '../../utils/schedule';
 
 const LEVEL_CODES = ['Basico1', 'Basico2', 'Inter1', 'Inter2', 'Avanz1', 'Avanz2'];
 const MODALITIES = [
@@ -24,59 +26,6 @@ const DAYS = [
 ];
 
 type DaySchedule = { startTime: string; endTime: string };
-
-function parseSchedule(schedule: string | null): {
-  days: string[];
-  sameTime: boolean;
-  uniformStart: string;
-  uniformEnd: string;
-  perDay: Record<string, DaySchedule>;
-} {
-  const empty = { days: [], sameTime: true, uniformStart: '', uniformEnd: '', perDay: {} as Record<string, DaySchedule> };
-  if (!schedule) return empty;
-
-  if (schedule.includes(' · ')) {
-    const [daysPart, timePart] = schedule.split(' · ');
-    const days = daysPart.split(', ').map(d => d.trim());
-    const [start, end] = (timePart || '').split('-').map(t => t.trim());
-    return { days, sameTime: true, uniformStart: start || '', uniformEnd: end || '', perDay: {} };
-  }
-
-  const parts = schedule.split(', ').map(p => p.trim());
-  const days: string[] = [];
-  const perDay: Record<string, DaySchedule> = {};
-  let allSame = true;
-  let firstTime = '';
-
-  for (const part of parts) {
-    const match = part.match(/^(\S+)\s+(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$/);
-    if (match) {
-      const [, day, start, end] = match;
-      days.push(day);
-      perDay[day] = { startTime: start, endTime: end };
-      const timeStr = `${start}-${end}`;
-      if (!firstTime) firstTime = timeStr;
-      else if (timeStr !== firstTime) allSame = false;
-    }
-  }
-
-  if (allSame && days.length > 0) {
-    const [start, end] = firstTime.split('-');
-    return { days, sameTime: true, uniformStart: start, uniformEnd: end, perDay };
-  }
-  return { days, sameTime: false, uniformStart: '', uniformEnd: '', perDay };
-}
-
-function buildScheduleString(days: string[], sameTime: boolean, uniformStart: string, uniformEnd: string, perDay: Record<string, DaySchedule>): string {
-  if (days.length === 0) return '';
-  if (sameTime && uniformStart && uniformEnd) {
-    return `${days.join(', ')} · ${uniformStart}-${uniformEnd}`;
-  }
-  return days
-    .filter(d => perDay[d]?.startTime && perDay[d]?.endTime)
-    .map(d => `${d} ${perDay[d].startTime}-${perDay[d].endTime}`)
-    .join(', ');
-}
 
 export function GroupsManager() {
   const [levels, setLevels] = useState<any[]>([]);
@@ -106,6 +55,7 @@ export function GroupsManager() {
   const [sameTime, setSameTime] = useState(true);
   const [uniformStart, setUniformStart] = useState('');
   const [uniformEnd, setUniformEnd] = useState('');
+  const [showManualTime, setShowManualTime] = useState(false);
   const [perDay, setPerDay] = useState<Record<string, DaySchedule>>({});
 
   const fetchData = async () => {
@@ -140,7 +90,7 @@ export function GroupsManager() {
     setName(''); setLevelCode('Basico1'); setModality('GROUP'); setRhythm('REGULAR');
     setMaxStudents(8); setTeacherId(''); setZoomHostId(''); setZoomLink(''); setZoomMode('host');
     setSelectedDays([]); setSameTime(true); setUniformStart(''); setUniformEnd('');
-    setPerDay({}); setEditingId(null);
+    setPerDay({}); setEditingId(null); setShowManualTime(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -184,12 +134,12 @@ export function GroupsManager() {
           body: JSON.stringify(body),
         });
 
-      if (res.ok) { resetForm(); fetchData(); }
+      if (res.ok) { showSuccess('Grupo guardado'); resetForm(); fetchData(); }
       else {
         const error = await res.json();
-        alert(`Error: ${error.message}`);
+        showError('Error al guardar', error.message);
       }
-    } catch (e) { console.error(e); alert('Error de conexión'); }
+    } catch (e) { console.error(e); showError('Error de conexión'); }
     finally { setIsSubmitting(false); }
   };
 
@@ -214,7 +164,7 @@ export function GroupsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este grupo y todos sus recursos?')) return;
+    if (!(await confirmDelete('¿Eliminar este grupo?', 'Se eliminarán todos sus recursos.'))) return;
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/levels/${id}`, {
         method: 'DELETE',
@@ -234,6 +184,8 @@ export function GroupsManager() {
     else if (modality === 'PART_DUO') setMaxStudents(2);
     else if (modality === 'GROUP') setMaxStudents(8);
   }, [modality]);
+
+
 
   return (
     <div className="space-y-6">
@@ -324,7 +276,18 @@ export function GroupsManager() {
                     >
                       <input type="radio" name="rhythm" value={r.value}
                         checked={rhythm === r.value}
-                        onChange={() => setRhythm(r.value)}
+                        onChange={() => {
+                          setRhythm(r.value);
+                          if (r.value === 'SATURDAY') {
+                            setSelectedDays(['Sáb']);
+                          } else if (r.value === 'INTENSIVE') {
+                            setSelectedDays(['Lun', 'Mar', 'Mié', 'Jue', 'Vie']);
+                          } else if (r.value === 'REGULAR') {
+                            setSelectedDays(['Lun', 'Mié', 'Vie']);
+                          } else {
+                            setSelectedDays([]);
+                          }
+                        }}
                         className="accent-[#1D3A8A]"
                       />
                       <div>
@@ -429,9 +392,9 @@ export function GroupsManager() {
                               if (zoomRes.ok) setZoomHosts(await zoomRes.json());
                             } else {
                               const err = await res.json();
-                              alert(`Error: ${err.message}`);
+                              showError('Error al guardar', err.message);
                             }
-                          } catch { alert('Error de conexión'); }
+                          } catch { showError('Error de conexión'); }
                           finally { setAddingZoom(false); }
                         }}
                         className="w-full py-1.5 rounded-lg text-xs font-bold bg-[#2D8CFF] text-white hover:bg-blue-600 transition-colors flex items-center justify-center gap-1 disabled:opacity-50">
@@ -458,19 +421,42 @@ export function GroupsManager() {
               </label>
 
               {/* Day picker */}
-              <div className="flex gap-2 mb-3">
-                {DAYS.map(d => (
-                  <button key={d.key} type="button" onClick={() => toggleDay(d.key)}
-                    className={`w-9 h-9 rounded-full font-bold text-sm transition-all ${
-                      selectedDays.includes(d.key)
-                        ? 'bg-[#1D3A8A] text-white shadow-md'
-                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                    }`}
-                  >
-                    {d.label}
+              {modality === 'GROUP' && rhythm === 'REGULAR' ? (
+                <div className="flex gap-2 mb-3">
+                  <button type="button" onClick={() => setSelectedDays(['Lun', 'Mié', 'Vie'])}
+                    className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${JSON.stringify(selectedDays) === JSON.stringify(['Lun', 'Mié', 'Vie']) ? 'bg-[#1D3A8A] text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                    Lunes, Miércoles y Viernes
                   </button>
-                ))}
-              </div>
+                  <button type="button" onClick={() => setSelectedDays(['Mié', 'Jue', 'Vie'])}
+                    className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${JSON.stringify(selectedDays) === JSON.stringify(['Mié', 'Jue', 'Vie']) ? 'bg-[#1D3A8A] text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                    Miércoles, Jueves y Viernes
+                  </button>
+                </div>
+              ) : modality === 'GROUP' ? (
+                <div className="flex gap-2 mb-3">
+                  {selectedDays.map(day => (
+                    <div key={day} className="w-9 h-9 rounded-full font-bold text-sm bg-[#1D3A8A] text-white shadow-md flex items-center justify-center cursor-default">
+                      {DAYS.find(d => d.key === day)?.label || day}
+                    </div>
+                  ))}
+                  <p className="text-xs text-slate-500 self-center ml-2">(Días fijos por modalidad)</p>
+                </div>
+              ) : (
+                <div className="flex gap-2 mb-3">
+                  {DAYS.map(d => (
+                    <button key={d.key} type="button" 
+                      onClick={() => toggleDay(d.key)}
+                      className={`w-9 h-9 rounded-full font-bold text-sm transition-all ${
+                        selectedDays.includes(d.key)
+                          ? 'bg-[#1D3A8A] text-white shadow-md'
+                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {selectedDays.length > 0 && (
                 <>
@@ -483,16 +469,60 @@ export function GroupsManager() {
                   </label>
 
                   {sameTime ? (
-                    <div className="flex gap-2 items-center">
-                      <input type="time" value={uniformStart}
-                        onChange={e => setUniformStart(e.target.value)}
-                        className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
-                      />
-                      <span className="text-slate-400 text-sm">a</span>
-                      <input type="time" value={uniformEnd}
-                        onChange={e => setUniformEnd(e.target.value)}
-                        className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
-                      />
+                    <div>
+                      {!showManualTime ? (
+                        <select 
+                          value={`${uniformStart}-${uniformEnd}`}
+                          onChange={e => {
+                            if (e.target.value === 'manual') {
+                              setShowManualTime(true);
+                              setUniformStart('');
+                              setUniformEnd('');
+                            } else {
+                              const [s, eTime] = e.target.value.split('-');
+                              if (s && eTime) {
+                                setUniformStart(s);
+                                setUniformEnd(eTime);
+                              }
+                            }
+                          }}
+                          className="w-full border border-slate-200 rounded-lg py-2 px-3 text-sm bg-slate-50 focus:ring-2 focus:ring-[#1D3A8A]/20"
+                        >
+                          <option value="-">Selecciona un horario sugerido...</option>
+                          {rhythm === 'SATURDAY' ? (
+                            <>
+                              <option value="08:00-10:50">08:00 a 10:50</option>
+                              <option value="11:00-13:50">11:00 a 13:50</option>
+                              <option value="14:00-16:50">14:00 a 16:50</option>
+                            </>
+                          ) : (
+                            Array.from({ length: 14 }).map((_, i) => {
+                              const hour = i + 8;
+                              const start = `${hour.toString().padStart(2, '0')}:00`;
+                              const end = `${hour.toString().padStart(2, '0')}:50`;
+                              return <option key={start} value={`${start}-${end}`}>{start} a {end}</option>;
+                            })
+                          )}
+                          <option value="manual">Otro (Ingreso manual)</option>
+                        </select>
+                      ) : (
+                        <div>
+                          <div className="flex gap-2 items-center">
+                            <input type="time" value={uniformStart}
+                              onChange={e => setUniformStart(e.target.value)}
+                              className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
+                            />
+                            <span className="text-slate-400 text-sm">a</span>
+                            <input type="time" value={uniformEnd}
+                              onChange={e => setUniformEnd(e.target.value)}
+                              className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
+                            />
+                          </div>
+                          <button type="button" onClick={() => setShowManualTime(false)} className="text-xs text-blue-600 mt-1 hover:underline">
+                            Volver a sugerencias
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-2">

@@ -75,6 +75,47 @@ export declare class TeacherService {
         createdAt: Date;
         updatedAt: Date;
         zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    })[]>;
+    getAttendanceSchedule(teacherId: string): Promise<({
+        module: {
+            level: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                levelCode: string;
+                modality: import("@prisma/client").$Enums.ClassModality;
+                rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
+                schedule: string | null;
+                maxStudents: number;
+                zoomLink: string | null;
+                totalScoreTarget: number;
+                zoomHostId: string | null;
+                teacherId: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            orderIndex: number;
+            title: string;
+            levelId: string;
+        };
+    } & {
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
         title: string;
         type: import("@prisma/client").$Enums.ResourceType;
         description: string | null;
@@ -118,6 +159,7 @@ export declare class TeacherService {
             createdAt: Date;
             updatedAt: Date;
             zoomHostId: string | null;
+            teacherId: string | null;
             title: string;
             type: import("@prisma/client").$Enums.ResourceType;
             description: string | null;
@@ -149,6 +191,102 @@ export declare class TeacherService {
         resourceId: string;
         attended: boolean;
     })[]>;
+    getGroupAttendanceAudit(levelId: string): Promise<{
+        students: {
+            id: string;
+            email: string;
+            role: import("@prisma/client").$Enums.Role;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            isActive: boolean;
+            currentLevelId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        classes: ({
+            module: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                orderIndex: number;
+                title: string;
+                levelId: string;
+            };
+        } & {
+            url: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            zoomHostId: string | null;
+            teacherId: string | null;
+            title: string;
+            type: import("@prisma/client").$Enums.ResourceType;
+            description: string | null;
+            zoomMeetingId: string | null;
+            scheduledAt: Date | null;
+            durationExpected: number;
+            moduleId: string;
+        })[];
+        attendanceMap: any;
+    }>;
+    getStudentAttendanceAudit(studentId: string): Promise<{
+        student: {
+            currentLevel: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                levelCode: string;
+                modality: import("@prisma/client").$Enums.ClassModality;
+                rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
+                schedule: string | null;
+                maxStudents: number;
+                zoomLink: string | null;
+                totalScoreTarget: number;
+                zoomHostId: string | null;
+                teacherId: string | null;
+            } | null;
+        } & {
+            id: string;
+            email: string;
+            role: import("@prisma/client").$Enums.Role;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            isActive: boolean;
+            currentLevelId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        audit: {
+            class: {
+                module: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    orderIndex: number;
+                    title: string;
+                    levelId: string;
+                };
+            } & {
+                url: string | null;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                zoomHostId: string | null;
+                teacherId: string | null;
+                title: string;
+                type: import("@prisma/client").$Enums.ResourceType;
+                description: string | null;
+                zoomMeetingId: string | null;
+                scheduledAt: Date | null;
+                durationExpected: number;
+                moduleId: string;
+            };
+            attended: boolean | null | undefined;
+        }[];
+    }>;
     createEvaluation(evaluatorId: string, data: any): Promise<{
         id: string;
         createdAt: Date;
@@ -184,4 +322,148 @@ export declare class TeacherService {
         evaluatedById: string | null;
         certificateUrl: string | null;
     })[]>;
+    createClassLog(teacherId: string, data: {
+        levelId: string;
+        title: string;
+        description: string;
+        date?: string;
+    }): Promise<{
+        module: {
+            level: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                levelCode: string;
+                modality: import("@prisma/client").$Enums.ClassModality;
+                rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
+                schedule: string | null;
+                maxStudents: number;
+                zoomLink: string | null;
+                totalScoreTarget: number;
+                zoomHostId: string | null;
+                teacherId: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            orderIndex: number;
+            title: string;
+            levelId: string;
+        };
+    } & {
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    }>;
+    getClassLogs(teacherId: string): Promise<({
+        module: {
+            level: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                levelCode: string;
+                modality: import("@prisma/client").$Enums.ClassModality;
+                rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
+                schedule: string | null;
+                maxStudents: number;
+                zoomLink: string | null;
+                totalScoreTarget: number;
+                zoomHostId: string | null;
+                teacherId: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            orderIndex: number;
+            title: string;
+            levelId: string;
+        };
+    } & {
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    })[]>;
+    updateClassLog(teacherId: string, logId: string, data: {
+        title: string;
+        description: string;
+        date?: string;
+    }): Promise<{
+        module: {
+            level: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                name: string;
+                levelCode: string;
+                modality: import("@prisma/client").$Enums.ClassModality;
+                rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
+                schedule: string | null;
+                maxStudents: number;
+                zoomLink: string | null;
+                totalScoreTarget: number;
+                zoomHostId: string | null;
+                teacherId: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            orderIndex: number;
+            title: string;
+            levelId: string;
+        };
+    } & {
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    }>;
+    deleteClassLog(teacherId: string, logId: string): Promise<{
+        url: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        zoomHostId: string | null;
+        teacherId: string | null;
+        title: string;
+        type: import("@prisma/client").$Enums.ResourceType;
+        description: string | null;
+        zoomMeetingId: string | null;
+        scheduledAt: Date | null;
+        durationExpected: number;
+        moduleId: string;
+    }>;
 }
