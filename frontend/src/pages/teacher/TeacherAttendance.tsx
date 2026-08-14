@@ -30,11 +30,15 @@ export function TeacherAttendance() {
   useEffect(() => {
     if (!session) return;
     Promise.all([
-      fetch(`${import.meta.env.VITE_API_URL}/teacher/groups`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }).then(r => r.json()),
-      fetch(`${import.meta.env.VITE_API_URL}/teacher/attendance/schedule`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }).then(r => r.json()),
-      fetch(`${import.meta.env.VITE_API_URL}/teacher/students`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }).then(r => r.json()),
+      fetch(`${import.meta.env.VITE_API_URL}/teacher/groups`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }).then(r => r.ok ? r.json() : []),
+      fetch(`${import.meta.env.VITE_API_URL}/teacher/attendance/schedule`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }).then(r => r.ok ? r.json() : []),
+      fetch(`${import.meta.env.VITE_API_URL}/teacher/students`, { headers: { 'Authorization': `Bearer ${session.access_token}` } }).then(r => r.ok ? r.json() : []),
     ])
-      .then(([g, s, st]) => { setGroups(g); setSchedule(s); setStudents(st); })
+      .then(([g, s, st]) => {
+        setGroups(Array.isArray(g) ? g : []);
+        setSchedule(Array.isArray(s) ? s : []);
+        setStudents(Array.isArray(st) ? st : []);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [session]);
@@ -42,7 +46,9 @@ export function TeacherAttendance() {
   // When a class is selected, find its level, get students and fetch existing attendance
   useEffect(() => {
     if (!selectedClass) return;
-    const cls = schedule.find(c => c.id === selectedClass);
+    const safeSchedule = Array.isArray(schedule) ? schedule : [];
+    const safeStudents = Array.isArray(students) ? students : [];
+    const cls = safeSchedule.find(c => c.id === selectedClass);
     if (!cls) return;
     const levelId = cls.module?.level?.id;
     setSelectedLevel(levelId || '');
@@ -53,9 +59,10 @@ export function TeacherAttendance() {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/teacher/attendance/${selectedClass}`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
         });
-        const existingAttendance = res.ok ? await res.json() : [];
+        const existingData = res.ok ? await res.json() : [];
+        const existingAttendance = Array.isArray(existingData) ? existingData : [];
         
-        const groupStudents = students.filter(s => s.currentLevel?.id === levelId);
+        const groupStudents = safeStudents.filter(s => s.currentLevel?.id === levelId);
         const initial: Record<string, boolean> = {};
         
         groupStudents.forEach(s => {
@@ -149,7 +156,10 @@ export function TeacherAttendance() {
 
   if (loading) return <div className="flex justify-center items-center min-h-[60vh]"><Loader2 className="w-10 h-10 animate-spin text-[#1D3A8A]" /></div>;
 
-  const groupStudentsForSelected = students
+  const safeStudents = Array.isArray(students) ? students : [];
+  const safeSchedule = Array.isArray(schedule) ? schedule : [];
+
+  const groupStudentsForSelected = safeStudents
     .filter(s => s.currentLevel?.id === selectedLevel)
     .sort((a, b) => {
       if (sortBy === 'firstName') return a.firstName.localeCompare(b.firstName);
@@ -159,10 +169,10 @@ export function TeacherAttendance() {
 
   // Group schedule into "Hoy/Futuras" and "Pasadas"
   const now = new Date();
-  const pastClasses = schedule.filter(c => new Date(c.scheduledAt) < now).reverse(); // newest past classes first
-  const futureClasses = schedule.filter(c => new Date(c.scheduledAt) >= now);
+  const pastClasses = safeSchedule.filter(c => new Date(c.scheduledAt) < now).reverse(); // newest past classes first
+  const futureClasses = safeSchedule.filter(c => new Date(c.scheduledAt) >= now);
 
-  const selectedClassData = schedule.find(c => c.id === selectedClass);
+  const selectedClassData = safeSchedule.find(c => c.id === selectedClass);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">

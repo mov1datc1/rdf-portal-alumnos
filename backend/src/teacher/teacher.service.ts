@@ -185,6 +185,9 @@ export class TeacherService {
    * Get attendance for a specific class.
    */
   async getAttendance(resourceId: string) {
+    if (!resourceId || resourceId === 'schedule' || resourceId === 'audit') {
+      return [];
+    }
     return this.prisma.attendance.findMany({
       where: { resourceId },
       include: {

@@ -35,6 +35,16 @@ export class TeacherController {
     return this.teacherService.getAttendanceSchedule(req.user.userId);
   }
 
+  @Get('attendance/audit/group/:levelId')
+  getGroupAttendanceAudit(@Param('levelId') levelId: string) {
+    return this.teacherService.getGroupAttendanceAudit(levelId);
+  }
+
+  @Get('attendance/audit/:studentId')
+  getStudentAttendanceAudit(@Param('studentId') studentId: string) {
+    return this.teacherService.getStudentAttendanceAudit(studentId);
+  }
+
   @Post('attendance')
   recordAttendance(@Body() body: { resourceId: string; levelId: string; attendees: { userId: string; attended: boolean }[] }) {
     return this.teacherService.recordAttendance(body);
@@ -43,16 +53,6 @@ export class TeacherController {
   @Get('attendance/:resourceId')
   getAttendance(@Param('resourceId') resourceId: string) {
     return this.teacherService.getAttendance(resourceId);
-  }
-
-  @Get('attendance/audit/:studentId')
-  getStudentAttendanceAudit(@Param('studentId') studentId: string) {
-    return this.teacherService.getStudentAttendanceAudit(studentId);
-  }
-
-  @Get('attendance/audit/group/:levelId')
-  getGroupAttendanceAudit(@Param('levelId') levelId: string) {
-    return this.teacherService.getGroupAttendanceAudit(levelId);
   }
 
   @Get('evaluations')

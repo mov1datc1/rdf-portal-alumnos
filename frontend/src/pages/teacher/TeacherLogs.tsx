@@ -139,15 +139,17 @@ export function TeacherLogs() {
     Promise.all([
       fetch(`${import.meta.env.VITE_API_URL}/teacher/logs`, {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
-      }).then(r => r.json()),
+      }).then(r => r.ok ? r.json() : []),
       fetch(`${import.meta.env.VITE_API_URL}/teacher/groups`, {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
-      }).then(r => r.json())
+      }).then(r => r.ok ? r.json() : [])
     ])
       .then(([logsData, groupsData]) => {
-        setLogs(logsData);
-        setGroups(groupsData);
-        if (groupsData.length > 0) setLevelId(groupsData[0].id);
+        const safeLogs = Array.isArray(logsData) ? logsData : [];
+        const safeGroups = Array.isArray(groupsData) ? groupsData : [];
+        setLogs(safeLogs);
+        setGroups(safeGroups);
+        if (safeGroups.length > 0) setLevelId(safeGroups[0].id);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -320,8 +322,8 @@ export function TeacherLogs() {
                   required
                   disabled={!!editingId}
                 >
-                  {groups.length === 0 && <option value="">No tienes grupos asignados</option>}
-                  {groups.map(g => (
+                  {(!Array.isArray(groups) || groups.length === 0) && <option value="">No tienes grupos asignados</option>}
+                  {Array.isArray(groups) && groups.map(g => (
                     <option key={g.id} value={g.id}>{g.name} ({g.levelCode})</option>
                   ))}
                 </select>
@@ -409,7 +411,7 @@ export function TeacherLogs() {
           <div className="space-y-4">
             <h2 className="font-bold text-slate-800 mb-2">Historial de Clases</h2>
             
-            {logs.length === 0 ? (
+            {(!Array.isArray(logs) || logs.length === 0) ? (
               <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
                 <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                 <p className="text-slate-500">Aún no has registrado ninguna bitácora.</p>

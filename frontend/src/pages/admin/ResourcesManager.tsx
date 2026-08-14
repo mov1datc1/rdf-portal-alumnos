@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link as LinkIcon, Check, Loader2, ArrowLeft, Video, FileText, ClipboardList, Trash2, Edit2, X, History, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { showSuccess, showError } from '../../utils/alerts';
@@ -61,12 +61,7 @@ export function ResourcesManager() {
     const moduleIds = formData.levelIds.map(levelId => {
       const lvl = levels.find(l => l.id === levelId);
       return lvl?.modules?.[0]?.id;
-    }).filter(Boolean);
-
-    if (moduleIds.length === 0) {
-      showError('Error de grupo', 'Ninguno de los grupos seleccionados tiene módulos válidos.');
-      return;
-    }
+    }).filter(Boolean) as string[];
 
     let type = 'RECORDED_VIDEO';
     if (selectedCategory === "PDF's") type = 'PDF';
@@ -84,6 +79,7 @@ export function ResourcesManager() {
           title: formData.title,
           url: formData.url,
           type: type,
+          levelIds: formData.levelIds,
           moduleIds: moduleIds
         })
       });
