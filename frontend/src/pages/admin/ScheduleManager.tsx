@@ -145,18 +145,18 @@ export function ScheduleManager() {
         body.teacherId = formData.teacherId;
       }
 
-      // Include either zoomHostId (for auto-create), group's permanent link, or manual URL
+      // Include either zoomHostId (for API auto-create), group's permanent link, or manual URL
       const selectedLevelData = levels.find((l: any) => l.id === formData.levelId);
-      const groupZoomLink = selectedLevelData?.zoomLink || selectedLevelData?.zoomHostGroup?.permanentLink || null;
-      
-      if (formData.zoomHostId) {
-        body.zoomHostId = formData.zoomHostId;
-      } else if (!isZoomOverridden && selectedLevelData?.zoomHostId) {
-        body.zoomHostId = selectedLevelData.zoomHostId;
+      const targetHostId = formData.zoomHostId || (!isZoomOverridden ? selectedLevelData?.zoomHostId : null);
+      const selectedHost = zoomHosts.find((h: any) => h.id === targetHostId);
+      const hasS2SCredentials = !!(selectedHost?.accountId && selectedHost?.clientId && selectedHost?.clientSecret);
+      const groupZoomLink = selectedLevelData?.zoomLink || selectedLevelData?.zoomHostGroup?.permanentLink || selectedHost?.permanentLink || null;
+
+      if (targetHostId && hasS2SCredentials) {
+        body.zoomHostId = targetHostId;
       } else if (formData.url) {
         body.url = formData.url;
-      } else if (groupZoomLink && !isZoomOverridden) {
-        // Auto-use the group's permanent link
+      } else if (groupZoomLink) {
         body.url = groupZoomLink;
       }
 
