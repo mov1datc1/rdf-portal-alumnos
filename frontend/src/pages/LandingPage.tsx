@@ -236,6 +236,9 @@ export function LandingPage() {
               <a href="https://www.instagram.com/lesroisdufrancais?igsh=MTNxbWR1OHM1Z2h6dA==" target="_blank" rel="noreferrer" className="lrd-social-icon" aria-label="Instagram">
                 <InstagramIcon size={14} color="#092B6B" />
               </a>
+              <a href="https://www.youtube.com/@RoisduFrancais" target="_blank" rel="noreferrer" className="lrd-social-icon" aria-label="YouTube">
+                <YoutubeIcon size={14} color="#092B6B" />
+              </a>
             </div>
 
             <button className="lrd-btn-cta-red" onClick={() => openLeadModal('Clase de Prueba Gratis')}>
@@ -727,7 +730,7 @@ export function LandingPage() {
               <a href="https://www.instagram.com/lesroisdufrancais?igsh=MTNxbWR1OHM1Z2h6dA==" target="_blank" rel="noreferrer" aria-label="Instagram">
                 <InstagramIcon size={16} />
               </a>
-              <a href="https://www.youtube.com/watch?v=T_uYP1uYkhE" target="_blank" rel="noreferrer" aria-label="YouTube">
+              <a href="https://www.youtube.com/@RoisduFrancais" target="_blank" rel="noreferrer" aria-label="YouTube">
                 <YoutubeIcon size={16} />
               </a>
             </div>
