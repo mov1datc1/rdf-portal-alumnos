@@ -13,6 +13,7 @@ import {
   Calendar,
   ChevronDown,
   Menu,
+  X,
   Send,
   Phone,
   Mail,
@@ -197,35 +198,53 @@ export function LandingPage() {
             />
           </Link>
 
-          <nav className="lrd-nav-menu">
+          {/* Mobile Backdrop Overlay */}
+          <div
+            className={`lrd-mobile-backdrop ${isMobileMenuOpen ? 'active' : ''}`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          <nav className={`lrd-nav-menu ${isMobileMenuOpen ? 'active' : ''}`}>
             <ul className="lrd-nav-list">
               <li className="lrd-nav-item">
-                <a href="#cursos" className="lrd-nav-link">
+                <a href="#cursos" className="lrd-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
                   CURSOS <ChevronDown size={14} />
                 </a>
                 <ul className="lrd-dropdown-menu">
-                  <li><a href="#cursos">Francés General</a></li>
-                  <li><a href="#cursos">Conversación Intensiva</a></li>
-                  <li><a href="#cursos">Preparación DELF / DALF</a></li>
-                  <li><a href="#cursos">Clases Particulares</a></li>
+                  <li><a href="#cursos" onClick={() => setIsMobileMenuOpen(false)}>Francés General</a></li>
+                  <li><a href="#cursos" onClick={() => setIsMobileMenuOpen(false)}>Conversación Intensiva</a></li>
+                  <li><a href="#cursos" onClick={() => setIsMobileMenuOpen(false)}>Preparación DELF / DALF</a></li>
+                  <li><a href="#cursos" onClick={() => setIsMobileMenuOpen(false)}>Clases Particulares</a></li>
                 </ul>
               </li>
               <li className="lrd-nav-item">
-                <a href="#precios" className="lrd-nav-link">PRECIOS Y HORARIOS</a>
+                <a href="#precios" className="lrd-nav-link" onClick={() => setIsMobileMenuOpen(false)}>PRECIOS Y HORARIOS</a>
               </li>
               <li className="lrd-nav-item">
-                <a href="#metodo" className="lrd-nav-link">MÉTODO MRAF</a>
+                <a href="#metodo" className="lrd-nav-link" onClick={() => setIsMobileMenuOpen(false)}>MÉTODO MRAF</a>
               </li>
               <li className="lrd-nav-item">
-                <a href="#promos" className="lrd-nav-link">PROMOCIONES</a>
+                <a href="#promos" className="lrd-nav-link" onClick={() => setIsMobileMenuOpen(false)}>PROMOCIONES</a>
               </li>
               <li className="lrd-nav-item">
-                <a href="#nosotros" className="lrd-nav-link">SOBRE NOSOTROS</a>
+                <a href="#nosotros" className="lrd-nav-link" onClick={() => setIsMobileMenuOpen(false)}>SOBRE NOSOTROS</a>
               </li>
               <li className="lrd-nav-item">
-                <a href="#contacto" className="lrd-nav-link">CONTACTO</a>
+                <a href="#contacto" className="lrd-nav-link" onClick={() => setIsMobileMenuOpen(false)}>CONTACTO</a>
               </li>
             </ul>
+
+            <div className="lrd-mobile-nav-cta">
+              <button
+                className="lrd-btn-cta-red lrd-full-width"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  openLeadModal('Clase de Prueba Gratis (Móvil)');
+                }}
+              >
+                CLASE DE PRUEBA GRATIS
+              </button>
+            </div>
           </nav>
 
           <div className="lrd-nav-actions">
@@ -241,7 +260,7 @@ export function LandingPage() {
               </a>
             </div>
 
-            <button className="lrd-btn-cta-red" onClick={() => openLeadModal('Clase de Prueba Gratis')}>
+            <button className="lrd-btn-cta-red lrd-desktop-only-btn" onClick={() => openLeadModal('Clase de Prueba Gratis')}>
               CLASE DE PRUEBA GRATIS
             </button>
 
@@ -250,7 +269,7 @@ export function LandingPage() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle Menu"
             >
-              <Menu size={24} />
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
