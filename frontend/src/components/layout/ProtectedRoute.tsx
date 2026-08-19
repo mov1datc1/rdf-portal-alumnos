@@ -17,12 +17,12 @@ export function ProtectedRoute({ requireAdmin = false, requireTeacher = false }:
 
   // Admin-required route
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Teacher-required route
   if (requireTeacher && !isTeacher) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // Redirect admins to admin panel if they hit student routes

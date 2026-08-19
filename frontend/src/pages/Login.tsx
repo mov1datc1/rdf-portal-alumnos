@@ -19,7 +19,7 @@ export function Login() {
       if (isAdmin) {
         navigate('/admin');
       } else {
-        navigate('/');
+        navigate('/dashboard');
       }
     }
   }, [session, isAdmin, navigate]);

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 900" preserveAspectRatio="xMidYMid meet" width="100%" height="100%">
+  <defs>
+    <linearGradient id="eiffelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8FAFE2" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#9CB5E4" stop-opacity="0.7" />
+      <stop offset="100%" stop-color="#B4C8EC" stop-opacity="0.5" />
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(30, 10)" stroke="url(#eiffelGrad)" stroke-width="1.8" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Spire Tip -->
+    <line x1="150" y1="15" x2="150" y2="80" stroke-width="2.5" />
+    <circle cx="150" cy="15" r="3.5" fill="#8FAFE2" />
+    
+    <!-- Top Dome Platform -->
+    <path d="M140,80 L160,80 L163,120 L137,120 Z" stroke-width="2" />
+    <line x1="134" y1="120" x2="166" y2="120" stroke-width="3" />
+    <line x1="140" y1="95" x2="160" y2="95" />
+
+    <!-- Upper Section -->
+    <path d="M138,120 L124,310 L176,310 L162,120 Z" stroke-width="2" />
+    <!-- X Bracings Upper -->
+    <line x1="136" y1="140" x2="164" y2="175" />
+    <line x1="164" y1="140" x2="136" y2="175" />
+    <line x1="133" y1="190" x2="167" y2="225" />
+    <line x1="167" y1="190" x2="133" y2="225" />
+    <line x1="129" y1="240" x2="171" y2="275" />
+    <line x1="171" y1="240" x2="129" y2="275" />
+    <!-- Horizontal Bars Upper -->
+    <line x1="136" y1="155" x2="164" y2="155" />
+    <line x1="133" y1="205" x2="167" y2="205" />
+    <line x1="128" y1="260" x2="172" y2="260" />
+
+    <!-- Double Deck Platform (Middle) -->
+    <line x1="118" y1="310" x2="182" y2="310" stroke-width="4" />
+    <rect x="122" y="310" width="56" height="16" stroke-width="1.8" fill="rgba(143,175,226,0.1)" />
+    <line x1="114" y1="326" x2="186" y2="326" stroke-width="4.5" />
+
+    <!-- Lower Section Pillar Legs -->
+    <path d="M120,326 L65,880 M180,326 L235,880" stroke-width="4" />
+    <path d="M134,326 L105,880 M166,326 L195,880" stroke-width="2.2" />
+
+    <!-- Main Base Arch -->
+    <path d="M98,880 Q150,620 202,880" stroke-width="4.5" fill="rgba(143,175,226,0.05)" />
+    <path d="M108,880 Q150,660 192,880" stroke-width="2" />
+    <path d="M118,880 Q150,700 182,880" stroke-width="1.5" />
+
+    <!-- X Bracings Lower Section -->
+    <line x1="130" y1="350" x2="170" y2="390" />
+    <line x1="170" y1="350" x2="130" y2="390" />
+    <line x1="123" y1="410" x2="177" y2="460" />
+    <line x1="177" y1="410" x2="123" y2="460" />
+    <line x1="115" y1="485" x2="185" y2="540" />
+    <line x1="185" y1="485" x2="115" y2="540" />
+    <line x1="104" y1="570" x2="196" y2="630" />
+    <line x1="196" y1="570" x2="104" y2="630" />
+    <line x1="90" y1="660" x2="210" y2="730" />
+    <line x1="210" y1="660" x2="90" y2="730" />
+    <line x1="76" y1="760" x2="224" y2="840" />
+    <line x1="224" y1="760" x2="76" y2="840" />
+
+    <!-- Horizontal Bars Lower Section -->
+    <line x1="126" y1="370" x2="174" y2="370" />
+    <line x1="119" y1="435" x2="181" y2="435" />
+    <line x1="110" y1="510" x2="190" y2="510" />
+    <line x1="97" y1="600" x2="203" y2="600" />
+    <line x1="83" y1="695" x2="217" y2="695" />
+    <line x1="70" y1="795" x2="230" y2="795" />
+  </g>
+</svg>

@@ -159,27 +159,46 @@ let AdminService = class AdminService {
         });
     }
     async createResource(data) {
-        if (data.moduleIds && Array.isArray(data.moduleIds)) {
-            const created = await Promise.all(data.moduleIds.map((modId) => this.prisma.resource.create({
-                data: {
-                    title: data.title,
-                    url: data.url,
-                    type: data.type || 'RECORDED_VIDEO',
-                    moduleId: modId,
-                    durationExpected: data.durationExpected || 0,
-                }
-            })));
-            return { success: true, count: created.length };
+        let moduleIds = [];
+        if (data.moduleIds && Array.isArray(data.moduleIds) && data.moduleIds.length > 0) {
+            moduleIds = data.moduleIds;
         }
-        return this.prisma.resource.create({
+        else if (data.levelIds && Array.isArray(data.levelIds) && data.levelIds.length > 0) {
+            for (const levelId of data.levelIds) {
+                let mod = await this.prisma.module.findFirst({ where: { levelId }, orderBy: { orderIndex: 'asc' } });
+                if (!mod) {
+                    mod = await this.prisma.module.create({
+                        data: { levelId, title: 'Unidad 1', orderIndex: 1 }
+                    });
+                }
+                moduleIds.push(mod.id);
+            }
+        }
+        else if (data.levelId) {
+            let mod = await this.prisma.module.findFirst({ where: { levelId: data.levelId }, orderBy: { orderIndex: 'asc' } });
+            if (!mod) {
+                mod = await this.prisma.module.create({
+                    data: { levelId: data.levelId, title: 'Unidad 1', orderIndex: 1 }
+                });
+            }
+            moduleIds.push(mod.id);
+        }
+        else if (data.moduleId) {
+            moduleIds.push(data.moduleId);
+        }
+        if (moduleIds.length === 0) {
+            throw new common_1.HttpException('No se especificó ningún grupo o módulo válido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const created = await Promise.all(moduleIds.map((modId) => this.prisma.resource.create({
             data: {
                 title: data.title,
                 url: data.url,
                 type: data.type || 'RECORDED_VIDEO',
-                moduleId: data.moduleId,
+                moduleId: modId,
                 durationExpected: data.durationExpected || 0,
             }
-        });
+        })));
+        return { success: true, count: created.length };
     }
     async getLevelsWithModules() {
         return this.prisma.level.findMany({
@@ -313,13 +332,47 @@ let AdminService = class AdminService {
         let zoomJoinUrl = data.url || null;
         const zoomHostId = data.zoomHostId || null;
         if (zoomHostId && this.zoomService) {
-            const durationMinutes = Math.round((data.durationExpected || 3600) / 60);
-            const result = await this.zoomService.createMeeting(zoomHostId, data.title, new Date(data.scheduledAt), durationMinutes);
-            zoomMeetingId = result.meetingId;
-            zoomJoinUrl = result.joinUrl;
+            try {
+                const durationMinutes = Math.round((data.durationExpected || 3600) / 60);
+                const result = await this.zoomService.createMeeting(zoomHostId, data.title, new Date(data.scheduledAt), durationMinutes);
+                if (result?.meetingId)
+                    zoomMeetingId = result.meetingId;
+                if (result?.joinUrl)
+                    zoomJoinUrl = result.joinUrl;
+            }
+            catch (err) {
+                console.error('Zoom meeting creation failed, falling back:', err?.message || err);
+            }
+        }
+        if (!zoomJoinUrl && data.levelId) {
+            const level = await this.prisma.level.findUnique({
+                where: { id: data.levelId },
+                include: { zoomHostGroup: true }
+            });
+            zoomJoinUrl = level?.zoomLink || level?.zoomHostGroup?.permanentLink || null;
         }
         let moduleId = data.moduleId;
-        if (data.moduleName && data.levelId) {
+        if (!moduleId && data.levelId) {
+            const existingModule = await this.prisma.module.findFirst({
+                where: { levelId: data.levelId },
+                orderBy: { orderIndex: 'asc' }
+            });
+            if (existingModule) {
+                moduleId = existingModule.id;
+            }
+            else {
+                const count = await this.prisma.module.count({ where: { levelId: data.levelId } });
+                const newModule = await this.prisma.module.create({
+                    data: {
+                        levelId: data.levelId,
+                        title: data.moduleName || `Unidad ${count + 1}`,
+                        orderIndex: count + 1
+                    }
+                });
+                moduleId = newModule.id;
+            }
+        }
+        else if (data.moduleName && data.levelId) {
             const existingModule = await this.prisma.module.findFirst({
                 where: { levelId: data.levelId, title: data.moduleName }
             });
@@ -337,6 +390,9 @@ let AdminService = class AdminService {
                 });
                 moduleId = newModule.id;
             }
+        }
+        if (!moduleId) {
+            throw new common_1.HttpException('No se encontró ni se pudo crear un módulo para la clase', common_1.HttpStatus.BAD_REQUEST);
         }
         let teacherId = data.teacherId;
         if (!teacherId && data.levelId) {

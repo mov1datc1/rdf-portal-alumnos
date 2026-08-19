@@ -38,17 +38,17 @@ let TeacherController = class TeacherController {
     getAttendanceSchedule(req) {
         return this.teacherService.getAttendanceSchedule(req.user.userId);
     }
+    getGroupAttendanceAudit(levelId) {
+        return this.teacherService.getGroupAttendanceAudit(levelId);
+    }
+    getStudentAttendanceAudit(studentId) {
+        return this.teacherService.getStudentAttendanceAudit(studentId);
+    }
     recordAttendance(body) {
         return this.teacherService.recordAttendance(body);
     }
     getAttendance(resourceId) {
         return this.teacherService.getAttendance(resourceId);
-    }
-    getStudentAttendanceAudit(studentId) {
-        return this.teacherService.getStudentAttendanceAudit(studentId);
-    }
-    getGroupAttendanceAudit(levelId) {
-        return this.teacherService.getGroupAttendanceAudit(levelId);
     }
     getMyEvaluations(req) {
         return this.teacherService.getMyEvaluations(req.user.userId);
@@ -106,6 +106,20 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], TeacherController.prototype, "getAttendanceSchedule", null);
 __decorate([
+    (0, common_1.Get)('attendance/audit/group/:levelId'),
+    __param(0, (0, common_1.Param)('levelId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "getGroupAttendanceAudit", null);
+__decorate([
+    (0, common_1.Get)('attendance/audit/:studentId'),
+    __param(0, (0, common_1.Param)('studentId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TeacherController.prototype, "getStudentAttendanceAudit", null);
+__decorate([
     (0, common_1.Post)('attendance'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -119,20 +133,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TeacherController.prototype, "getAttendance", null);
-__decorate([
-    (0, common_1.Get)('attendance/audit/:studentId'),
-    __param(0, (0, common_1.Param)('studentId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], TeacherController.prototype, "getStudentAttendanceAudit", null);
-__decorate([
-    (0, common_1.Get)('attendance/audit/group/:levelId'),
-    __param(0, (0, common_1.Param)('levelId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], TeacherController.prototype, "getGroupAttendanceAudit", null);
 __decorate([
     (0, common_1.Get)('evaluations'),
     __param(0, (0, common_1.Request)()),

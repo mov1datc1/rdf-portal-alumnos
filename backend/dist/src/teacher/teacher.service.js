@@ -156,6 +156,9 @@ let TeacherService = class TeacherService {
         return results;
     }
     async getAttendance(resourceId) {
+        if (!resourceId || resourceId === 'schedule' || resourceId === 'audit') {
+            return [];
+        }
         return this.prisma.attendance.findMany({
             where: { resourceId },
             include: {

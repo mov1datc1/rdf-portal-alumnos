@@ -13,6 +13,7 @@ import { Estadisticas } from './pages/Estadisticas';
 import { Recursos } from './pages/Recursos';
 import { VideoFrances } from './pages/VideoFrances';
 import { Perfil } from './pages/Perfil';
+import { LandingPage } from './pages/LandingPage';
 
 import { AdminLayout } from './components/admin/AdminLayout';
 import { UsersManager } from './pages/admin/UsersManager';
@@ -40,22 +41,40 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    const timer = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 2000);
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (!mounted) return;
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching session:', err);
+        if (mounted) setLoading(false);
+      });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, [setSession, setUser]);
 
   if (loading) {
@@ -65,11 +84,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         
         {/* Rutas Protegidas para Alumnos */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Layout />}>
+          <Route path="/dashboard" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="clases" element={<MisClases />} />
             <Route path="progreso" element={<Progreso />} />

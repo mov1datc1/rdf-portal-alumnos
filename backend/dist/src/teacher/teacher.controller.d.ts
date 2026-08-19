@@ -169,28 +169,45 @@ export declare class TeacherController {
         durationExpected: number;
         moduleId: string;
     })[]>;
-    recordAttendance(body: {
-        resourceId: string;
-        levelId: string;
-        attendees: {
-            userId: string;
-            attended: boolean;
-        }[];
-    }): Promise<any[]>;
-    getAttendance(resourceId: string): Promise<({
-        user: {
+    getGroupAttendanceAudit(levelId: string): Promise<{
+        students: {
             id: string;
+            email: string;
+            role: import("@prisma/client").$Enums.Role;
             firstName: string | null;
             lastName: string | null;
-        };
-    } & {
-        id: string;
-        createdAt: Date;
-        levelId: string;
-        userId: string;
-        resourceId: string;
-        attended: boolean;
-    })[]>;
+            phone: string | null;
+            isActive: boolean;
+            currentLevelId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+        }[];
+        classes: ({
+            module: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                orderIndex: number;
+                title: string;
+                levelId: string;
+            };
+        } & {
+            url: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            zoomHostId: string | null;
+            teacherId: string | null;
+            title: string;
+            type: import("@prisma/client").$Enums.ResourceType;
+            description: string | null;
+            zoomMeetingId: string | null;
+            scheduledAt: Date | null;
+            durationExpected: number;
+            moduleId: string;
+        })[];
+        attendanceMap: any;
+    }>;
     getStudentAttendanceAudit(studentId: string): Promise<{
         student: {
             currentLevel: {
@@ -248,45 +265,28 @@ export declare class TeacherController {
             attended: boolean | null | undefined;
         }[];
     }>;
-    getGroupAttendanceAudit(levelId: string): Promise<{
-        students: {
+    recordAttendance(body: {
+        resourceId: string;
+        levelId: string;
+        attendees: {
+            userId: string;
+            attended: boolean;
+        }[];
+    }): Promise<any[]>;
+    getAttendance(resourceId: string): Promise<({
+        user: {
             id: string;
-            email: string;
-            role: import("@prisma/client").$Enums.Role;
             firstName: string | null;
             lastName: string | null;
-            phone: string | null;
-            isActive: boolean;
-            currentLevelId: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-        }[];
-        classes: ({
-            module: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                orderIndex: number;
-                title: string;
-                levelId: string;
-            };
-        } & {
-            url: string | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            zoomHostId: string | null;
-            teacherId: string | null;
-            title: string;
-            type: import("@prisma/client").$Enums.ResourceType;
-            description: string | null;
-            zoomMeetingId: string | null;
-            scheduledAt: Date | null;
-            durationExpected: number;
-            moduleId: string;
-        })[];
-        attendanceMap: any;
-    }>;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        levelId: string;
+        userId: string;
+        resourceId: string;
+        attended: boolean;
+    })[]>;
     getMyEvaluations(req: any): Promise<({
         user: {
             id: string;
