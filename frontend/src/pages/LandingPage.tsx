@@ -190,9 +190,10 @@ export function LandingPage() {
         <div className="lrd-container lrd-nav-container">
           <Link to="/landing" className="lrd-brand-logo">
             <img
-              src="/imagenes-lp/logo_official.png"
+              src="/imagenes-lp/logo_official.webp"
               alt="Les Rois du Français"
               className="lrd-brand-logo-img"
+              decoding="async"
             />
           </Link>
 
@@ -255,15 +256,16 @@ export function LandingPage() {
       {/* Hero Section */}
       <section className="lrd-hero-section" id="hero">
         <img
-          src="/imagenes-lp/eiffel_tower_hero_full.png"
+          src="/imagenes-lp/eiffel_tower_hero_full.webp"
           alt="Eiffel Tower Background"
           className="lrd-hero-bg-eiffel"
+          decoding="async"
         />
 
         <div className="lrd-container lrd-hero-container">
           <div className="lrd-hero-content">
             <div className="lrd-crown-draw">
-              <img src="/imagenes-lp/hero_crown_red.png" alt="Corona Les Rois du Français" className="lrd-hero-crown-img" />
+              <img src="/imagenes-lp/hero_crown_red.webp" alt="Corona Les Rois du Français" className="lrd-hero-crown-img" decoding="async" />
             </div>
 
             <h1 className="lrd-hero-title">
@@ -301,9 +303,11 @@ export function LandingPage() {
 
           <div className="lrd-hero-king-wrapper">
             <img
-              src="/imagenes-lp/rey.png"
+              src="/imagenes-lp/rey.webp"
               alt="El Rey de Les Rois du Français"
               className="lrd-king-img"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
@@ -372,7 +376,7 @@ export function LandingPage() {
               {/* M */}
               <div className="lrd-mraf-col">
                 <div className="lrd-mraf-crown-wrap">
-                  <img src="/imagenes-lp/crown_m.png" alt="Corona M" className="lrd-mraf-crown-img" />
+                  <img src="/imagenes-lp/crown_m.webp" alt="Corona M" className="lrd-mraf-crown-img" loading="lazy" decoding="async" />
                 </div>
                 <div className="lrd-mraf-letter">M</div>
                 <h4 className="lrd-mraf-word">MÉTODO</h4>
@@ -384,7 +388,7 @@ export function LandingPage() {
               {/* R */}
               <div className="lrd-mraf-col">
                 <div className="lrd-mraf-crown-wrap">
-                  <img src="/imagenes-lp/crown_r.png" alt="Corona R" className="lrd-mraf-crown-img" />
+                  <img src="/imagenes-lp/crown_r.webp" alt="Corona R" className="lrd-mraf-crown-img" loading="lazy" decoding="async" />
                 </div>
                 <div className="lrd-mraf-letter">R</div>
                 <h4 className="lrd-mraf-word">RÁPIDO</h4>
@@ -396,7 +400,7 @@ export function LandingPage() {
               {/* A */}
               <div className="lrd-mraf-col">
                 <div className="lrd-mraf-crown-wrap">
-                  <img src="/imagenes-lp/crown_a.png" alt="Corona A" className="lrd-mraf-crown-img" />
+                  <img src="/imagenes-lp/crown_a.webp" alt="Corona A" className="lrd-mraf-crown-img" loading="lazy" decoding="async" />
                 </div>
                 <div className="lrd-mraf-letter">A</div>
                 <h4 className="lrd-mraf-word">APRENDIZAJE</h4>
@@ -408,7 +412,7 @@ export function LandingPage() {
               {/* F */}
               <div className="lrd-mraf-col">
                 <div className="lrd-mraf-crown-wrap">
-                  <img src="/imagenes-lp/crown_f.png" alt="Corona F" className="lrd-mraf-crown-img" />
+                  <img src="/imagenes-lp/crown_f.webp" alt="Corona F" className="lrd-mraf-crown-img" loading="lazy" decoding="async" />
                 </div>
                 <div className="lrd-mraf-letter">F</div>
                 <h4 className="lrd-mraf-word">FRANCÉS</h4>
@@ -495,23 +499,23 @@ export function LandingPage() {
             {/* 5 Icons Row */}
             <div className="lrd-why-icons-grid">
               <div className="lrd-why-icon-item">
-                <img src="/imagenes-lp/why_icon1.png" alt="Método MRAF" className="lrd-why-icon-img" />
+                <img src="/imagenes-lp/why_icon1.webp" alt="Método MRAF" className="lrd-why-icon-img" loading="lazy" decoding="async" />
                 <span className="lrd-why-icon-label">Método MRAF®<br />único y efectivo</span>
               </div>
               <div className="lrd-why-icon-item">
-                <img src="/imagenes-lp/why_icon2.png" alt="Profesores nativos" className="lrd-why-icon-img" />
+                <img src="/imagenes-lp/why_icon2.webp" alt="Profesores nativos" className="lrd-why-icon-img" loading="lazy" decoding="async" />
                 <span className="lrd-why-icon-label">Profesores nativos<br />y certificados</span>
               </div>
               <div className="lrd-why-icon-item">
-                <img src="/imagenes-lp/why_icon3.png" alt="Clases en vivo" className="lrd-why-icon-img" />
+                <img src="/imagenes-lp/why_icon3.webp" alt="Clases en vivo" className="lrd-why-icon-img" loading="lazy" decoding="async" />
                 <span className="lrd-why-icon-label">Clases en vivo<br />100% online</span>
               </div>
               <div className="lrd-why-icon-item">
-                <img src="/imagenes-lp/why_icon4.png" alt="Cultura francesa" className="lrd-why-icon-img" />
+                <img src="/imagenes-lp/why_icon4.webp" alt="Cultura francesa" className="lrd-why-icon-img" loading="lazy" decoding="async" />
                 <span className="lrd-why-icon-label">Cultura francesa<br />en cada clase</span>
               </div>
               <div className="lrd-why-icon-item">
-                <img src="/imagenes-lp/why_icon5.png" alt="Comunidad global" className="lrd-why-icon-img" />
+                <img src="/imagenes-lp/why_icon5.webp" alt="Comunidad global" className="lrd-why-icon-img" loading="lazy" decoding="async" />
                 <span className="lrd-why-icon-label">Comunidad global<br />de estudiantes</span>
               </div>
             </div>
@@ -531,7 +535,7 @@ export function LandingPage() {
 
               {/* VS Center Divider */}
               <div className="lrd-vs-divider-center">
-                <img src="/imagenes-lp/blue_crown_vs.png" alt="Corona VS" className="lrd-vs-crown-img" />
+                <img src="/imagenes-lp/blue_crown_vs.webp" alt="Corona VS" className="lrd-vs-crown-img" loading="lazy" decoding="async" />
                 <span className="lrd-vs-text-blue">VS</span>
               </div>
 
@@ -551,9 +555,11 @@ export function LandingPage() {
           {/* Right Banner Side (Full 50% split) */}
           <div className="lrd-why-right-side">
             <img
-              src="/imagenes-lp/why_girl_banner.png"
+              src="/imagenes-lp/why_girl_banner.webp"
               alt="Aprender francés nunca ha sido tan divertido"
               className="lrd-why-girl-full"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         </div>
@@ -575,9 +581,11 @@ export function LandingPage() {
           <div className="lrd-levels-content-grid">
             <div className="lrd-levels-image-col">
               <img
-                src="/imagenes-lp/student_laptop.png"
+                src="/imagenes-lp/student_laptop.webp"
                 alt="Estudiante en clase de francés en laptop"
                 className="lrd-student-img"
+                loading="lazy"
+                decoding="async"
               />
             </div>
 
@@ -635,7 +643,7 @@ export function LandingPage() {
             <div className="lrd-testimonials-flex">
               {/* Free Ebook Promo Book Card */}
               <div className="lrd-ebook-card">
-                <img src="/imagenes-lp/hero_crown_red.png" alt="Corona" className="lrd-ebook-crown-img" />
+                <img src="/imagenes-lp/hero_crown_red.webp" alt="Corona" className="lrd-ebook-crown-img" loading="lazy" decoding="async" />
                 <span className="lrd-ebook-tag">GUÍA GRATUITA</span>
                 <div className="lrd-ebook-num">25</div>
                 <div className="lrd-ebook-word">ERRORES</div>
