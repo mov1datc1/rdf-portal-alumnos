@@ -1309,6 +1309,8 @@
   margin-top: 60px;
   padding-top: 40px;
   border-top: 1px solid rgba(27, 54, 93, 0.08);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .lrd-testimonials-flex {
@@ -1824,7 +1826,7 @@
    Responsive Breakpoints: Tablet (768px - 1024px) & Smartphone (< 767px)
    ========================================================================== */
 
-/* Tablet & Mobile Layout Adaptations (Screens <= 1024px) */
+/* Tablet & Mobile Breakpoint (max-width: 1024px, including iPad Mini, iPad Air, iPad Pro, and all smartphones) */
 @media (max-width: 1024px) {
   .lrd-container {
     padding-left: 32px;
@@ -1921,10 +1923,27 @@
     font-size: 0.72rem !important;
   }
 
-  /* MRAF Grid 2x2 on Tablet */
+  /* MRAF Method Section Responsive Layout */
+  .lrd-method-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 32px !important;
+    width: 100% !important;
+  }
+
+  .lrd-method-left {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* MRAF Grid 2x2 on Tablet & Mobile */
   .lrd-mraf-grid {
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 24px !important;
+    gap: 20px !important;
+    width: 100% !important;
   }
 
   /* Plans Grid 2 Columns on Tablet */
@@ -2263,7 +2282,10 @@
   .lrd-mraf-col {
     padding: 18px 12px !important;
     text-align: center;
-    border-radius: 16px;
+    border-radius: 16px !important;
+    border-right: none !important;
+    background: #F8FAFC !important;
+    border: 1px solid #E2E8F0 !important;
   }
 
   .lrd-mraf-letter {
@@ -2386,33 +2408,8 @@
     margin: 8px 0;
   }
 
-  .lrd-testimonials-flex {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 24px !important;
-    align-items: center !important;
-    width: 100% !important;
-  }
-
-  .lrd-ebook-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 30px 20px !important;
-    box-sizing: border-box !important;
-    min-height: auto !important;
-  }
-
   .lrd-testimonials-grid {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 16px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .lrd-testimonial-card {
-    width: 100% !important;
-    box-sizing: border-box !important;
+    grid-template-columns: 1fr !important;
   }
 
   /* Level Selector 2 Columns on Mobile */
