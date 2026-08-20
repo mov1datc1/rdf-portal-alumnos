@@ -5,6 +5,16 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [2.1.3] — 2026-08-20
+
+### Arreglado & Optimizado (Responsivo Móvil)
+- **Corrección de la Sección Método MRAF® en Celulares (`LandingPage.css`):**
+  - Se corrigió la regla `.lrd-method-layout` ajustando su visualización a 1 sola columna centrada (`flex-direction: column`) en dispositivos móviles (< 1024px, incluyendo iPhone 12 Pro).
+  - Se adaptó la cuadrícula `.lrd-mraf-grid` a una disposición compacta 2x2 para las tarjetas **M**, **R**, **A**, **F**, eliminando el desbordamiento horizontal y el espacio blanco a la derecha.
+- **Ajuste de Media Queries para Testimonios y Guía Ebook (`LandingPage.css`):**
+  - Ajustado el punto de interrupción a `@media (max-width: 1024px)` para aplicar la pila vertical a `.lrd-testimonials-flex`, permitiendo que la tarjeta de la Guía Gratuita Ebook y la lista de testimonios en 1 columna convivan perfectamente sin salirse del área visible del teléfono.
+- **Sincronización:** Cambios aprobados localmente y publicados en ramas `dev` y `main` con despliegue exitoso en Render.
+
 ---
 
 ## [2.1.2] — 2026-08-18
