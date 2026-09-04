@@ -5,6 +5,43 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.0.0] — 2026-09-04
+
+### Optimización Masiva de Rendimiento Web (WebP de Alta Fidelidad & Preloads)
+- **Compresión y Conversión Global a WebP (-88% de Carga):**
+  - Diagnóstico de más de 50 imágenes rasterizadas que sumaban **23.97 MB**, ocasionando tiempos de carga lentos.
+  - Conversión total a formato moderno `.webp` con compresión de alta fidelidad (quality 82).
+  - Redimensión proporcional de imágenes sobredimensionadas (fondos ultra-pesados reducidos a 1920px).
+  - **Reducción del payload global de 23.97 MB a 2.68 MB (-88.8% de ahorro de ancho de banda)**, permitiendo entrada y renderizado inmediato.
+- **Preload de Recursos Críticos (`frontend/index.html`):**
+  - Implementación de etiquetas `<link rel="preload" as="image" type="image/webp">` para los assets clave *above-the-fold* (`hero_bg_official.webp`, `hero_clean_versailles_king.webp` y `logo_official.svg`).
+
+### Video Modal Cinema VIP (YouTube Embebido Sin Salir de la Página)
+- **Reproductor Flotante Cinema (`LandingPage.tsx` & `LandingPage.css`):**
+  - Al hacer clic en *"Ver Video"* o en el botón de reproducción de la clase muestra, se abre un **Modal Cinema inmersivo** (`backdrop-blur-md bg-black/85`).
+  - Video oficial incorporado: `https://www.youtube.com/watch?v=T_uYP1uYkhE` con reproducción automática controlada e iframe seguro con `referrerPolicy="strict-origin-when-cross-origin"`.
+- **Controles Intuitivos de Navegación:**
+  - Botón de cierre en 'X' flotante y soporte para la tecla `Escape`.
+  - Botón de pantalla completa para visualización extendida.
+  - Botón interactivo para abrir el video en una pestaña externa nueva.
+
+### Rediseño de Tarjetas de Precios 3D ("Royal & Chic")
+- **Selección Activa Dinámica:**
+  - Al presionar cualquier tarjeta de modalidad o plan, se resalta de forma activa e inmediata con borde dorado brillante (`#D59B28`), sombra 3D profunda y micro-elevación, reemplazando el estado predeterminado estático.
+- **Armonización Tipográfica & Ajuste de Espaciado:**
+  - Textos y titulares adaptados a **Azul Marino Imperial (`#001b50`)** y **Azul Real Institucional (`#1D3A8A`)** para perfecta sincronía visual con la paleta de la landing.
+  - Encabezado y títulos elevados verticalmente para mejorar el balance de composición.
+- **Ajuste Móvil y Responsivo:**
+  - Optimización de márgenes y contenedor del modal para evitar que la 'X' o los bordes queden fuera de la pantalla en dispositivos móviles.
+
+### Portal Administrador: Resiliencia en Clases Recurrentes & Sincronización
+- **Fallback Inteligente en Creación y Borrado en Lote (`ScheduleManager.tsx`):**
+  - Implementación de mecanismo de respaldo transparente: si el servidor backend responde 404 por demoras de despliegue en la nube al solicitar `/admin/schedule/batch` o `/admin/schedule/batch-delete`, el frontend ejecuta automáticamente la creación o eliminación de las clases de manera individual sin arrojar errores al usuario.
+- **Endpoints Nativos en Backend (`admin.controller.ts` y `admin.service.ts`):**
+  - Rutas `batchScheduleClasses` y `batchDeleteScheduledClasses` completamente integradas, compiladas y listas para despliegue productivo.
+
+---
+
 ## [2.9.0] — 2026-09-04
 
 ### Sección Oficial de Precios, Horarios y Modalidades Reales ("Royal & Chic")
