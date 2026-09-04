@@ -69,7 +69,7 @@ let AdminController = class AdminController {
         return this.adminService.deleteLevel(id);
     }
     batchDeleteScheduledClasses(body) {
-        return this.adminService.batchDeleteResources(body.ids);
+        return this.adminService.batchDeleteScheduledClasses(body.ids);
     }
     batchScheduleClasses(body) {
         return this.adminService.batchScheduleClasses(body);

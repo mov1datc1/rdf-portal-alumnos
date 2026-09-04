@@ -346,6 +346,9 @@ export declare class AdminService {
         durationExpected: number;
         moduleId: string;
     }>;
+    batchDeleteScheduledClasses(ids: string[]): Promise<{
+        count: number;
+    }>;
     updateScheduledClass(id: string, data: any): Promise<{
         url: string | null;
         id: string;

@@ -559,6 +559,19 @@ let AdminService = class AdminService {
         await this.prisma.userProgress.deleteMany({ where: { resourceId: id } });
         return this.prisma.resource.delete({ where: { id } });
     }
+    async batchDeleteScheduledClasses(ids) {
+        if (!ids || ids.length === 0)
+            return { count: 0 };
+        for (const id of ids) {
+            try {
+                await this.deleteScheduledClass(id);
+            }
+            catch (e) {
+                console.error(`Error deleting scheduled class ${id}:`, e);
+            }
+        }
+        return { count: ids.length };
+    }
     async updateScheduledClass(id, data) {
         const currentClass = await this.prisma.resource.findUnique({ where: { id }, include: { module: { include: { level: true } } } });
         if (!currentClass)

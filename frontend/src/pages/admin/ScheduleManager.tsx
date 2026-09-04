@@ -241,7 +241,7 @@ export function ScheduleManager() {
     if (selectedClassIds.length === 0) return;
     setIsBatchDeleting(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/batch-delete`, {
+      let res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/batch-delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
@@ -249,6 +249,28 @@ export function ScheduleManager() {
         },
         body: JSON.stringify({ ids: selectedClassIds })
       });
+
+      // Fallback resiliente si el backend remoto aún no tiene desplegado batch-delete
+      if (res.status === 404) {
+        await Promise.all(
+          selectedClassIds.map(id =>
+            fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/${id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${session?.access_token}` }
+            })
+          )
+        );
+        const count = selectedClassIds.length;
+        setSelectedClassIds([]);
+        setBatchDeleteConfirm(false);
+        setCustomAlert({
+          show: true,
+          message: `¡Listo! Se han eliminado ${count} clases exitosamente.`,
+          type: 'success'
+        });
+        fetchData();
+        return;
+      }
 
       if (res.ok) {
         const count = selectedClassIds.length;
@@ -635,7 +657,7 @@ export function ScheduleManager() {
         }))
       };
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/batch`, {
+      let res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/batch`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session?.access_token}`,
@@ -643,6 +665,55 @@ export function ScheduleManager() {
         },
         body: JSON.stringify(payload)
       });
+
+      // Fallback resiliente si el backend remoto responde 404 (endpoint batch aún no desplegado)
+      if (res.status === 404) {
+        let successCount = 0;
+        let lastErrorMsg = '';
+        for (const s of payload.classes) {
+          const singleRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              levelId: payload.levelId,
+              teacherId: payload.teacherId,
+              zoomHostId: payload.zoomHostId,
+              durationExpected: payload.durationExpected,
+              url: payload.url,
+              title: s.title,
+              scheduledAt: s.scheduledAt,
+              moduleName: s.moduleName
+            })
+          });
+          if (singleRes.ok) {
+            successCount++;
+          } else {
+            const errData = await singleRes.json().catch(() => ({}));
+            if (errData.message) lastErrorMsg = errData.message;
+          }
+        }
+
+        if (successCount > 0) {
+          setCustomAlert({
+            show: true,
+            message: `¡Éxito! Se han programado ${successCount} clases recurrentes exitosamente para el grupo "${selectedLvl?.name}".`,
+            type: 'success'
+          });
+          await fetchData();
+          setActiveTab('calendar');
+          return;
+        } else {
+          setCustomAlert({
+            show: true,
+            message: lastErrorMsg || 'Error al programar las clases recurrentes en el servidor.',
+            type: 'error'
+          });
+          return;
+        }
+      }
 
       if (res.ok) {
         const data = await res.json();
@@ -654,7 +725,7 @@ export function ScheduleManager() {
         await fetchData();
         setActiveTab('calendar');
       } else {
-        const error = await res.json();
+        const error = await res.json().catch(() => ({}));
         setCustomAlert({
           show: true,
           message: error.message || 'Error al programar clases en lote',

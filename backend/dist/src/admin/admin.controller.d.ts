@@ -255,7 +255,9 @@ export declare class AdminController {
     }>;
     batchDeleteScheduledClasses(body: {
         ids: string[];
-    }): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    }): Promise<{
+        count: number;
+    }>;
     batchScheduleClasses(body: any): Promise<{
         success: boolean;
         count: number;

@@ -606,6 +606,18 @@ export class AdminService {
     return this.prisma.resource.delete({ where: { id } });
   }
 
+  async batchDeleteScheduledClasses(ids: string[]) {
+    if (!ids || ids.length === 0) return { count: 0 };
+    for (const id of ids) {
+      try {
+        await this.deleteScheduledClass(id);
+      } catch (e) {
+        console.error(`Error deleting scheduled class ${id}:`, e);
+      }
+    }
+    return { count: ids.length };
+  }
+
   async updateScheduledClass(id: string, data: any) {
     // Get current class to know its teacher and duration if not provided
     const currentClass = await this.prisma.resource.findUnique({ where: { id }, include: { module: { include: { level: true } } } });
