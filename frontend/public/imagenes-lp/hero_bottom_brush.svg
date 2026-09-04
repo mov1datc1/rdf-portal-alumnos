@@ -1,0 +1,14 @@
+<svg width="1440" height="95" viewBox="0 0 1440 95" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <!-- 
+    Clean, Elegant Organic Wave Shape (No blue stripes/dashes at all!)
+    - Left corner: Smooth elegant organic white wave contour
+    - Center: Open for seamless navy #001b50 stats card connection
+    - Right corner: Smooth elegant organic white wave contour
+  -->
+  
+  <!-- Left Corner Smooth Organic White Wave -->
+  <path d="M0,95 H360 V35 C260,18 160,38 0,16 Z" fill="#FFFFFF"/>
+
+  <!-- Right Corner Smooth Organic White Wave -->
+  <path d="M1440,95 H1080 V35 C1180,18 1280,38 1440,16 Z" fill="#FFFFFF"/>
+</svg>

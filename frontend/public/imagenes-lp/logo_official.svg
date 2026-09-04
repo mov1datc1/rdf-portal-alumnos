@@ -1,0 +1,16 @@
+<svg width="150" height="95" viewBox="0 0 150 95" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Crown Icon -->
+  <path d="M45 8L57 20L75 5L93 20L105 8L100 28H50L45 8Z" fill="#FFFFFF"/>
+  <circle cx="45" cy="7" r="3" fill="#FFFFFF"/>
+  <circle cx="75" cy="4" r="3.5" fill="#FFFFFF"/>
+  <circle cx="105" cy="7" r="3" fill="#FFFFFF"/>
+  <rect x="50" y="30" width="50" height="3.5" fill="#FFFFFF" rx="1.5"/>
+
+  <!-- Text: Les Rois -->
+  <text x="75" y="56" text-anchor="middle" font-family="'Outfit', 'Cinzel', -apple-system, sans-serif" font-weight="800" font-size="23" fill="#FFFFFF" letter-spacing="0.5">Les Rois</text>
+
+  <!-- Text: du Français -->
+  <text x="75" y="82" text-anchor="middle" font-family="'Outfit', 'Cinzel', -apple-system, sans-serif" font-weight="800" font-size="23" letter-spacing="0.5">
+    <tspan fill="#FFFFFF">du Franc</tspan><tspan fill="#F24E1E">ais</tspan>
+  </text>
+</svg>

@@ -5,6 +5,142 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [2.9.0] — 2026-09-04
+
+### Sección Oficial de Precios, Horarios y Modalidades Reales ("Royal & Chic")
+- **Integración de Tabla de Precios y Horarios (`#precios` y `#promos`):**
+  - Implementación de la sección faltante para dar cumplimiento al 100% al checklist de entregables.
+  - Conexión de anclas del Header Navbar: `PRECIOS Y HORARIOS` (`#precios`) y `PROMOCIONES` (`#promos`).
+- **Selector Interactivo de Modalidades (Tabs):**
+  - **Pestaña 1: Clases Grupales (Máx. 8 Alumnos):**
+    - **Modalidad Regular ($1,490 MXN/mes):** 3 clases/sem (50 min) • L-M-V o M-J-V (08:00 a 21:00 hrs). Tarjeta destacada con insignia dorada `RECOMENDADO • MÁS POPULAR`.
+    - **Modalidad Sabatino ($1,650 MXN/mes):** 1 sesión intensiva de 2h 50 min los sábados en 3 turnos (08:00-10:50, 11:00-13:50, 14:00-16:50 hrs).
+    - **Modalidad Intensivo ($2,550 MXN/mes):** 5 clases/sem (50 min) de lunes a viernes con inmersión total y avance acelerado.
+  - **Pestaña 2: Clases Particulares & Part Duo:**
+    - Clases 1 a 1 personalizadas con tarifas oficiales: 1 clase ($1,500), 2 clases ($2,500), 3 clases ($3,750), 5 clases ($6,500 MXN/mes).
+    - Modalidad **Part Duo**: Estudia en pareja con el mismo profesor y horario compartido con tarifa preferencial.
+- **Banner de Promociones Multi-Mes (`#promos`):**
+  - Descuentos oficiales por prepago: 3 Meses (15% DTO), 6 Meses (20% DTO - Más Elegido), 9 Meses (25% DTO).
+- **Barra de Garantías y Refuerzo de Prueba Gratuita:**
+  - Sellos de confianza: Sin cuotas ocultas, libro de actividades 100% gratis, Zoom con enlace fijo permanente y certificado oficial avalado.
+  - Callout box con botón para agendar Clase de Prueba Gratis directamente conectado al modal.
+- **Estilos Visuales & Responsivo (`LandingPage.css`):**
+  - Tipografía *Cinzel* y *Outfit*, bordes dorados `#D59B28`, elevaciones suaves en hover y adaptación móvil fluida (1 columna en celulares y tablets).
+
+---
+
+## [2.8.0] — 2026-09-03
+
+### Adaptación a Información 100% Real del Cliente & Perfeccionamiento de Testimonios y Footer
+- **Estructura Académica Oficial de 6 Niveles:**
+  - Reemplazo completo de la escala genérica (A1 a C2) por los 6 niveles oficiales de la escuela:
+    - **B1 – Básico 1** (Principiante • 4 Meses / 4 Unidades)
+    - **B2 – Básico 2** (Elemental • 4 Meses / 4 Unidades)
+    - **I1 – Intermedio 1** (Autonomía • 4 Meses / 4 Unidades)
+    - **I2 – Intermedio 2** (Fluidez • 4 Meses / 4 Unidades)
+    - **A1 – Avanzado 1** (Dominio • 4 Meses / 4 Unidades)
+    - **A2 – Avanzado 2** (Bilingüismo • 4 Meses / 4 Unidades)
+  - Incorporación en cada tarjeta de nivel de la estructura real: 4 unidades (~1 mes c/u), evaluación dual (examen escrito + oral), certificación oficial de nivel y libro de actividades gratuito.
+  - Conservación milimétrica de los doodles vectoriales de esquina en el stepper (boina, taza, burbuja, corona, estrella y diamante).
+- **Perfeccionamiento de Testimonios (Avatares Limpios & Banderas Aparte):**
+  - Remoción de la píldora "Alumno Verificado".
+  - Avatares circulares limpios con enfoque centrado en los rostros de los alumnos (`avatar_mariana_clean.jpg`, `avatar_carlos_clean.jpg`, `avatar_sofia_clean.jpg`), eliminando barras negras, estrellas superpuestas o recortes de banderas dentro del círculo.
+  - Banderas de países ubicadas de forma independiente al lado del nombre de cada estudiante (`flag_mx.svg`, `flag_es.svg`, `flag_ar.svg`).
+  - Actualización de los badges de nivel de cada alumno a la nomenclatura oficial (`Nivel Intermedio 2 • México`, `Nivel Básico 2 • España`, `Nivel Avanzado 1 • Argentina`).
+- **Footer Oficial (Sede y Escuela Online):**
+  - Actualización de ubicación en la columna de contacto a `📍 Clases 100% Online · Sede: Puebla, México`, preservando proporciones con `flex-shrink: 0` en el icono `MapPin`.
+- **Menú de Navegación ("Cursos") & Modal de Registro:**
+  - Dropdown Cursos actualizado con 6 Niveles Oficiales, Modalidades Grupales y Clases Particulares / Part Duo.
+  - Selector de horarios en modal actualizado con las modalidades reales de estudio: Regular (3 clases/sem • 50 min), Sabatino (Sábados • 2h 50 min), Intensivo (5 clases/sem • 50 min) y Particulares/Part Duo (Personalizado).
+
+---
+
+## [2.7.0] — 2026-09-03
+
+### Rediseño Total "Royal & Chic" (Sección: Lo Que Dicen Nuestros Alumnos / Testimonios)
+- **Concepto Visual "Modern Royal Proof":**
+  - Rediseño completo de la sección de testimonios para armonizar visualmente con el Hero, Método MRAF® y Beneficios de la Realeza.
+  - Integración sutil de marca de agua inclinada de alta resolución (`petit_a_petit_stamp.png`) en el fondo con opacidad suave y rotación dinámica (-13deg).
+- **Encabezado Premium con Prueba Social Inmediata:**
+  - Píldora royal superior: `✨ TESTIMONIOS REALES • MÉTODO MRAF®` con fondo dorado tenue (`rgba(213, 155, 40, 0.1)`) y borde dorado de marca `#D59B28`.
+  - Título H2 100% vectorial en peso ultra bold (900) en Azul Marino Imperial `#001b50`.
+  - Subrayado vectorial de pincelada roja sketch (`sketch_red_underline.svg`).
+  - Barra de confianza flotante con valoración de 5 estrellas doradas (`⭐ 4.9 / 5 • Valoración promedio de +1,000 alumnos en más de 15 países`).
+- **Tarjetas de Alumnos con Identidad Individualizada:**
+  - **Tarjeta 1 (Mariana G. 🇲🇽):**
+    - Borde superior en Dorado Imperial `#D59B28` (5px) con esquina superior derecha pronunciada (36px).
+    - Tag temático: `#FluidezEn3Meses` en tonos dorados.
+    - Anillo de avatar en Dorado de Marca (`border: 2.5px solid #D59B28`) y bandera de México con borde blanco flotante.
+  - **Tarjeta 2 (Carlos T. 🇪🇸):**
+    - Borde superior en Rojo Carmesí `#D92534` (5px).
+    - Tag temático: `#HablaSinPena` en tonos rojos.
+    - Anillo de avatar en Rojo Carmesí (`border: 2.5px solid #D92534`) y bandera de España con borde blanco flotante.
+  - **Tarjeta 3 (Sofía R. 🇦🇷):**
+    - Borde superior en Azul Marino Imperial `#001b50` (5px).
+    - Tag temático: `#CeroAburrimiento` en tonos azul marino.
+    - Anillo de avatar en Azul Marino Imperial (`border: 2.5px solid #001b50`) y bandera de Argentina con borde blanco flotante.
+- **Micro-interacciones y Detalles de Acabado:**
+  - Elevación fluida en hover (`transform: translateY(-8px); box-shadow: 0 22px 46px rgba(0, 27, 80, 0.12)`).
+  - Comillas decorativas gigantes con cambio de color al tono temático en hover.
+  - Insignia verde de verificación con icono de check: `Alumno Verificado`.
+  - Indicador de slider inferior rediseñado con punto activo alargado en píldora roja carmesí `#D92534` (32px).
+- **100% Adherencia a la Paleta Oficial de Marca:**
+  - Dorado Imperial: `#D59B28`
+  - Azul Marino Imperial: `#001b50`
+  - Rojo Carmesí: `#D92534`
+
+---
+
+## [2.6.0] — 2026-09-03
+
+### Agregado & Reconstruido (Encabezado 1:1 Nítido HD "Beneficios de la Realeza")
+- **Eliminación Definitiva de Imagen Raster Borrosa (`beneficios_header_complete.png`):**
+  - Removida la imagen completa con texto incrustado para erradicar cualquier tipo de pixelación o desenfoque.
+- **Tipografía 100% Vectorial Nítida en HTML/CSS (`LandingPage.tsx` y `LandingPage.css`):**
+  - **Título Principal:** `BENEFICIOS DE LA` en Azul Marino Imperial `#001b50` y `REALEZA` en Rojo Carmesí `#D92534` en peso extra bold (900).
+  - **Subtítulo:** *"¿Por qué miles de alumnos eligen estudiar con Les Rois du Français?"* en tipografía *Outfit* 600 (`#001b50`).
+  - **Callout Manuscrito:** *"¡Resultados Reales!"* en tipografía *Caveat* 700 en Dorado de Marca `#D59B28` con subrayado vectorial rojo (`sketch_red_underline.svg`).
+- **Integración Milimétrica y Calibración de Stickers Transparentes (`frontend/public/imagenes-lp/`):**
+  - **Avión de Papel con Estela en Bucle (`paper_plane_loop_trail.png`):** Calibrado en altura (`top: 48px`) y avance a la derecha (`right: -120px; z-index: 5`) para acompañar fluidamente el título y la burbuja "Ça va?".
+  - **Burbuja 3D Glossy "Ça va?" (`ca_va_bubble_red.png`):** Posicionada en la derecha flotando despejada debajo del avión (`top: 104px`).
+  - **Coronita Doodle Amarilla (`crown_doodle_yellow.png`):** Asentada milimétricamente en la cúspide y hombro derecho de la letra **A** de *REALEZA* (`top: -28px; right: -38px; rotate(18deg)`).
+  - **Destellos Diagonales Rojos (`red_burst_diagonal.png`):** Posicionados arriba a la izquierda de la letra **B** de *BENEFICIOS*.
+  - **Destellos Laterales Rojos (`red_burst_vertical.png`):** Flanqueando a izquierda y derecha el lema *"¡Resultados Reales!"*.
+  - **Burbuja "Salut!" y Estrellas Doradas:** Burbuja ampliada a `126px` a la izquierda (`left: -140px`), removidas las 3 líneas y reposicionadas las estrellas doradas (`#D59B28`) a `60px` a la altura de *"¡Resultados Reales!"*.
+  - **Laptop & Planta:** Destellos azules reposicionados sobre las hojas centrales de la planta (`top: 102px; right: -18px`) y patrón de puntos azules (*navy halftone*) ampliado en un 60% (`215px`, opacidad `0.85`).
+  - **Tarjetas 2, 3 y VIP:**
+    - Estrella roja doodle y rayo amarillo doodle colocados **dentro** de los recuadros blancos en la esquina superior derecha (`top: 16px; right: 18px`).
+    - Removidos los puntos azules y halftone de Card 3 para un acabado pulcro.
+    - Card VIP con distribución armónica: 2 beneficios en la primera fila y el 3er beneficio (*Apoyo constante en tu camino*) perfectamente centrado debajo de ambos.
+- **Auditoría Exhaustiva de Paleta de Marca:**
+  - Verificado 100% el uso estricto y unificado de los 3 colores oficiales de Les Rois du Français en toda la sección:
+    - **Dorado Imperial:** `#D59B28`
+    - **Azul Marino Imperial:** `#001b50`
+    - **Rojo Carmesí:** `#D92534`
+
+---
+
+## [2.5.0] — 2026-08-29
+
+### Agregado & Perfeccionado (Rediseño de Método MRAF® y Doodles Manuscritos)
+- **Procesamiento de Doodles Manuscritos en PNG 100% Transparente (`frontend/public/imagenes-lp/`):**
+  - **Gorrito Francés a Rayas (`beret_doodle_navy.png`):** Recoloreado al azul marino imperial `#001b50` con opacidad total 100%, escala ajustada a `76px` y posicionamiento flotante a la derecha de la gran letra **F** (`right: -88px; top: -10px; rotate(3deg)`).
+  - **Rayo Rojo (`lightning_doodle_pure.png`):** Recoloreado al rojo oficial de la marca `#D92534`, sin bordes ni cajas blancas, posicionado a la derecha de la gran letra **R** (`right: -75px; top: 10px; width: 24px`).
+  - **Corazón Blanco (`heart_doodle.png`):** Dibujo de corazón blanco manuscrito con destellos recortado a transparencia total, posicionado a la izquierda de la gran letra **A** (`left: -68px; top: 18px; width: 26px`).
+- **Coronas de Tarjetas Interactivas M-R-A-F (`LandingPage.tsx`):**
+  - **Corona F (`crown_f_nobg.png`):** Corona roja con letra F blanca aislada a 0% de fondo mediante algoritmo flood-fill.
+  - **Corona A (`crown_a.png`):** Corona dorada oficial con letra A en azul marino `#001b50` recortada a transparencia total (incluyendo agujeros de aros superiores).
+  - **Eliminación de Estrellas:** Removidas las 3 estrellas indicadas en las tarjetas del método MRAF por solicitud explícita del usuario.
+- **Rama Floral Ornamental (`flora_fleur_sketch_hd.png`):**
+  - Procesada a transparencia pura (0% recuadro o relleno beige).
+  - Reubicada en la esquina inferior izquierda de la sección MRAF (`left: -50px; bottom: -40px; width: 310px; opacity: 0.85`), emergiendo sutilmente debajo del recorte del príncipe con la corona.
+- **Directivas Globales de Marca (`LandingPage.css`):**
+  - **Emoji-Free UI:** Reemplazados todos los emojis Unicode por íconos vectoriales SVG de Lucide React (`Crown`, `Star`, `Zap`, `Heart`).
+  - **Tipografía Azul Marino Imperial `#001b50`:** Reemplazados todos los tonos de texto gris (`#4A5568`, `#64748B`, `#2D3748`, `#718096`) por Azul Marino `#001b50`.
+  - **Pill Badge:** Actualizado *"Actitud Royal, Cero Aburrimiento"* a rojo degradado de marca (`.lrd-pill-red`, `#D92534`).
+
+---
+
 ## [2.1.3] — 2026-08-20
 
 ### Arreglado & Optimizado (Responsivo Móvil)
