@@ -68,6 +68,12 @@ let AdminController = class AdminController {
     deleteLevel(id) {
         return this.adminService.deleteLevel(id);
     }
+    batchDeleteScheduledClasses(body) {
+        return this.adminService.batchDeleteResources(body.ids);
+    }
+    batchScheduleClasses(body) {
+        return this.adminService.batchScheduleClasses(body);
+    }
     scheduleClass(body) {
         return this.adminService.scheduleClass(body);
     }
@@ -198,6 +204,20 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "deleteLevel", null);
+__decorate([
+    (0, common_1.Post)('schedule/batch-delete'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "batchDeleteScheduledClasses", null);
+__decorate([
+    (0, common_1.Post)('schedule/batch'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "batchScheduleClasses", null);
 __decorate([
     (0, common_1.Post)('schedule'),
     __param(0, (0, common_1.Body)()),

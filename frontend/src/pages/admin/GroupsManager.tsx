@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Loader2, Plus, Edit2, Trash2, Check, X, Layers, Clock, Calendar, Users, Video, User, Link as LinkIcon } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Loader2, Plus, Edit2, Trash2, Check, X, Layers, Clock, Calendar, Users, Video, User, Link as LinkIcon, UserCheck, Search, Mail, Phone, ExternalLink, Copy, GraduationCap, Info } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
 import { buildScheduleString, parseSchedule } from '../../utils/schedule';
@@ -39,8 +39,26 @@ export function GroupsManager() {
   const [newZoom, setNewZoom] = useState({ displayName: '', email: '', permanentLink: '' });
   const session = useAuthStore(state => state.session);
 
+  // Expanded group students state
+  const [selectedGroupForStudents, setSelectedGroupForStudents] = useState<any | null>(null);
+  const [groupStudents, setGroupStudents] = useState<Record<string, any[]>>({});
+  const [loadingStudentsId, setLoadingStudentsId] = useState<string | null>(null);
+
+  // Search & Detail modal states
+  const [groupSearchTerm, setGroupSearchTerm] = useState('');
+  const [studentSearchTerm, setStudentSearchTerm] = useState('');
+  const [selectedStudentForDetail, setSelectedStudentForDetail] = useState<any | null>(null);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(null), 2000);
+  };
+
   // Form state
   const [name, setName] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [levelCode, setLevelCode] = useState('Basico1');
   const [modality, setModality] = useState('GROUP');
   const [rhythm, setRhythm] = useState<string>('REGULAR');
@@ -57,6 +75,85 @@ export function GroupsManager() {
   const [uniformEnd, setUniformEnd] = useState('');
   const [showManualTime, setShowManualTime] = useState(false);
   const [perDay, setPerDay] = useState<Record<string, DaySchedule>>({});
+
+  // Memoized filter for Groups
+  const filteredLevels = useMemo(() => {
+    if (!groupSearchTerm.trim()) return levels;
+    const term = groupSearchTerm.toLowerCase().trim();
+    return levels.filter((lvl) => {
+      const gName = (lvl.name || '').toLowerCase();
+      const code = (lvl.levelCode || '').toLowerCase();
+      const formattedCode = code
+        .replace('basico', 'básico ')
+        .replace('inter', 'intermedio ')
+        .replace('avanz', 'avanzado ');
+      const teacherName = lvl.teacher ? `${lvl.teacher.firstName || ''} ${lvl.teacher.lastName || ''}`.toLowerCase() : '';
+      const schedule = (lvl.schedule || '').toLowerCase();
+      const mod = MODALITIES.find(m => m.value === lvl.modality)?.label?.toLowerCase() || '';
+      const rhy = RHYTHMS.find(r => r.value === lvl.rhythm)?.label?.toLowerCase() || '';
+
+      return (
+        gName.includes(term) ||
+        code.includes(term) ||
+        formattedCode.includes(term) ||
+        teacherName.includes(term) ||
+        schedule.includes(term) ||
+        mod.includes(term) ||
+        rhy.includes(term)
+      );
+    });
+  }, [levels, groupSearchTerm]);
+
+  // Memoized students for the active drawer
+  const currentGroupStudents = useMemo(() => {
+    if (!selectedGroupForStudents) return [];
+    return groupStudents[selectedGroupForStudents.id] || selectedGroupForStudents.users || [];
+  }, [selectedGroupForStudents, groupStudents]);
+
+  const filteredGroupStudents = useMemo(() => {
+    if (!studentSearchTerm.trim()) return currentGroupStudents;
+    const term = studentSearchTerm.toLowerCase().trim();
+    return currentGroupStudents.filter((st: any) => {
+      const fullName = `${st.firstName || ''} ${st.lastName || ''} ${st.name || ''}`.toLowerCase();
+      const email = (st.email || '').toLowerCase();
+      const phone = (st.phone || st.whatsapp || '').toLowerCase();
+      return fullName.includes(term) || email.includes(term) || phone.includes(term);
+    });
+  }, [currentGroupStudents, studentSearchTerm]);
+
+  const openGroupStudents = async (level: any) => {
+    setSelectedGroupForStudents(level);
+    setStudentSearchTerm('');
+    setSelectedStudentForDetail(null);
+    const groupId = level.id;
+
+    if (level.users && level.users.length > 0 && (!groupStudents[groupId] || groupStudents[groupId].length === 0)) {
+      setGroupStudents(prev => ({ ...prev, [groupId]: level.users }));
+    }
+
+    if (!groupStudents[groupId] || groupStudents[groupId].length === 0) {
+      setLoadingStudentsId(groupId);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/users`, {
+          headers: { 'Authorization': `Bearer ${session?.access_token}` }
+        });
+        if (res.ok) {
+          const allUsers = await res.json();
+          const filteredStudents = allUsers.filter((u: any) => 
+            u.currentLevelId === groupId || 
+            u.levelId === groupId || 
+            u.level?.id === groupId ||
+            (u.role === 'STUDENT' && (u.currentLevelId === groupId || u.levelId === groupId))
+          );
+          setGroupStudents(prev => ({ ...prev, [groupId]: filteredStudents }));
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingStudentsId(null);
+      }
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -87,7 +184,7 @@ export function GroupsManager() {
   }, [session]);
 
   const resetForm = () => {
-    setName(''); setLevelCode('Basico1'); setModality('GROUP'); setRhythm('REGULAR');
+    setName(''); setStartDate(''); setLevelCode('Basico1'); setModality('GROUP'); setRhythm('REGULAR');
     setMaxStudents(8); setTeacherId(''); setZoomHostId(''); setZoomLink(''); setZoomMode('host');
     setSelectedDays([]); setSameTime(true); setUniformStart(''); setUniformEnd('');
     setPerDay({}); setEditingId(null); setShowManualTime(false);
@@ -95,6 +192,35 @@ export function GroupsManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      showError('Nombre Requerido', 'Debes ingresar un nombre para el grupo (Ej. Grupo París).');
+      return;
+    }
+    if (!startDate) {
+      showError('Fecha de Inicio Requerida', 'Debes seleccionar la fecha de inicio del grupo.');
+      return;
+    }
+    if (!teacherId) {
+      showError('Profesor Requerido', 'Debes asignar un profesor responsable para este grupo.');
+      return;
+    }
+    if (selectedDays.length === 0) {
+      showError('Horario Requerido', 'Debes seleccionar al menos un día de clase para definir el horario del grupo.');
+      return;
+    }
+    if (sameTime && (!uniformStart || !uniformEnd)) {
+      showError('Horario Incompleto', 'Por favor selecciona la hora de inicio y fin para los días de clase.');
+      return;
+    }
+    if (zoomMode === 'host' && !zoomHostId) {
+      showError('Enlace de Zoom Requerido', 'Debes seleccionar una cuenta de Zoom asignada para el grupo.');
+      return;
+    }
+    if (zoomMode === 'manual' && !zoomLink.trim()) {
+      showError('Enlace de Zoom Requerido', 'Debes ingresar el enlace de Zoom manual.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const schedule = buildScheduleString(selectedDays, sameTime, uniformStart, uniformEnd, perDay);
@@ -106,11 +232,12 @@ export function GroupsManager() {
       const method = editingId ? 'PATCH' : 'POST';
 
       const body: any = {
-          name, levelCode, modality, schedule: schedule || null,
-          rhythm: modality === 'GROUP' ? rhythm : null,
-          maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
-          teacherId: teacherId || null,
-        };
+        name, levelCode, modality, schedule: schedule || null,
+        startDate: startDate ? new Date(startDate).toISOString() : null,
+        rhythm: modality === 'GROUP' ? rhythm : null,
+        maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
+        teacherId: teacherId || null,
+      };
 
         // Zoom: if using a host, send zoomHostId and sync the link; if manual, just send zoomLink
         if (zoomMode === 'host' && zoomHostId) {
@@ -145,6 +272,7 @@ export function GroupsManager() {
 
   const handleEdit = (level: any) => {
     setName(level.name);
+    setStartDate(level.startDate ? new Date(level.startDate).toISOString().substring(0, 10) : '');
     setLevelCode(level.levelCode);
     setModality(level.modality || 'GROUP');
     setRhythm(level.rhythm || 'REGULAR');
@@ -210,14 +338,29 @@ export function GroupsManager() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Nombre del Grupo</label>
-              <input
-                required type="text" placeholder="Ej. Grupo París, Grupo Lyon..."
-                value={name} onChange={e => setName(e.target.value)}
-                className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50"
-              />
+            {/* Name & Start Date */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Nombre del Grupo <span className="text-red-500">*</span>
+                </label>
+                <input
+                  required type="text" placeholder="Ej. Grupo París, Grupo Lyon..."
+                  value={name} onChange={e => setName(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-[#1D3A8A]" /> Fecha de Inicio <span className="text-red-500">*</span>
+                </label>
+                <input
+                  required
+                  type="date"
+                  value={startDate} onChange={e => setStartDate(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm cursor-pointer"
+                />
+              </div>
             </div>
 
             {/* Modality selector */}
@@ -303,11 +446,11 @@ export function GroupsManager() {
             {/* Teacher */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <User className="w-3.5 h-3.5" /> Profesor Asignado
+                <User className="w-3.5 h-3.5" /> Profesor Asignado <span className="text-red-500">*</span>
               </label>
-              <select value={teacherId} onChange={e => setTeacherId(e.target.value)}
+              <select required value={teacherId} onChange={e => setTeacherId(e.target.value)}
                 className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50">
-                <option value="">Sin profesor asignado</option>
+                <option value="">Selecciona un profesor asignado...</option>
                 {teachers.map((t: any) => (
                   <option key={t.id} value={t.id}>
                     {t.firstName} {t.lastName} ({t.email})
@@ -319,7 +462,7 @@ export function GroupsManager() {
             {/* Zoom Link - Dropdown with Add inline */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <Video className="w-3.5 h-3.5 text-[#2D8CFF]" /> Enlace Fijo de Zoom
+                <Video className="w-3.5 h-3.5 text-[#2D8CFF]" /> Enlace Fijo de Zoom <span className="text-red-500">*</span>
               </label>
 
               {/* Mode toggle */}
@@ -336,9 +479,9 @@ export function GroupsManager() {
 
               {zoomMode === 'host' ? (
                 <>
-                  <select value={zoomHostId} onChange={e => setZoomHostId(e.target.value)}
+                  <select required={zoomMode === 'host'} value={zoomHostId} onChange={e => setZoomHostId(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm">
-                    <option value="">Sin enlace de Zoom</option>
+                    <option value="">Selecciona una cuenta de Zoom...</option>
                     {zoomHosts.map((h: any) => (
                       <option key={h.id} value={h.id}>
                         🟢 {h.displayName} ({h.email.split('@')[0]})
@@ -406,7 +549,7 @@ export function GroupsManager() {
                 </>
               ) : (
                 <>
-                  <input type="url" placeholder="https://zoom.us/j/..."
+                  <input type="url" required={zoomMode === 'manual'} placeholder="https://zoom.us/j/..."
                     value={zoomLink} onChange={e => setZoomLink(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm" />
                   <p className="text-xs text-slate-400 mt-1">Pega un enlace de Zoom manualmente.</p>
@@ -417,7 +560,7 @@ export function GroupsManager() {
             {/* Schedule */}
             <div className="border-t border-dashed border-slate-200 pt-4">
               <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" /> Horario
+                <Calendar className="w-3.5 h-3.5" /> Horario <span className="text-red-500">*</span>
               </label>
 
               {/* Day picker */}
@@ -558,10 +701,38 @@ export function GroupsManager() {
         </div>
 
         {/* ── Table ── */}
-        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm lg:col-span-2">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <Layers className="w-6 h-6 text-[#1D3A8A]" /> Grupos Activos
-          </h2>
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm lg:col-span-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2.5">
+              <Layers className="w-6 h-6 text-[#1D3A8A]" />
+              <h2 className="text-xl font-bold text-slate-800">Grupos Activos</h2>
+              <span className="text-xs font-extrabold bg-blue-50 text-[#1D3A8A] px-2.5 py-1 rounded-full border border-blue-200">
+                {filteredLevels.length} {filteredLevels.length === 1 ? 'grupo' : 'grupos'}
+              </span>
+            </div>
+
+            {/* Buscador de Grupos */}
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={groupSearchTerm}
+                onChange={(e) => setGroupSearchTerm(e.target.value)}
+                placeholder="Buscar por grupo, nivel, profesor..."
+                className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D3A8A]/20 focus:border-[#1D3A8A] transition-all shadow-2xs"
+              />
+              {groupSearchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setGroupSearchTerm('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+                  title="Limpiar búsqueda"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
 
           {loading ? (
             <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 text-[#1D3A8A] animate-spin" /></div>
@@ -570,108 +741,572 @@ export function GroupsManager() {
               <Layers className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-slate-500">No hay grupos creados aún.</p>
             </div>
+          ) : filteredLevels.length === 0 ? (
+            <div className="text-center py-12 px-4 bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 space-y-2">
+              <Search className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm font-bold text-slate-700">No se encontraron grupos</p>
+              <p className="text-xs text-slate-400">
+                No hay ningún grupo que coincida con <span className="font-semibold text-slate-600">"{groupSearchTerm}"</span>
+              </p>
+              <button
+                type="button"
+                onClick={() => setGroupSearchTerm('')}
+                className="mt-3 px-3.5 py-1.5 text-xs font-bold text-[#1D3A8A] bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors border border-blue-200 shadow-2xs"
+              >
+                Limpiar filtro de búsqueda
+              </button>
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-gray-100">
+            <div className="overflow-x-auto rounded-2xl border border-slate-200">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="bg-slate-100/80 text-slate-700 font-bold text-xs uppercase tracking-wider border-b border-slate-200">
                   <tr>
-                    <th className="p-3">Grupo</th>
-                    <th className="p-3">Nivel</th>
-                    <th className="p-3">Modalidad</th>
-                    <th className="p-3">Profesor</th>
-                    <th className="p-3">Alumnos</th>
-                    <th className="p-3">Horario</th>
-                    <th className="p-3">Zoom</th>
-                    <th className="p-3 text-right">Acciones</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Grupo</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Nivel</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Modalidad</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Fecha de Inicio</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Profesor</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Alumnos</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Horario</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Enlace Zoom</th>
+                    <th className="py-3.5 px-4 text-right whitespace-nowrap">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {levels.map(level => {
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {filteredLevels.map(level => {
                     const mod = MODALITIES.find(m => m.value === level.modality);
                     const rhy = RHYTHMS.find(r => r.value === level.rhythm);
+                    const studentsList = groupStudents[level.id] || level.users || [];
+                    const countUsers = level._count?.users || studentsList.length || 0;
+                    const startDateFormatted = level.startDate 
+                      ? new Date(level.startDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                      : '—';
+
                     return (
-                      <tr key={level.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-3">
-                          <p className="font-bold text-slate-800">{level.name}</p>
-                        </td>
-                        <td className="p-3">
-                          <span className="text-xs font-bold bg-[#1D3A8A]/10 text-[#1D3A8A] px-2 py-0.5 rounded-full">
-                            {level.levelCode?.replace('Basico', 'Bás ').replace('Inter', 'Int ').replace('Avanz', 'Av ')}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1">
-                            <span>{mod?.icon || '👥'}</span>
-                            <span className="text-xs text-slate-600">{mod?.label || 'Grupal'}</span>
-                          </div>
-                          {rhy && <p className="text-xs text-slate-400">{rhy.label}</p>}
-                        </td>
-                        <td className="p-3">
-                          {level.teacher ? (
-                            <div className="flex items-center gap-1.5">
-                              <User className="w-3.5 h-3.5 text-slate-400" />
-                              <span className="text-xs font-medium text-slate-700">
-                                {level.teacher.firstName} {level.teacher.lastName}
+                        <tr key={level.id} className="hover:bg-slate-50/80 transition-colors">
+                          {/* Grupo & Button Ver Alumnos */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="flex flex-col gap-1.5">
+                              <span
+                                onClick={() => openGroupStudents(level)}
+                                className="font-bold text-slate-800 text-base hover:text-[#1D3A8A] cursor-pointer transition-colors"
+                              >
+                                {level.name}
                               </span>
+                              <button
+                                type="button"
+                                onClick={() => openGroupStudents(level)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all w-fit bg-blue-50 text-[#1D3A8A] hover:bg-blue-100 border border-blue-200 shadow-2xs hover:shadow-xs"
+                              >
+                                <Users className="w-3.5 h-3.5" />
+                                <span>Ver Alumnos ({countUsers})</span>
+                              </button>
                             </div>
-                          ) : (
-                            <span className="text-xs text-slate-400">—</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5 text-slate-400" />
-                            <span className="text-xs font-bold text-slate-700">
-                              {level._count?.users || 0}/{level.maxStudents || 8}
+                          </td>
+
+                          {/* Nivel */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <span className="text-xs font-extrabold bg-[#1D3A8A]/10 text-[#1D3A8A] px-3 py-1 rounded-full border border-[#1D3A8A]/20">
+                              {level.levelCode?.replace('Basico', 'Básico ').replace('Inter', 'Intermedio ').replace('Avanz', 'Avanzado ')}
                             </span>
-                          </div>
-                        </td>
-                        <td className="p-3">
-                          {level.schedule ? (
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5 text-slate-400" />
-                              <span className="text-xs text-slate-600">{level.schedule}</span>
+                          </td>
+
+                          {/* Modalidad */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm">{mod?.icon || '👥'}</span>
+                              <span className="text-xs font-semibold text-slate-700">{mod?.label || 'Grupal'}</span>
                             </div>
-                          ) : (
-                            <span className="text-xs text-slate-400">—</span>
-                          )}
-                        </td>
-                        <td className="p-3">
-                          {level.zoomHostGroup ? (
-                            <a href={level.zoomHostGroup.permanentLink || level.zoomLink} target="_blank" rel="noopener noreferrer"
-                              className="text-xs text-[#2D8CFF] hover:underline flex items-center gap-1" title={level.zoomHostGroup.permanentLink}>
-                              <Video className="w-3.5 h-3.5" /> {level.zoomHostGroup.displayName}
-                            </a>
-                          ) : level.zoomLink ? (
-                            <a href={level.zoomLink} target="_blank" rel="noopener noreferrer"
-                              className="text-xs text-[#2D8CFF] hover:underline flex items-center gap-1">
-                              <LinkIcon className="w-3.5 h-3.5" /> Manual
-                            </a>
-                          ) : (
-                            <span className="text-xs text-slate-400">—</span>
-                          )}
-                        </td>
-                        <td className="p-3 text-right">
-                          <div className="flex justify-end gap-2">
-                            <button onClick={() => handleEdit(level)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => handleDelete(level.id)}
-                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
+                            {rhy && <p className="text-[11px] text-slate-400 mt-0.5">{rhy.label}</p>}
+                          </td>
+
+                          {/* Fecha de Inicio */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 w-fit">
+                              <Calendar className="w-3.5 h-3.5 text-[#1D3A8A]" />
+                              <span>{startDateFormatted}</span>
+                            </div>
+                          </td>
+
+                          {/* Profesor */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            {level.teacher ? (
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold">
+                                  {level.teacher.firstName?.charAt(0)}
+                                </div>
+                                <span className="text-xs font-bold text-slate-700">
+                                  {level.teacher.firstName} {level.teacher.lastName}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-slate-400 font-medium">— Sin asignar —</span>
+                            )}
+                          </td>
+
+                          {/* Alumnos Count */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              <Users className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-xs font-extrabold text-slate-800">
+                                {countUsers}/{level.maxStudents || 8}
+                              </span>
+                              <div className="w-16 bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                                <div
+                                  className="bg-[#1D3A8A] h-2 rounded-full transition-all"
+                                  style={{ width: `${Math.min(100, (countUsers / (level.maxStudents || 8)) * 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Horario */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            {level.schedule ? (
+                              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-700 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 w-fit">
+                                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{level.schedule}</span>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-slate-400">—</span>
+                            )}
+                          </td>
+
+                          {/* Enlace Zoom */}
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            {level.zoomHostGroup ? (
+                              <a href={level.zoomHostGroup.permanentLink || level.zoomLink} target="_blank" rel="noopener noreferrer"
+                                className="text-xs font-bold text-[#2D8CFF] bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 inline-flex items-center gap-1.5 transition-colors" title={level.zoomHostGroup.permanentLink}>
+                                <Video className="w-3.5 h-3.5" /> {level.zoomHostGroup.displayName}
+                              </a>
+                            ) : level.zoomLink ? (
+                              <a href={level.zoomLink} target="_blank" rel="noopener noreferrer"
+                                className="text-xs font-bold text-[#2D8CFF] bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 inline-flex items-center gap-1.5 transition-colors">
+                                <LinkIcon className="w-3.5 h-3.5" /> Manual
+                              </a>
+                            ) : (
+                              <span className="text-xs text-slate-400">—</span>
+                            )}
+                          </td>
+
+                          {/* Acciones */}
+                          <td className="py-4 px-4 text-right whitespace-nowrap">
+                            <div className="flex justify-end items-center gap-1.5">
+                              <button onClick={(e) => { e.stopPropagation(); handleEdit(level); }}
+                                className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors border border-transparent hover:border-blue-200" title="Editar grupo">
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button onClick={(e) => { e.stopPropagation(); handleDelete(level.id); }}
+                                className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-200" title="Eliminar grupo">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
               </table>
             </div>
           )}
         </div>
       </div>
+
+      {/* ── Slide-Over Modal: Alumnos del Grupo ── */}
+      {selectedGroupForStudents && (
+        <div 
+          onClick={() => setSelectedGroupForStudents(null)}
+          className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-xl bg-white h-full shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-300 cursor-default"
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#1D3A8A] text-white flex items-center justify-center font-bold shadow-md">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                    Alumnos de <span className="text-[#1D3A8A]">{selectedGroupForStudents.name}</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {selectedGroupForStudents.levelCode} · Profesor: {selectedGroupForStudents.teacher ? `${selectedGroupForStudents.teacher.firstName} ${selectedGroupForStudents.teacher.lastName}` : 'Sin asignar'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedGroupForStudents(null)}
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 flex-1 overflow-y-auto space-y-4">
+              <div className="flex justify-between items-center bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1D3A8A]">
+                  <Users className="w-4 h-4" /> Capacidad del Grupo
+                </div>
+                <span className="text-xs font-extrabold bg-white text-[#1D3A8A] px-3 py-1 rounded-full border border-blue-200 shadow-xs">
+                  {currentGroupStudents.length}/{selectedGroupForStudents.maxStudents || 8} Alumnos
+                </span>
+              </div>
+
+              {/* Buscador de Alumnos en el Grupo */}
+              {currentGroupStudents.length > 0 && (
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={studentSearchTerm}
+                    onChange={(e) => setStudentSearchTerm(e.target.value)}
+                    placeholder="Buscar alumno por nombre, correo o WhatsApp..."
+                    className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D3A8A]/20 focus:border-[#1D3A8A] transition-all shadow-2xs"
+                  />
+                  {studentSearchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setStudentSearchTerm('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+                      title="Limpiar búsqueda"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {loadingStudentsId === selectedGroupForStudents.id ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3 text-slate-500 text-sm font-semibold">
+                  <Loader2 className="w-8 h-8 text-[#1D3A8A] animate-spin" />
+                  <span>Obteniendo alumnos asignados...</span>
+                </div>
+              ) : currentGroupStudents.length === 0 ? (
+                <div className="text-center py-16 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
+                  <Users className="w-10 h-10 text-slate-300 mx-auto" />
+                  <p className="text-sm font-bold text-slate-600">No hay alumnos asignados aún</p>
+                  <p className="text-xs text-slate-400">Puedes asignar alumnos desde el módulo CRM o desde la gestión de Usuarios.</p>
+                </div>
+              ) : filteredGroupStudents.length === 0 ? (
+                <div className="text-center py-10 px-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
+                  <Search className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p className="text-xs font-bold text-slate-600">No se encontraron alumnos para "{studentSearchTerm}"</p>
+                  <button
+                    type="button"
+                    onClick={() => setStudentSearchTerm('')}
+                    className="px-3 py-1 rounded-lg text-xs font-bold text-[#1D3A8A] bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+                  >
+                    Limpiar búsqueda
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredGroupStudents.map((st: any) => {
+                    const fullName = `${st.firstName || st.name?.split(' ')[0] || 'Alumno'} ${st.lastName || st.name?.split(' ').slice(1).join(' ') || ''}`.trim();
+                    const enrolledDate = st.createdAt || st.enrollmentDate 
+                      ? new Date(st.createdAt || st.enrollmentDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+                      : '—';
+                    const phone = st.phone || st.whatsapp;
+
+                    return (
+                      <div
+                        key={st.id || st.email}
+                        onClick={() => setSelectedStudentForDetail(st)}
+                        className="group/card bg-slate-50/80 hover:bg-white p-4 rounded-2xl border border-slate-200 hover:border-[#1D3A8A] shadow-2xs hover:shadow-md transition-all cursor-pointer space-y-3 relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 left-0 bottom-0 w-1 bg-transparent group-hover/card:bg-[#1D3A8A] transition-colors" />
+
+                        {/* Header Student Info: Nombre Completo & Estado */}
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-[#1D3A8A] group-hover/card:bg-blue-800 text-white flex items-center justify-center font-extrabold text-sm shadow-sm flex-shrink-0 transition-colors">
+                              {fullName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Alumno</span>
+                                <span className="text-[9px] font-bold text-[#1D3A8A] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 opacity-80 group-hover/card:opacity-100 transition-opacity flex items-center gap-0.5">
+                                  Ver Ficha ➔
+                                </span>
+                              </div>
+                              <p className="font-extrabold text-slate-800 text-sm group-hover/card:text-[#1D3A8A] transition-colors">{fullName}</p>
+                            </div>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold border ${
+                            st.isActive === false 
+                              ? 'bg-rose-50 text-rose-700 border-rose-200' 
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                            {st.isActive === false ? 'Inactivo ❌' : 'Activo / Inscrito ✅'}
+                          </span>
+                        </div>
+
+                        {/* Details grid: Correo & Fecha de Inscripción */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 text-xs">
+                          <div>
+                            <span className="text-slate-400 font-semibold block text-[11px]">Correo Electrónico:</span>
+                            <span className="font-bold text-slate-700 hover:text-blue-600 truncate block">
+                              {st.email || '— Sin correo registrado —'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 font-semibold block text-[11px]">Fecha de Inscripción:</span>
+                            <span className="font-bold text-slate-700 block">
+                              🗓️ {enrolledDate}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card action footer: Click instruction + WhatsApp link */}
+                        <div className="pt-2 flex items-center justify-between border-t border-slate-200/60 text-xs">
+                          <span className="text-[11px] font-semibold text-slate-400 group-hover/card:text-[#1D3A8A] flex items-center gap-1 transition-colors">
+                            <Info className="w-3 h-3 text-[#1D3A8A]" /> Clic para abrir ficha completa
+                          </span>
+                          {phone && (
+                            <a
+                              href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center gap-1 text-[11px] font-bold shadow-2xs"
+                              title="Chatear por WhatsApp"
+                            >
+                              💬 WhatsApp
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setSelectedGroupForStudents(null)}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300 transition-colors"
+              >
+                Cerrar Panel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Ficha Detallada del Alumno ── */}
+      {selectedStudentForDetail && (
+        <div 
+          onClick={() => setSelectedStudentForDetail(null)}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 animate-in zoom-in-95 duration-200 cursor-default flex flex-col max-h-[90vh]"
+          >
+            {/* Header con estilo Real francés */}
+            <div className="bg-gradient-to-br from-[#1D3A8A] via-[#1e40af] to-[#0f172a] p-6 text-white relative">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D92534] to-[#B81B28] text-white font-black text-2xl flex items-center justify-center shadow-lg border-2 border-white/30 flex-shrink-0">
+                    {((selectedStudentForDetail.firstName || selectedStudentForDetail.name || 'A')[0]).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[11px] font-extrabold uppercase tracking-wider bg-white/15 px-2 py-0.5 rounded-md text-white border border-white/20">
+                        🎓 Alumno
+                      </span>
+                      <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded-md border ${
+                        selectedStudentForDetail.isActive === false
+                          ? 'bg-rose-500/20 text-rose-200 border-rose-400/30'
+                          : 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30'
+                      }`}>
+                        {selectedStudentForDetail.isActive === false ? 'Inactivo' : 'Inscrito / Activo'}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-black tracking-tight leading-snug">
+                      {`${selectedStudentForDetail.firstName || selectedStudentForDetail.name?.split(' ')[0] || ''} ${selectedStudentForDetail.lastName || selectedStudentForDetail.name?.split(' ').slice(1).join(' ') || ''}`.trim() || 'Alumno'}
+                    </h3>
+                    <p className="text-xs text-blue-200 font-medium">
+                      Portal Les Rois du Français
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStudentForDetail(null)}
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                  title="Cerrar ficha"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto space-y-5 text-sm">
+              {/* Sección 1: Información de Contacto */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-[#1D3A8A]" /> Información de Contacto
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Correo */}
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                    <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mb-1">
+                      <Mail className="w-3 h-3 text-[#1D3A8A]" /> Correo Electrónico
+                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-slate-800 text-xs truncate" title={selectedStudentForDetail.email}>
+                        {selectedStudentForDetail.email || '—'}
+                      </span>
+                      {selectedStudentForDetail.email && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(selectedStudentForDetail.email, 'email')}
+                          className="p-1 text-slate-400 hover:text-[#1D3A8A] rounded-md transition-colors flex-shrink-0"
+                          title="Copiar correo"
+                        >
+                          {copiedText === 'email' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Teléfono / WhatsApp */}
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                    <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mb-1">
+                      <Phone className="w-3 h-3 text-[#1D3A8A]" /> Teléfono / WhatsApp
+                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-slate-800 text-xs">
+                        {selectedStudentForDetail.phone || selectedStudentForDetail.whatsapp || '— Sin registrar —'}
+                      </span>
+                      {(selectedStudentForDetail.phone || selectedStudentForDetail.whatsapp) && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(selectedStudentForDetail.phone || selectedStudentForDetail.whatsapp, 'phone')}
+                          className="p-1 text-slate-400 hover:text-[#1D3A8A] rounded-md transition-colors flex-shrink-0"
+                          title="Copiar teléfono"
+                        >
+                          {copiedText === 'phone' ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Fecha de Registro */}
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                    <span className="text-[11px] font-bold text-slate-400 block mb-1">Fecha de Registro</span>
+                    <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      {selectedStudentForDetail.createdAt || selectedStudentForDetail.enrollmentDate
+                        ? new Date(selectedStudentForDetail.createdAt || selectedStudentForDetail.enrollmentDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })
+                        : '—'}
+                    </span>
+                  </div>
+
+                  {/* ID de Usuario */}
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                    <span className="text-[11px] font-bold text-slate-400 block mb-1">ID de Sistema</span>
+                    <span className="font-mono text-slate-600 text-xs truncate block" title={selectedStudentForDetail.id}>
+                      {selectedStudentForDetail.id?.substring(0, 8)}...
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sección 2: Información Académica del Grupo */}
+              {selectedGroupForStudents && (
+                <div className="space-y-3 pt-2 border-t border-slate-100">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                    <GraduationCap className="w-3.5 h-3.5 text-[#1D3A8A]" /> Asignación de Grupo
+                  </h4>
+                  <div className="bg-blue-50/60 p-4 rounded-2xl border border-blue-100 space-y-2.5">
+                    <div className="flex justify-between items-center">
+                      <span className="font-extrabold text-slate-800 text-sm">
+                        {selectedGroupForStudents.name}
+                      </span>
+                      <span className="text-xs font-extrabold bg-[#1D3A8A] text-white px-2.5 py-0.5 rounded-full">
+                        {selectedGroupForStudents.levelCode?.replace('Basico', 'Básico ').replace('Inter', 'Intermedio ').replace('Avanz', 'Avanzado ')}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                      <div>
+                        <span className="text-slate-400 block text-[11px] font-medium">Profesor:</span>
+                        <span className="font-bold text-slate-700">
+                          {selectedGroupForStudents.teacher 
+                            ? `${selectedGroupForStudents.teacher.firstName} ${selectedGroupForStudents.teacher.lastName}` 
+                            : '— Sin asignar —'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[11px] font-medium">Horario:</span>
+                        <span className="font-bold text-slate-700">
+                          {selectedGroupForStudents.schedule || '— Sin horario —'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {(selectedGroupForStudents.zoomHostGroup?.permanentLink || selectedGroupForStudents.zoomLink) && (
+                      <div className="pt-2 border-t border-blue-200/60 flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                          <Video className="w-3.5 h-3.5 text-[#2D8CFF]" /> Enlace de Zoom
+                        </span>
+                        <a
+                          href={selectedGroupForStudents.zoomHostGroup?.permanentLink || selectedGroupForStudents.zoomLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-extrabold text-[#2D8CFF] hover:underline flex items-center gap-1"
+                        >
+                          Abrir Zoom <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer con Acciones Rápidas */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                {(selectedStudentForDetail.phone || selectedStudentForDetail.whatsapp) && (
+                  <a
+                    href={`https://wa.me/${(selectedStudentForDetail.phone || selectedStudentForDetail.whatsapp).replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition-colors"
+                  >
+                    💬 WhatsApp
+                  </a>
+                )}
+                {selectedStudentForDetail.email && (
+                  <a
+                    href={`mailto:${selectedStudentForDetail.email}`}
+                    className="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                  >
+                    <Mail className="w-3.5 h-3.5" /> Enviar Correo
+                  </a>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedStudentForDetail(null)}
+                className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

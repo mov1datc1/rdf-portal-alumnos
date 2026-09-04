@@ -93,6 +93,16 @@ export class AdminController {
 
   // ── Schedule ──
 
+  @Post('schedule/batch-delete')
+  batchDeleteScheduledClasses(@Body() body: { ids: string[] }) {
+    return this.adminService.batchDeleteResources(body.ids);
+  }
+
+  @Post('schedule/batch')
+  batchScheduleClasses(@Body() body: any) {
+    return this.adminService.batchScheduleClasses(body);
+  }
+
   @Post('schedule')
   scheduleClass(@Body() body: any) {
     return this.adminService.scheduleClass(body);

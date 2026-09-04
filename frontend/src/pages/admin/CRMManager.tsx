@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Plus, X, Phone, Mail, MessageSquare, TrendingUp, Search, Edit2, Trash2, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Loader2, Plus, X, Phone, Mail, MessageSquare, TrendingUp, Search, Edit2, Trash2, ShieldCheck, AlertTriangle, Table, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
 
@@ -12,6 +12,66 @@ const SOURCES = [
   { value: 'REFERRAL', label: 'Referido', color: '#FF9800', icon: '🤝' },
   { value: 'WEBSITE', label: 'Website', color: '#607D8B', icon: '🌐' },
 ];
+
+const renderSourceIcon = (sourceValue: string, className = "w-4 h-4 inline-block align-middle") => {
+  switch (sourceValue) {
+    case 'WHATSAPP_ORGANIC':
+    case 'WHATSAPP':
+      return (
+        <img
+          src="/imagenes-lp/whatsapp_official_meta.svg"
+          alt="WhatsApp"
+          className={`${className} object-contain inline-block align-middle`}
+        />
+      );
+    case 'FACEBOOK':
+      return (
+        <svg className={`${className} inline-block align-middle flex-shrink-0`} viewBox="0 0 24 24" fill="#1877F2">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      );
+    case 'INSTAGRAM':
+      return (
+        <svg className={`${className} inline-block align-middle flex-shrink-0`} viewBox="0 0 24 24" fill="#E1306C">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+      );
+    case 'GOOGLE_ADS':
+      return (
+        <svg className={`${className} inline-block align-middle flex-shrink-0`} viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+      );
+    case 'META_ADS':
+      return (
+        <svg className={`${className} inline-block align-middle flex-shrink-0`} viewBox="0 0 24 24" fill="#0668E1">
+          <path d="M16.924 5.31c-1.488 0-2.858.625-3.924 1.688A5.556 5.556 0 0 0 9.076 5.31C6.273 5.31 4 7.583 4 10.386c0 4.148 5.618 8.304 8.536 10.154.286.182.642.182.928 0C16.382 18.69 22 14.534 22 10.386c0-2.803-2.273-5.076-5.076-5.076zM13 10.386c0-2.206 1.794-4 4-4s4 1.794 4 4c0 2.946-4.306 6.425-7 8.163V10.386z"/>
+        </svg>
+      );
+    case 'REFERRAL':
+      return (
+        <svg className={`${className} inline-block align-middle flex-shrink-0`} viewBox="0 0 24 24" fill="none" stroke="#FF9800" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      );
+    case 'WEBSITE':
+      return (
+        <svg className={`${className} inline-block align-middle flex-shrink-0`} viewBox="0 0 24 24" fill="none" stroke="#607D8B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+      );
+    default:
+      return <span className={className}>🌐</span>;
+  }
+};
 
 const STATUSES = [
   { value: 'NEW', label: 'Nuevo', color: '#3B82F6', bg: 'bg-blue-50', border: 'border-blue-200' },
@@ -34,7 +94,12 @@ export function CRMManager() {
   const [showForm, setShowForm] = useState(false);
   const [editingLead, setEditingLead] = useState<any>(null);
   const [search, setSearch] = useState('');
-  const [tab, setTab] = useState<'kanban' | 'analytics'>('kanban');
+  const [tab, setTab] = useState<'kanban' | 'table' | 'analytics'>('kanban');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showSourceDropdown, setShowSourceDropdown] = useState(false);
+  const pageSize = 10;
+
   const session = useAuthStore(state => state.session);
   const dragRef = useRef<string | null>(null);
 
@@ -100,12 +165,7 @@ export function CRMManager() {
 
   const handleDragStart = (leadId: string) => { dragRef.current = leadId; };
 
-  const handleDrop = async (newStatus: string) => {
-    if (!dragRef.current) return;
-    const leadId = dragRef.current;
-    dragRef.current = null;
-
-    // Intercept drops to ENROLLED — show confirmation modal
+  const handleStatusChange = async (leadId: string, newStatus: string) => {
     if (newStatus === 'ENROLLED') {
       const lead = leads.find(l => l.id === leadId);
       if (lead && lead.status !== 'ENROLLED') {
@@ -113,12 +173,17 @@ export function CRMManager() {
         return;
       }
     }
-
-    // All other status changes: apply immediately
     await fetch(`${apiUrl}/admin/leads/${leadId}/status`, {
       method: 'PATCH', headers, body: JSON.stringify({ status: newStatus }),
     });
     fetchData();
+  };
+
+  const handleDrop = async (newStatus: string) => {
+    if (!dragRef.current) return;
+    const leadId = dragRef.current;
+    dragRef.current = null;
+    handleStatusChange(leadId, newStatus);
   };
 
   const confirmEnrollment = async () => {
@@ -145,8 +210,17 @@ export function CRMManager() {
 
   const filtered = leads.filter(l => {
     const t = search.toLowerCase();
-    return l.name?.toLowerCase().includes(t) || l.phone?.includes(t) || l.email?.toLowerCase().includes(t);
+    const matchesSearch = l.name?.toLowerCase().includes(t) || l.phone?.includes(t) || l.email?.toLowerCase().includes(t);
+    const matchesStatus = statusFilter === 'ALL' || l.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+  const paginatedLeads = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
 
   if (loading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-[#1D3A8A]" /></div>;
 
@@ -159,33 +233,60 @@ export function CRMManager() {
           <p className="text-slate-500 text-sm">Pipeline de leads desde Google Ads, Meta Ads y WhatsApp.</p>
         </div>
         <button onClick={() => { resetForm(); setShowForm(true); }}
-          className="flex items-center gap-2 bg-[#1D3A8A] text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-800 transition-colors"
+          className="flex items-center gap-2 bg-[#1D3A8A] text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-blue-800 transition-colors shadow-sm"
         >
           <Plus className="w-5 h-5" /> Nuevo Lead
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 border-b border-slate-200 pb-3">
         <button onClick={() => setTab('kanban')}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${tab === 'kanban' ? 'bg-[#1D3A8A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 ${tab === 'kanban' ? 'bg-[#1D3A8A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
         >
           Pipeline Kanban
         </button>
-        <button onClick={() => setTab('analytics')}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${tab === 'analytics' ? 'bg-[#1D3A8A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+        <button onClick={() => setTab('table')}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 ${tab === 'table' ? 'bg-[#1D3A8A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
         >
-          <TrendingUp className="w-4 h-4 inline mr-1" /> Analytics
+          <Table className="w-4 h-4" /> Vista Tabla
+        </button>
+        <button onClick={() => setTab('analytics')}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2 ${tab === 'analytics' ? 'bg-[#1D3A8A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+        >
+          <TrendingUp className="w-4 h-4" /> Analytics
         </button>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-        <input type="text" placeholder="Buscar por nombre, teléfono o email..."
-          value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-[#1D3A8A]/20 text-sm"
-        />
+      {/* Filters Bar */}
+      <div className="flex flex-col md:flex-row gap-3 justify-between items-stretch md:items-center">
+        {/* Search */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input type="text" placeholder="Buscar por nombre, teléfono o email..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-[#1D3A8A]/20 text-sm shadow-sm"
+          />
+        </div>
+
+        {tab === 'table' && (
+          <div className="flex items-center gap-3">
+            {/* Filter Status */}
+            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm">
+              <Filter className="w-4 h-4 text-slate-400" />
+              <span className="text-xs font-semibold text-slate-500">Estado:</span>
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+                className="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 cursor-pointer">
+                <option value="ALL">Todos los prospectos ({leads.length})</option>
+                {STATUSES.map(s => (
+                  <option key={s.value} value={s.value}>
+                    {s.label} ({leads.filter(l => l.status === s.value).length})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
       {tab === 'kanban' && (
@@ -233,8 +334,8 @@ export function CRMManager() {
                         </div>
 
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100" title={src?.label}>
-                            {src?.icon} {src?.label}
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-slate-100 flex items-center gap-1" title={src?.label}>
+                            {renderSourceIcon(lead.source, "w-3.5 h-3.5")} {src?.label}
                           </span>
                           {lead.interestedIn && (
                             <span className="text-xs text-slate-400 truncate max-w-[80px]">{lead.interestedIn}</span>
@@ -253,6 +354,147 @@ export function CRMManager() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {tab === 'table' && (
+        /* ── Centralized Table View ── */
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-0">
+          <div className="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center text-xs text-slate-500 font-medium">
+            <span>
+              Mostrando <strong className="text-slate-800">{paginatedLeads.length}</strong> de <strong className="text-slate-800">{filtered.length}</strong> prospectos encontrados
+            </span>
+            <span>Página {currentPage} de {totalPages}</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-100/70 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th className="p-3.5">Nombre del Prospecto</th>
+                  <th className="p-3.5">Correo Electrónico</th>
+                  <th className="p-3.5">Teléfono / WhatsApp</th>
+                  <th className="p-3.5">Estado del Prospecto</th>
+                  <th className="p-3.5">Fecha Registro</th>
+                  <th className="p-3.5 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {paginatedLeads.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-12 text-slate-400">
+                      No se encontraron prospectos con los filtros seleccionados.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedLeads.map(lead => {
+                    const src = SOURCES.find(s => s.value === lead.source);
+                    const st = STATUSES.find(s => s.value === lead.status);
+                    const cleanPhone = lead.phone?.replace(/\D/g, '') || '';
+                    const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : null;
+                    const createdDate = lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+                    return (
+                      <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-3.5">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800 text-sm">{lead.name}</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 font-medium text-slate-600 flex items-center gap-1.5 w-fit">
+                                {renderSourceIcon(lead.source, "w-3.5 h-3.5")} {src?.label}
+                              </span>
+                              {lead.interestedIn && (
+                                <span className="text-xs text-slate-400 font-medium">• {lead.interestedIn}</span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3.5">
+                          {lead.email ? (
+                            <a href={`mailto:${lead.email}`} className="text-slate-600 hover:text-blue-600 flex items-center gap-1.5 text-xs font-medium">
+                              <Mail className="w-3.5 h-3.5 text-slate-400" />
+                              {lead.email}
+                            </a>
+                          ) : (
+                            <span className="text-xs text-slate-400">—</span>
+                          )}
+                        </td>
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-slate-700">{lead.phone}</span>
+                            {whatsappUrl && (
+                              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded-full transition-colors" title="Abrir WhatsApp">
+                                <MessageSquare className="w-3 h-3" /> Chat
+                              </a>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3.5">
+                          <select
+                            value={lead.status}
+                            onChange={e => handleStatusChange(lead.id, e.target.value)}
+                            className="text-xs font-bold py-1 px-2.5 rounded-full border cursor-pointer transition-colors focus:ring-2 focus:ring-blue-500/20"
+                            style={{
+                              backgroundColor: st?.color ? `${st.color}15` : '#f1f5f9',
+                              borderColor: st?.color ? `${st.color}40` : '#e2e8f0',
+                              color: st?.color || '#334155'
+                            }}
+                          >
+                            {STATUSES.map(s => (
+                              <option key={s.value} value={s.value} className="bg-white text-slate-800 font-normal">
+                                {s.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="p-3.5 text-xs text-slate-500 font-medium">
+                          {createdDate}
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <div className="flex justify-end items-center gap-1">
+                            <button onClick={() => handleEdit(lead)} title="Editar prospecto"
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDelete(lead.id)} title="Eliminar prospecto"
+                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Table Pagination Footer */}
+          {totalPages > 1 && (
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <span className="text-xs text-slate-500">
+                Página <strong>{currentPage}</strong> de <strong>{totalPages}</strong>
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-colors flex items-center gap-1"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" /> Anterior
+                </button>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-colors flex items-center gap-1"
+                >
+                  Siguiente <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -292,7 +534,7 @@ export function CRMManager() {
                   const pct = analytics.total > 0 ? ((s.count / analytics.total) * 100).toFixed(0) : 0;
                   return (
                     <div key={s.source} className="flex items-center gap-3">
-                      <span className="text-lg">{src?.icon}</span>
+                      <span className="text-base flex items-center justify-center w-6 h-6">{renderSourceIcon(s.source, "w-5 h-5")}</span>
                       <div className="flex-1">
                         <div className="flex justify-between text-xs mb-0.5">
                           <span className="font-semibold text-slate-700">{src?.label || s.source}</span>
@@ -414,12 +656,37 @@ export function CRMManager() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Canal de Origen</label>
-                  <select value={form.source} onChange={e => setForm({...form, source: e.target.value})}
-                    className="w-full border border-slate-200 rounded-xl py-2 px-3 text-sm bg-slate-50">
-                    {SOURCES.map(s => (
-                      <option key={s.value} value={s.value}>{s.icon} {s.label}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowSourceDropdown(!showSourceDropdown)}
+                      className="w-full border border-slate-200 rounded-xl py-2 px-3 text-sm bg-slate-50 flex items-center justify-between hover:bg-slate-100 transition-colors text-left"
+                    >
+                      <span className="flex items-center gap-2 font-medium text-slate-800">
+                        {renderSourceIcon(form.source, "w-4 h-4")}
+                        {SOURCES.find(s => s.value === form.source)?.label}
+                      </span>
+                      <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${showSourceDropdown ? 'rotate-90' : ''}`} />
+                    </button>
+                    {showSourceDropdown && (
+                      <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden py-1 max-h-56 overflow-y-auto">
+                        {SOURCES.map(s => (
+                          <button
+                            key={s.value}
+                            type="button"
+                            onClick={() => {
+                              setForm({ ...form, source: s.value });
+                              setShowSourceDropdown(false);
+                            }}
+                            className={`w-full px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors text-left font-medium ${form.source === s.value ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700'}`}
+                          >
+                            <span className="w-5 h-5 flex items-center justify-center flex-shrink-0">{renderSourceIcon(s.value, "w-4 h-4")}</span>
+                            <span>{s.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Interesado en</label>

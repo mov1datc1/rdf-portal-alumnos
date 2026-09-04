@@ -20,10 +20,28 @@ export declare class AdminController {
         phone: string | null;
         isActive: boolean;
         currentLevelId: string | null;
+        createdAt: Date;
         currentLevel: {
+            id: string;
             name: string;
             levelCode: string;
+            modality: import("@prisma/client").$Enums.ClassModality;
+            schedule: string | null;
+            zoomLink: string | null;
+            zoomHostGroup: {
+                displayName: string;
+                permanentLink: string | null;
+            } | null;
+            teacher: {
+                email: string;
+                firstName: string | null;
+                lastName: string | null;
+            } | null;
         } | null;
+        _count: {
+            evaluations: number;
+            attendances: number;
+        };
     }[]>;
     createUser(body: any): Promise<{
         id: string;
@@ -165,6 +183,16 @@ export declare class AdminController {
             title: string;
             levelId: string;
         }[];
+        users: {
+            id: string;
+            email: string;
+            role: import("@prisma/client").$Enums.Role;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            isActive: boolean;
+            createdAt: Date;
+        }[];
     } & {
         id: string;
         createdAt: Date;
@@ -225,6 +253,14 @@ export declare class AdminController {
         zoomHostId: string | null;
         teacherId: string | null;
     }>;
+    batchDeleteScheduledClasses(body: {
+        ids: string[];
+    }): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    batchScheduleClasses(body: any): Promise<{
+        success: boolean;
+        count: number;
+        classes: any[];
+    }>;
     scheduleClass(body: any): Promise<{
         url: string | null;
         id: string;
@@ -253,6 +289,14 @@ export declare class AdminController {
         } | null;
         module: {
             level: {
+                users: {
+                    id: string;
+                    email: string;
+                    firstName: string | null;
+                    lastName: string | null;
+                    phone: string | null;
+                }[];
+            } & {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;

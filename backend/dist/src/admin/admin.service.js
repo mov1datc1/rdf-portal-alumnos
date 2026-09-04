@@ -30,8 +30,25 @@ let AdminService = class AdminService {
         return this.prisma.user.findMany({
             select: {
                 id: true, email: true, firstName: true, lastName: true, phone: true,
-                role: true, isActive: true, currentLevelId: true,
-                currentLevel: { select: { name: true, levelCode: true } },
+                role: true, isActive: true, currentLevelId: true, createdAt: true,
+                currentLevel: {
+                    select: {
+                        id: true,
+                        name: true,
+                        levelCode: true,
+                        schedule: true,
+                        modality: true,
+                        zoomLink: true,
+                        zoomHostGroup: { select: { permanentLink: true, displayName: true } },
+                        teacher: { select: { firstName: true, lastName: true, email: true } },
+                    }
+                },
+                _count: {
+                    select: {
+                        attendances: true,
+                        evaluations: true,
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' }
         });
@@ -143,6 +160,10 @@ let AdminService = class AdminService {
         return this.prisma.resource.delete({ where: { id } });
     }
     async batchDeleteResources(ids) {
+        if (!ids || ids.length === 0)
+            return { count: 0 };
+        await this.prisma.attendance.deleteMany({ where: { resourceId: { in: ids } } });
+        await this.prisma.userProgress.deleteMany({ where: { resourceId: { in: ids } } });
         return this.prisma.resource.deleteMany({
             where: {
                 id: { in: ids }
@@ -206,6 +227,13 @@ let AdminService = class AdminService {
                 modules: { orderBy: { orderIndex: 'asc' } },
                 teacher: { select: { id: true, firstName: true, lastName: true, email: true } },
                 zoomHostGroup: { select: { id: true, displayName: true, email: true, permanentLink: true } },
+                users: {
+                    select: {
+                        id: true, email: true, firstName: true, lastName: true, phone: true,
+                        role: true, isActive: true, createdAt: true,
+                    },
+                    orderBy: { firstName: 'asc' },
+                },
                 _count: { select: { users: true } },
             },
             orderBy: { createdAt: 'desc' },
@@ -327,6 +355,88 @@ let AdminService = class AdminService {
             }
         }
     }
+    async batchScheduleClasses(data) {
+        const { levelId, classes, durationExpected = 3600 } = data;
+        if (!levelId || !classes || !Array.isArray(classes) || classes.length === 0) {
+            throw new common_1.HttpException('Debes proporcionar un grupo y al menos una fecha de clase.', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const level = await this.prisma.level.findUnique({
+            where: { id: levelId },
+            include: { zoomHostGroup: true }
+        });
+        if (!level) {
+            throw new common_1.HttpException('El grupo especificado no existe.', common_1.HttpStatus.NOT_FOUND);
+        }
+        const zoomJoinUrl = data.url || level.zoomLink || level.zoomHostGroup?.permanentLink || null;
+        const zoomHostId = data.zoomHostId || level.zoomHostId || null;
+        const teacherId = data.teacherId || level.teacherId || null;
+        let defaultModuleId = data.moduleId;
+        if (!defaultModuleId) {
+            const existingModule = await this.prisma.module.findFirst({
+                where: { levelId },
+                orderBy: { orderIndex: 'asc' }
+            });
+            if (existingModule) {
+                defaultModuleId = existingModule.id;
+            }
+            else {
+                const count = await this.prisma.module.count({ where: { levelId } });
+                const newModule = await this.prisma.module.create({
+                    data: {
+                        levelId,
+                        title: data.moduleName || `Unidad 1`,
+                        orderIndex: count + 1
+                    }
+                });
+                defaultModuleId = newModule.id;
+            }
+        }
+        const createdResources = [];
+        const moduleCache = {};
+        for (const item of classes) {
+            if (!item.scheduledAt)
+                continue;
+            let itemModuleId = defaultModuleId;
+            if (item.moduleName && item.moduleName !== data.moduleName) {
+                if (!moduleCache[item.moduleName]) {
+                    let mod = await this.prisma.module.findFirst({
+                        where: { levelId, title: item.moduleName }
+                    });
+                    if (!mod) {
+                        const count = await this.prisma.module.count({ where: { levelId } });
+                        mod = await this.prisma.module.create({
+                            data: {
+                                levelId,
+                                title: item.moduleName,
+                                orderIndex: count + 1
+                            }
+                        });
+                    }
+                    moduleCache[item.moduleName] = mod.id;
+                }
+                itemModuleId = moduleCache[item.moduleName];
+            }
+            const scheduledStart = new Date(item.scheduledAt);
+            const res = await this.prisma.resource.create({
+                data: {
+                    title: item.title,
+                    url: item.url || zoomJoinUrl,
+                    type: 'LIVE_CLASS',
+                    moduleId: itemModuleId,
+                    teacherId: teacherId || null,
+                    scheduledAt: scheduledStart,
+                    durationExpected: Number(durationExpected),
+                    zoomHostId: zoomHostId || null,
+                }
+            });
+            createdResources.push(res);
+        }
+        return {
+            success: true,
+            count: createdResources.length,
+            classes: createdResources
+        };
+    }
     async scheduleClass(data) {
         let zoomMeetingId = null;
         let zoomJoinUrl = data.url || null;
@@ -423,7 +533,17 @@ let AdminService = class AdminService {
         return this.prisma.resource.findMany({
             where: { type: 'LIVE_CLASS' },
             include: {
-                module: { include: { level: true } },
+                module: {
+                    include: {
+                        level: {
+                            include: {
+                                users: {
+                                    select: { id: true, firstName: true, lastName: true, email: true, phone: true }
+                                }
+                            }
+                        }
+                    }
+                },
                 zoomHost: { select: { id: true, displayName: true, email: true } },
                 teacher: { select: { id: true, firstName: true, lastName: true } },
             },
@@ -454,6 +574,7 @@ let AdminService = class AdminService {
             where: { id },
             data: {
                 title: data.title,
+                description: data.description !== undefined ? data.description : undefined,
                 url: data.url,
                 moduleId: data.moduleId,
                 scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
