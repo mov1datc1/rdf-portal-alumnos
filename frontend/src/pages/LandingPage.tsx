@@ -339,6 +339,13 @@ export function LandingPage() {
               </ul>
 
               <div className="lrd-mobile-nav-cta">
+                <Link
+                  to={accountPortalLink}
+                  className="lrd-btn-mobile-portal-link"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <User size={15} /> ACCEDER A MI CUENTA
+                </Link>
                 <button
                   className="lrd-btn-cta-red-compact lrd-full-width"
                   onClick={() => {
@@ -353,6 +360,13 @@ export function LandingPage() {
 
             {/* Right Side Header Actions: Account (Top Right) + Social & Red CTA Button (Bottom Right) */}
             <div className="lrd-nav-actions-clean">
+              {/* Botón directo de Acceso para Móvil y Tablet */}
+              <Link to={accountPortalLink} className="lrd-btn-header-account-pill">
+                <User size={13} color="#FFFFFF" />
+                <span className="lrd-pill-txt-short">MI CUENTA</span>
+                <span className="lrd-pill-txt-full">ACCEDER A MI CUENTA</span>
+              </Link>
+
               <div className="lrd-header-right-stacked">
                 <div className="lrd-account-row-top">
                   <Link to={accountPortalLink} className="lrd-btn-top-account-clean">
