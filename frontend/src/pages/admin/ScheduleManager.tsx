@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { ScheduleCalendar } from './components/ScheduleCalendar';
 import { useAuthStore } from '../../store/authStore';
+import { supabase } from '../../lib/supabase';
 
 export function ScheduleManager() {
   const [levels, setLevels] = useState<any[]>([]);
@@ -65,13 +66,24 @@ export function ScheduleManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // 1. Direct Supabase fetch for Level (guarantees real startDate)
+      const sbLevelsMap = new Map<string, any>();
+      try {
+        const { data: sbLevels, error: sbErr } = await supabase
+          .from('Level')
+          .select('*');
+        if (!sbErr && sbLevels && Array.isArray(sbLevels)) {
+          sbLevels.forEach((sl: any) => sbLevelsMap.set(sl.id, sl));
+        }
+      } catch (_) {}
+
       const [levelsRes, scheduleRes, hostsRes, teachersRes] = await Promise.all([
         fetch(`${import.meta.env.VITE_API_URL}/admin/levels`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        }),
+        }).catch(() => null),
         fetch(`${import.meta.env.VITE_API_URL}/admin/schedule`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        }),
+        }).catch(() => null),
         fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/hosts`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
         }).catch(() => null),
@@ -80,8 +92,21 @@ export function ScheduleManager() {
         }).catch(() => null),
       ]);
       
-      if (levelsRes.ok) setLevels(await levelsRes.json());
-      if (scheduleRes.ok) setScheduledClasses(await scheduleRes.json());
+      if (levelsRes && levelsRes.ok) {
+        const rawLevels = await levelsRes.json();
+        const enrichedLevels = rawLevels.map((lvl: any) => {
+          const sbMatch = sbLevelsMap.get(lvl.id);
+          return {
+            ...lvl,
+            startDate: lvl.startDate || sbMatch?.startDate || null,
+          };
+        });
+        setLevels(enrichedLevels);
+      } else if (sbLevelsMap.size > 0) {
+        setLevels(Array.from(sbLevelsMap.values()));
+      }
+
+      if (scheduleRes && scheduleRes.ok) setScheduledClasses(await scheduleRes.json());
       if (hostsRes?.ok) setZoomHosts(await hostsRes.json());
       if (teachersRes?.ok) {
         const users = await teachersRes.json();

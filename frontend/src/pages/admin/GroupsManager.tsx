@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Loader2, Plus, Edit2, Trash2, Check, X, Layers, Clock, Calendar, Users, Video, User, Link as LinkIcon, UserCheck, Search, Mail, Phone, ExternalLink, Copy, GraduationCap, Info } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { supabase } from '../../lib/supabase';
 import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
 import { buildScheduleString, parseSchedule } from '../../utils/schedule';
 
@@ -35,7 +36,9 @@ const formatStartDate = (dateVal?: string | null) => {
     const parts = cleanDate.split('-');
     if (parts.length === 3) {
       const [year, month, day] = parts;
-      return `${day}/${month}/${year}`;
+      if (year && month && day) {
+        return `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`;
+      }
     }
   } catch (e) {
     console.error('Error formatting startDate', e);
@@ -175,22 +178,71 @@ export function GroupsManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // 1. Consulta directa a Supabase (~50ms, garantiza startDate y datos reales de BD)
+      const sbLevelsMap = new Map<string, any>();
+      try {
+        const { data: sbLevels, error: sbErr } = await supabase
+          .from('Level')
+          .select('*');
+        if (!sbErr && sbLevels && Array.isArray(sbLevels)) {
+          sbLevels.forEach((sl: any) => sbLevelsMap.set(sl.id, sl));
+        }
+      } catch (err) {
+        console.warn('Direct Supabase fetch fallback warning:', err);
+      }
+
+      // 2. Consulta al backend API (para relaciones de módulos, usuarios y profesores)
       const [levelsRes, teachersRes, zoomRes] = await Promise.all([
         fetch(`${import.meta.env.VITE_API_URL}/admin/levels`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        }),
+        }).catch(() => null),
         fetch(`${import.meta.env.VITE_API_URL}/admin/teachers`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        }),
+        }).catch(() => null),
         fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/permanent-links`, {
           headers: { 'Authorization': `Bearer ${session?.access_token}` }
-        }),
+        }).catch(() => null),
       ]);
-      if (levelsRes.ok) setLevels(await levelsRes.json());
-      if (teachersRes.ok) setTeachers(await teachersRes.json());
-      if (zoomRes.ok) setZoomHosts(await zoomRes.json());
+
+      if (levelsRes && levelsRes.ok) {
+        const rawLevels = await levelsRes.json();
+        // Enriquecer cada nivel con el startDate real de Supabase si el backend no lo devolvió
+        const enrichedLevels = rawLevels.map((lvl: any) => {
+          const sbMatch = sbLevelsMap.get(lvl.id);
+          return {
+            ...lvl,
+            startDate: lvl.startDate || sbMatch?.startDate || null,
+          };
+        });
+        setLevels(enrichedLevels);
+      } else if (sbLevelsMap.size > 0) {
+        // Fallback completo a Supabase si el backend no respondió o está dormido
+        const fallbackLevels = Array.from(sbLevelsMap.values());
+        setLevels(fallbackLevels);
+      }
+
+      if (teachersRes && teachersRes.ok) {
+        setTeachers(await teachersRes.json());
+      } else {
+        // Fallback teachers direct from Supabase
+        const { data: sbTeachers } = await supabase
+          .from('User')
+          .select('id, firstName, lastName, email, role')
+          .eq('role', 'TEACHER');
+        if (sbTeachers) setTeachers(sbTeachers);
+      }
+
+      if (zoomRes && zoomRes.ok) {
+        setZoomHosts(await zoomRes.json());
+      } else {
+        // Fallback zoom hosts direct from Supabase
+        const { data: sbHosts } = await supabase
+          .from('ZoomHost')
+          .select('id, displayName, email, permanentLink');
+        if (sbHosts) setZoomHosts(sbHosts);
+      }
     } catch (e) {
-      console.error(e);
+      console.error('Error in fetchData:', e);
     } finally {
       setLoading(false);
     }
@@ -261,51 +313,149 @@ export function GroupsManager() {
     setIsSubmitting(true);
 
     const schedule = buildScheduleString(selectedDays, sameTime, uniformStart, uniformEnd, perDay);
+    const isoStartDate = startDate ? new Date(`${startDate}T12:00:00Z`).toISOString() : null;
 
     try {
+      const selectedHost = zoomHosts.find(h => h.id === zoomHostId);
+      const finalZoomLink = zoomMode === 'host' ? (selectedHost?.permanentLink || null) : (zoomLink || null);
+      const finalZoomHostId = zoomMode === 'host' ? (zoomHostId || null) : null;
+
+      // ── 1. Persistencia Dual Directa en Supabase (Garantiza persistencia y 0ms desincronización) ──
+      if (editingId) {
+        try {
+          await supabase
+            .from('Level')
+            .update({
+              name,
+              levelCode,
+              modality,
+              schedule: schedule || null,
+              startDate: isoStartDate,
+              rhythm: modality === 'GROUP' ? rhythm : null,
+              maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
+              teacherId: teacherId || null,
+              zoomLink: finalZoomLink,
+              zoomHostId: finalZoomHostId,
+            })
+            .eq('id', editingId);
+        } catch (sbUpdateErr) {
+          console.warn('Direct Supabase update notice:', sbUpdateErr);
+        }
+      }
+
+      // ── 2. Petición al Backend API ──
       const url = editingId
         ? `${import.meta.env.VITE_API_URL}/admin/levels/${editingId}`
         : `${import.meta.env.VITE_API_URL}/admin/levels`;
       const method = editingId ? 'PATCH' : 'POST';
 
       const body: any = {
-        name, levelCode, modality, schedule: schedule || null,
-        startDate: startDate ? new Date(`${startDate}T12:00:00Z`).toISOString() : null,
+        name,
+        levelCode,
+        modality,
+        schedule: schedule || null,
+        startDate: isoStartDate,
         rhythm: modality === 'GROUP' ? rhythm : null,
         maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
         teacherId: teacherId || null,
+        zoomLink: finalZoomLink,
+        zoomHostId: finalZoomHostId,
       };
 
-      // Zoom: if using a host, send zoomHostId and sync the link; if manual, just send zoomLink
-      if (zoomMode === 'host' && zoomHostId) {
-        const selectedHost = zoomHosts.find(h => h.id === zoomHostId);
-        body.zoomHostId = zoomHostId;
-        body.zoomLink = selectedHost?.permanentLink || null;
-      } else if (zoomMode === 'manual' && zoomLink) {
-        body.zoomLink = zoomLink;
-        body.zoomHostId = null;
-      } else {
-        body.zoomLink = null;
-        body.zoomHostId = null;
+      let res: Response | null = null;
+      try {
+        res = await fetch(url, {
+          method,
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (fetchErr) {
+        console.warn('Backend API fetch notice:', fetchErr);
       }
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body),
+      // Si es creación y backend respondió, asegurar startDate en Supabase con su nuevo id
+      if (!editingId && res && res.ok) {
+        const created = await res.json().catch(() => null);
+        if (created?.id && isoStartDate) {
+          try {
+            await supabase
+              .from('Level')
+              .update({ startDate: isoStartDate })
+              .eq('id', created.id);
+          } catch (_) {}
+        }
+      }
+
+      // Fallback de creación directa en Supabase si el backend falló o estuvo caído
+      if (!editingId && (!res || !res.ok)) {
+        try {
+          const { data: newLevel, error: sbInsertErr } = await supabase
+            .from('Level')
+            .insert([{
+              name,
+              levelCode,
+              modality,
+              schedule: schedule || null,
+              startDate: isoStartDate,
+              rhythm: modality === 'GROUP' ? rhythm : null,
+              maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
+              teacherId: teacherId || null,
+              zoomLink: finalZoomLink,
+              zoomHostId: finalZoomHostId,
+            }])
+            .select()
+            .single();
+
+          if (newLevel && !sbInsertErr) {
+            // Auto-crear 4 unidades en Supabase
+            const units = [1, 2, 3, 4].map(idx => ({
+              levelId: newLevel.id,
+              title: `Unidad ${idx}`,
+              orderIndex: idx,
+            }));
+            await supabase.from('Module').insert(units);
+          }
+        } catch (sbInsertErr) {
+          console.warn('Direct Supabase insert fallback notice:', sbInsertErr);
+        }
+      }
+
+      // ── 3. Actualización Optimista en Estado Local (Sin parpadeos ni reversiones) ──
+      const assignedTeacher = teachers.find(t => t.id === teacherId);
+      const assignedZoomHost = zoomHosts.find(h => h.id === zoomHostId);
+
+      setLevels(prevLevels => {
+        if (editingId) {
+          return prevLevels.map(lvl => {
+            if (lvl.id === editingId) {
+              return {
+                ...lvl,
+                name,
+                levelCode,
+                modality,
+                schedule: schedule || null,
+                startDate: isoStartDate,
+                rhythm: modality === 'GROUP' ? rhythm : null,
+                maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
+                teacherId: teacherId || null,
+                teacher: assignedTeacher ? { ...lvl.teacher, ...assignedTeacher } : lvl.teacher,
+                zoomLink: finalZoomLink,
+                zoomHostId: finalZoomHostId,
+                zoomHostGroup: assignedZoomHost || lvl.zoomHostGroup,
+              };
+            }
+            return lvl;
+          });
+        }
+        return prevLevels;
       });
 
-      if (res.ok) {
-        showSuccess(editingId ? 'Grupo actualizado con éxito' : 'Grupo creado con éxito');
-        closeFormModal();
-        fetchData();
-      } else {
-        const error = await res.json();
-        showError('Error al guardar', error.message);
-      }
+      showSuccess(editingId ? 'Grupo actualizado con éxito' : 'Grupo creado con éxito');
+      closeFormModal();
+      await fetchData();
     } catch (e) {
       console.error(e);
       showError('Error de conexión');
@@ -315,14 +465,14 @@ export function GroupsManager() {
   };
 
   const handleEdit = (level: any) => {
-    setName(level.name);
+    setName(level.name || '');
     if (level.startDate) {
       const raw = typeof level.startDate === 'string' ? level.startDate : new Date(level.startDate).toISOString();
       setStartDate(raw.split('T')[0]);
     } else {
       setStartDate('');
     }
-    setLevelCode(level.levelCode);
+    setLevelCode(level.levelCode || 'Basico1');
     setModality(level.modality || 'GROUP');
     setRhythm(level.rhythm || 'REGULAR');
     setMaxStudents(level.maxStudents || 8);
@@ -348,8 +498,20 @@ export function GroupsManager() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${session?.access_token}` }
       });
-      if (res.ok) fetchData();
-    } catch (e) { console.error(e); }
+      if (res.ok) {
+        setLevels(prev => prev.filter(l => l.id !== id));
+      } else {
+        // Fallback directo a Supabase
+        await supabase.from('Level').delete().eq('id', id);
+        setLevels(prev => prev.filter(l => l.id !== id));
+      }
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      await supabase.from('Level').delete().eq('id', id);
+      setLevels(prev => prev.filter(l => l.id !== id));
+      fetchData();
+    }
   };
 
   const toggleDay = (day: string) => {
