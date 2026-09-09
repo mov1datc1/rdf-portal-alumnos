@@ -4,6 +4,17 @@ Todos los cambios notables realizados en el proyecto se documentan en este archi
 
 ---
 
+## [2026-09-09] - Persistencia y Visualización Resiliente de Fecha de Inicio en Gestión de Grupos (Supabase-First)
+
+### 🛡️ Resiliencia Supabase-First y Sincronización Dual en Gestión de Grupos (`/admin/groups`)
+- **Carga Híbrida Supabase-First (~50ms):** Enriquecimiento automático en tiempo real de cada grupo consultando directamente la tabla `Level` de Supabase en paralelo con la API backend. Garantiza que las fechas reales de inicio (`startDate`) registradas en base de datos se muestren siempre en la tabla principal (`DD/MM/YYYY`) sin depender de la serialización del backend remoto ni mostrar `—`.
+- **Prellenado Confiable en Edición de Grupo:** Al pulsar el botón "Editar", el selector de fecha (`<input type="date">`) se inicializa automáticamente con la fecha de inicio del grupo (`YYYY-MM-DD`), previniendo campos vacíos.
+- **Persistencia Dual Resiliente (`handleSubmit`):** Al editar o registrar un grupo, la fecha de inicio se actualiza de inmediato directamente en Supabase y de manera concurrente en el backend remoto, previniendo descartes por desincronizaciones de versión.
+- **Actualización Optimista de Estado Local:** El estado en React se actualiza en 0ms al guardar, eliminando parpadeos, estados intermedios y reversiones visuales en la tabla de grupos activos.
+- **Sincronización con Programación de Clases (`/admin/schedule`):** Enriquecimiento de la lista de niveles en `ScheduleManager` para asegurar que el calendario y la creación recurrente tomen automáticamente la fecha de inicio del grupo.
+
+---
+
 ## [2026-09-08 v2] - Persistencia Resiliente de Fotos en Portal Administrador & Carga Supabase-First
 
 ### 🛡️ Resiliencia y Cero Parpadeo de Fábrica en Portal Administrador (`/admin/settings`)
