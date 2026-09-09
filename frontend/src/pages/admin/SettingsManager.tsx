@@ -94,10 +94,28 @@ export function SettingsManager() {
   const [teachers, setTeachers] = useState<any[]>(DEFAULT_TEACHERS);
   const [levelsData, setLevelsData] = useState<Record<string, any>>(DEFAULT_LEVELS);
 
-  // History memory for instant undo / revert to previous image
-  const [previousHeroImages, setPreviousHeroImages] = useState<Record<number, string>>({});
-  const [previousTeacherImages, setPreviousTeacherImages] = useState<Record<string, string>>({});
-  const [previousLevelImages, setPreviousLevelImages] = useState<Record<string, string>>({});
+  // History memory for instant undo / revert to previous image (persisted in localStorage across reloads & navigation)
+  const [previousHeroImages, setPreviousHeroImages] = useState<Record<number, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('rdf_previous_hero_images') || '{}');
+    } catch {
+      return {};
+    }
+  });
+  const [previousTeacherImages, setPreviousTeacherImages] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('rdf_previous_teacher_images') || '{}');
+    } catch {
+      return {};
+    }
+  });
+  const [previousLevelImages, setPreviousLevelImages] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('rdf_previous_level_images') || '{}');
+    } catch {
+      return {};
+    }
+  });
 
   // Sub-selection states
   const [selectedTeacherIndex, setSelectedTeacherIndex] = useState<number>(0);
@@ -515,7 +533,11 @@ export function SettingsManager() {
     if (field === 'src') {
       const currentSrc = heroSlides[index]?.src || DEFAULT_HERO_SLIDE_IMAGES[index];
       if (currentSrc && currentSrc !== value) {
-        setPreviousHeroImages(prev => ({ ...prev, [index]: currentSrc }));
+        setPreviousHeroImages(prev => {
+          const next = { ...prev, [index]: currentSrc };
+          try { localStorage.setItem('rdf_previous_hero_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
       }
     }
     const updated = [...heroSlides];
@@ -530,7 +552,11 @@ export function SettingsManager() {
     if (field === 'image' && teacherId) {
       const currentImg = teachers[index]?.image || DEFAULT_TEACHERS[index]?.image;
       if (currentImg && currentImg !== value) {
-        setPreviousTeacherImages(prev => ({ ...prev, [teacherId]: currentImg }));
+        setPreviousTeacherImages(prev => {
+          const next = { ...prev, [teacherId]: currentImg };
+          try { localStorage.setItem('rdf_previous_teacher_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
       }
     }
     const updated = [...teachers];
@@ -573,7 +599,11 @@ export function SettingsManager() {
     if (field === 'characterImage') {
       const currentImg = levelsData[lvlKey]?.characterImage || DEFAULT_LEVELS[lvlKey]?.characterImage;
       if (currentImg && currentImg !== value) {
-        setPreviousLevelImages(prev => ({ ...prev, [lvlKey]: currentImg }));
+        setPreviousLevelImages(prev => {
+          const next = { ...prev, [lvlKey]: currentImg };
+          try { localStorage.setItem('rdf_previous_level_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
       }
     }
     setLevelsData(prev => ({
@@ -894,26 +924,32 @@ export function SettingsManager() {
                   </button>
 
                   {/* Action buttons for Undo previous / Restore factory default */}
-                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
                     {previousHeroImages[idx] && previousHeroImages[idx] !== slide.src && (
                       <button
                         type="button"
                         onClick={() => handleHeroSlideChange(idx, 'src', previousHeroImages[idx])}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
                         title="Volver a la foto que tenías antes de este cambio"
                       >
                         <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver a foto anterior
                       </button>
                     )}
-                    {slide.src !== DEFAULT_HERO_SLIDE_IMAGES[idx] && (
+                    {slide.src !== DEFAULT_HERO_SLIDE_IMAGES[idx] ? (
                       <button
                         type="button"
                         onClick={() => handleHeroSlideChange(idx, 'src', DEFAULT_HERO_SLIDE_IMAGES[idx])}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                         title="Restaurar a la imagen oficial por defecto"
                       >
                         <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar oficial #{idx + 1}
                       </button>
+                    ) : (
+                      !previousHeroImages[idx] && (
+                        <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
+                          <Check className="w-3.5 h-3.5 text-emerald-600" /> Foto oficial activa
+                        </span>
+                      )
                     )}
                   </div>
                 </div>
@@ -1137,26 +1173,32 @@ export function SettingsManager() {
                 </button>
 
                 {/* Botones de acción: Deshacer cambio / Restaurar oficial */}
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
                   {previousTeacherImages[currentTeacher?.id] && previousTeacherImages[currentTeacher?.id] !== currentTeacher?.image && (
                     <button
                       type="button"
                       onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', previousTeacherImages[currentTeacher?.id])}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Volver a la foto que tenías antes de este cambio"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver a la foto anterior (Deshacer)
                     </button>
                   )}
-                  {currentTeacher?.image !== DEFAULT_TEACHER_IMAGES[currentTeacher?.id] && (
+                  {currentTeacher?.image !== DEFAULT_TEACHER_IMAGES[currentTeacher?.id] ? (
                     <button
                       type="button"
                       onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', DEFAULT_TEACHER_IMAGES[currentTeacher?.id])}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Restaurar a la foto oficial original de fábrica"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar foto oficial ({currentTeacher?.name})
                     </button>
+                  ) : (
+                    !previousTeacherImages[currentTeacher?.id] && (
+                      <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" /> Foto oficial activa ({currentTeacher?.name})
+                      </span>
+                    )
                   )}
                 </div>
               </div>
@@ -1461,26 +1503,32 @@ export function SettingsManager() {
                 </button>
 
                 {/* Botones de acción: Deshacer cambio / Restaurar personaje oficial */}
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
                   {previousLevelImages[selectedLevelKey] && previousLevelImages[selectedLevelKey] !== currentLevel?.characterImage && (
                     <button
                       type="button"
                       onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', previousLevelImages[selectedLevelKey])}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Volver al personaje que tenías antes de este cambio"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver al personaje anterior
                     </button>
                   )}
-                  {currentLevel?.characterImage !== DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] && (
+                  {currentLevel?.characterImage !== DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] ? (
                     <button
                       type="button"
                       onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey])}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Restaurar a la silueta oficial original de fábrica"
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar personaje oficial ({selectedLevelKey})
                     </button>
+                  ) : (
+                    !previousLevelImages[selectedLevelKey] && (
+                      <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" /> Silueta oficial activa ({selectedLevelKey})
+                      </span>
+                    )
                   )}
                 </div>
               </div>
