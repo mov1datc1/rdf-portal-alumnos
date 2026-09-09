@@ -27,6 +27,22 @@ const DAYS = [
 
 type DaySchedule = { startTime: string; endTime: string };
 
+const formatStartDate = (dateVal?: string | null) => {
+  if (!dateVal) return '—';
+  try {
+    const dateStr = typeof dateVal === 'string' ? dateVal : new Date(dateVal).toISOString();
+    const cleanDate = dateStr.split('T')[0];
+    const parts = cleanDate.split('-');
+    if (parts.length === 3) {
+      const [year, month, day] = parts;
+      return `${day}/${month}/${year}`;
+    }
+  } catch (e) {
+    console.error('Error formatting startDate', e);
+  }
+  return '—';
+};
+
 export function GroupsManager() {
   const [levels, setLevels] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -34,6 +50,7 @@ export function GroupsManager() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [showAddZoom, setShowAddZoom] = useState(false);
   const [addingZoom, setAddingZoom] = useState(false);
   const [newZoom, setNewZoom] = useState({ displayName: '', email: '', permanentLink: '' });
@@ -190,6 +207,26 @@ export function GroupsManager() {
     setPerDay({}); setEditingId(null); setShowManualTime(false);
   };
 
+  const openCreateModal = () => {
+    resetForm();
+    setIsFormModalOpen(true);
+  };
+
+  const closeFormModal = () => {
+    resetForm();
+    setIsFormModalOpen(false);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFormModalOpen) {
+        closeFormModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFormModalOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -233,46 +270,58 @@ export function GroupsManager() {
 
       const body: any = {
         name, levelCode, modality, schedule: schedule || null,
-        startDate: startDate ? new Date(startDate).toISOString() : null,
+        startDate: startDate ? new Date(`${startDate}T12:00:00Z`).toISOString() : null,
         rhythm: modality === 'GROUP' ? rhythm : null,
         maxStudents: modality === 'GROUP' ? maxStudents : (modality === 'PART_DUO' ? 2 : 1),
         teacherId: teacherId || null,
       };
 
-        // Zoom: if using a host, send zoomHostId and sync the link; if manual, just send zoomLink
-        if (zoomMode === 'host' && zoomHostId) {
-          const selectedHost = zoomHosts.find(h => h.id === zoomHostId);
-          body.zoomHostId = zoomHostId;
-          body.zoomLink = selectedHost?.permanentLink || null;
-        } else if (zoomMode === 'manual' && zoomLink) {
-          body.zoomLink = zoomLink;
-          body.zoomHostId = null;
-        } else {
-          body.zoomLink = null;
-          body.zoomHostId = null;
-        }
+      // Zoom: if using a host, send zoomHostId and sync the link; if manual, just send zoomLink
+      if (zoomMode === 'host' && zoomHostId) {
+        const selectedHost = zoomHosts.find(h => h.id === zoomHostId);
+        body.zoomHostId = zoomHostId;
+        body.zoomLink = selectedHost?.permanentLink || null;
+      } else if (zoomMode === 'manual' && zoomLink) {
+        body.zoomLink = zoomLink;
+        body.zoomHostId = null;
+      } else {
+        body.zoomLink = null;
+        body.zoomHostId = null;
+      }
 
-        const res = await fetch(url, {
-          method,
-          headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body),
-        });
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body),
+      });
 
-      if (res.ok) { showSuccess('Grupo guardado'); resetForm(); fetchData(); }
-      else {
+      if (res.ok) {
+        showSuccess(editingId ? 'Grupo actualizado con éxito' : 'Grupo creado con éxito');
+        closeFormModal();
+        fetchData();
+      } else {
         const error = await res.json();
         showError('Error al guardar', error.message);
       }
-    } catch (e) { console.error(e); showError('Error de conexión'); }
-    finally { setIsSubmitting(false); }
+    } catch (e) {
+      console.error(e);
+      showError('Error de conexión');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEdit = (level: any) => {
     setName(level.name);
-    setStartDate(level.startDate ? new Date(level.startDate).toISOString().substring(0, 10) : '');
+    if (level.startDate) {
+      const raw = typeof level.startDate === 'string' ? level.startDate : new Date(level.startDate).toISOString();
+      setStartDate(raw.split('T')[0]);
+    } else {
+      setStartDate('');
+    }
     setLevelCode(level.levelCode);
     setModality(level.modality || 'GROUP');
     setRhythm(level.rhythm || 'REGULAR');
@@ -289,6 +338,7 @@ export function GroupsManager() {
     setUniformStart(parsed.uniformStart);
     setUniformEnd(parsed.uniformEnd);
     setPerDay(parsed.perDay);
+    setIsFormModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -322,419 +372,53 @@ export function GroupsManager() {
         <p className="text-slate-500 text-sm">Crea y administra grupos, clases individuales y Part Duo. Asigna profesores, horarios y enlaces de Zoom.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* ── Formulario ── */}
-        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm lg:col-span-1 sticky top-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <Layers className="w-6 h-6 text-[#1D3A8A]" />
-              {editingId ? 'Editar Grupo' : 'Nuevo Grupo'}
-            </h2>
-            {editingId && (
-              <button onClick={resetForm} className="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
-                <X className="w-4 h-4" /> Cancelar
-              </button>
-            )}
+      {/* ── Table Container (100% Width) ── */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2.5">
+            <Layers className="w-6 h-6 text-[#1D3A8A]" />
+            <h2 className="text-xl font-bold text-slate-800">Grupos Activos</h2>
+            <span className="text-xs font-extrabold bg-blue-50 text-[#1D3A8A] px-2.5 py-1 rounded-full border border-blue-200">
+              {filteredLevels.length} {filteredLevels.length === 1 ? 'grupo' : 'grupos'}
+            </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name & Start Date */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Nombre del Grupo <span className="text-red-500">*</span>
-                </label>
-                <input
-                  required type="text" placeholder="Ej. Grupo París, Grupo Lyon..."
-                  value={name} onChange={e => setName(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-[#1D3A8A]" /> Fecha de Inicio <span className="text-red-500">*</span>
-                </label>
-                <input
-                  required
-                  type="date"
-                  value={startDate} onChange={e => setStartDate(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm cursor-pointer"
-                />
-              </div>
-            </div>
-
-            {/* Modality selector */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Modalidad</label>
-              <div className="grid grid-cols-3 gap-2">
-                {MODALITIES.map(m => (
-                  <button
-                    key={m.value} type="button"
-                    onClick={() => setModality(m.value)}
-                    className={`py-2 px-1 rounded-xl text-center transition-all text-sm border-2 ${
-                      modality === m.value
-                        ? 'border-[#1D3A8A] bg-[#1D3A8A]/5 text-[#1D3A8A] font-bold'
-                        : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    <span className="text-lg">{m.icon}</span>
-                    <p className="text-xs font-semibold">{m.label}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {/* Level Code */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Nivel</label>
-                <select value={levelCode} onChange={e => setLevelCode(e.target.value)}
-                  className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50">
-                  {LEVEL_CODES.map(c => <option key={c} value={c}>{c.replace('Basico', 'Básico ').replace('Inter', 'Intermedio ').replace('Avanz', 'Avanzado ')}</option>)}
-                </select>
-              </div>
-
-              {/* Max students */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Capacidad</label>
-                <input
-                  type="number" min={1} max={20}
-                  value={maxStudents} onChange={e => setMaxStudents(Number(e.target.value))}
-                  disabled={modality !== 'GROUP'}
-                  className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 disabled:opacity-50"
-                />
-              </div>
-            </div>
-
-            {/* Rhythm (only for GROUP) */}
-            {modality === 'GROUP' && (
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Ritmo de Estudio</label>
-                <div className="space-y-1.5">
-                  {RHYTHMS.map(r => (
-                    <label key={r.value}
-                      className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer border transition-all ${
-                        rhythm === r.value ? 'border-[#1D3A8A] bg-[#1D3A8A]/5' : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <input type="radio" name="rhythm" value={r.value}
-                        checked={rhythm === r.value}
-                        onChange={() => {
-                          setRhythm(r.value);
-                          if (r.value === 'SATURDAY') {
-                            setSelectedDays(['Sáb']);
-                          } else if (r.value === 'INTENSIVE') {
-                            setSelectedDays(['Lun', 'Mar', 'Mié', 'Jue', 'Vie']);
-                          } else if (r.value === 'REGULAR') {
-                            setSelectedDays(['Lun', 'Mié', 'Vie']);
-                          } else {
-                            setSelectedDays([]);
-                          }
-                        }}
-                        className="accent-[#1D3A8A]"
-                      />
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800">{r.label}</p>
-                        <p className="text-xs text-slate-500">{r.desc}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Teacher */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <User className="w-3.5 h-3.5" /> Profesor Asignado <span className="text-red-500">*</span>
-              </label>
-              <select required value={teacherId} onChange={e => setTeacherId(e.target.value)}
-                className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50">
-                <option value="">Selecciona un profesor asignado...</option>
-                {teachers.map((t: any) => (
-                  <option key={t.id} value={t.id}>
-                    {t.firstName} {t.lastName} ({t.email})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Zoom Link - Dropdown with Add inline */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
-                <Video className="w-3.5 h-3.5 text-[#2D8CFF]" /> Enlace Fijo de Zoom <span className="text-red-500">*</span>
-              </label>
-
-              {/* Mode toggle */}
-              <div className="flex gap-1 mb-2">
-                <button type="button" onClick={() => setZoomMode('host')}
-                  className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all ${zoomMode === 'host' ? 'bg-[#2D8CFF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                  Seleccionar Cuenta
-                </button>
-                <button type="button" onClick={() => setZoomMode('manual')}
-                  className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-all ${zoomMode === 'manual' ? 'bg-[#2D8CFF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                  Link Manual
-                </button>
-              </div>
-
-              {zoomMode === 'host' ? (
-                <>
-                  <select required={zoomMode === 'host'} value={zoomHostId} onChange={e => setZoomHostId(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm">
-                    <option value="">Selecciona una cuenta de Zoom...</option>
-                    {zoomHosts.map((h: any) => (
-                      <option key={h.id} value={h.id}>
-                        🟢 {h.displayName} ({h.email.split('@')[0]})
-                        {h._count?.assignedGroups > 0 ? ` · ${h._count.assignedGroups} grupo(s)` : ''}
-                      </option>
-                    ))}
-                  </select>
-
-                  {/* Add new zoom link inline */}
-                  {!showAddZoom ? (
-                    <button type="button" onClick={() => setShowAddZoom(true)}
-                      className="mt-2 text-xs text-[#2D8CFF] hover:text-blue-700 flex items-center gap-1 font-semibold">
-                      <Plus className="w-3 h-3" /> Agregar nuevo enlace Zoom
-                    </button>
-                  ) : (
-                    <div className="mt-2 p-3 border border-[#2D8CFF]/30 rounded-xl bg-blue-50/50 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs font-bold text-[#2D8CFF]">Nuevo Enlace Zoom</p>
-                        <button type="button" onClick={() => { setShowAddZoom(false); setNewZoom({ displayName: '', email: '', permanentLink: '' }); }}
-                          className="text-slate-400 hover:text-slate-600">
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <input type="text" placeholder="Nombre (Ej. Zoom 7)" value={newZoom.displayName}
-                        onChange={e => setNewZoom({ ...newZoom, displayName: e.target.value })}
-                        className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white" />
-                      <input type="email" placeholder="Email de Zoom" value={newZoom.email}
-                        onChange={e => setNewZoom({ ...newZoom, email: e.target.value })}
-                        className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white" />
-                      <input type="url" placeholder="https://zoom.us/j/..." value={newZoom.permanentLink}
-                        onChange={e => setNewZoom({ ...newZoom, permanentLink: e.target.value })}
-                        className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white font-mono" />
-                      <button type="button" disabled={addingZoom || !newZoom.displayName || !newZoom.email || !newZoom.permanentLink}
-                        onClick={async () => {
-                          setAddingZoom(true);
-                          try {
-                            const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/hosts`, {
-                              method: 'POST',
-                              headers: { 'Authorization': `Bearer ${session?.access_token}`, 'Content-Type': 'application/json' },
-                              body: JSON.stringify(newZoom),
-                            });
-                            if (res.ok) {
-                              const created = await res.json();
-                              setZoomHostId(created.id);
-                              setShowAddZoom(false);
-                              setNewZoom({ displayName: '', email: '', permanentLink: '' });
-                              // Refresh zoom hosts
-                              const zoomRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/permanent-links`, {
-                                headers: { 'Authorization': `Bearer ${session?.access_token}` }
-                              });
-                              if (zoomRes.ok) setZoomHosts(await zoomRes.json());
-                            } else {
-                              const err = await res.json();
-                              showError('Error al guardar', err.message);
-                            }
-                          } catch { showError('Error de conexión'); }
-                          finally { setAddingZoom(false); }
-                        }}
-                        className="w-full py-1.5 rounded-lg text-xs font-bold bg-[#2D8CFF] text-white hover:bg-blue-600 transition-colors flex items-center justify-center gap-1 disabled:opacity-50">
-                        {addingZoom ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-                        Guardar Enlace
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  <input type="url" required={zoomMode === 'manual'} placeholder="https://zoom.us/j/..."
-                    value={zoomLink} onChange={e => setZoomLink(e.target.value)}
-                    className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm" />
-                  <p className="text-xs text-slate-400 mt-1">Pega un enlace de Zoom manualmente.</p>
-                </>
-              )}
-            </div>
-
-            {/* Schedule */}
-            <div className="border-t border-dashed border-slate-200 pt-4">
-              <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5" /> Horario <span className="text-red-500">*</span>
-              </label>
-
-              {/* Day picker */}
-              {modality === 'GROUP' && rhythm === 'REGULAR' ? (
-                <div className="flex gap-2 mb-3">
-                  <button type="button" onClick={() => setSelectedDays(['Lun', 'Mié', 'Vie'])}
-                    className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${JSON.stringify(selectedDays) === JSON.stringify(['Lun', 'Mié', 'Vie']) ? 'bg-[#1D3A8A] text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                    Lunes, Miércoles y Viernes
-                  </button>
-                  <button type="button" onClick={() => setSelectedDays(['Mié', 'Jue', 'Vie'])}
-                    className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${JSON.stringify(selectedDays) === JSON.stringify(['Mié', 'Jue', 'Vie']) ? 'bg-[#1D3A8A] text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                    Miércoles, Jueves y Viernes
-                  </button>
-                </div>
-              ) : modality === 'GROUP' ? (
-                <div className="flex gap-2 mb-3">
-                  {selectedDays.map(day => (
-                    <div key={day} className="w-9 h-9 rounded-full font-bold text-sm bg-[#1D3A8A] text-white shadow-md flex items-center justify-center cursor-default">
-                      {DAYS.find(d => d.key === day)?.label || day}
-                    </div>
-                  ))}
-                  <p className="text-xs text-slate-500 self-center ml-2">(Días fijos por modalidad)</p>
-                </div>
-              ) : (
-                <div className="flex gap-2 mb-3">
-                  {DAYS.map(d => (
-                    <button key={d.key} type="button" 
-                      onClick={() => toggleDay(d.key)}
-                      className={`w-9 h-9 rounded-full font-bold text-sm transition-all ${
-                        selectedDays.includes(d.key)
-                          ? 'bg-[#1D3A8A] text-white shadow-md'
-                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                      }`}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {selectedDays.length > 0 && (
-                <>
-                  <label className="flex items-center gap-2 mb-2 cursor-pointer">
-                    <input type="checkbox" checked={sameTime}
-                      onChange={() => setSameTime(!sameTime)}
-                      className="accent-[#1D3A8A] w-4 h-4"
-                    />
-                    <span className="text-xs text-slate-600">Misma hora todos los días</span>
-                  </label>
-
-                  {sameTime ? (
-                    <div>
-                      {!showManualTime ? (
-                        <select 
-                          value={`${uniformStart}-${uniformEnd}`}
-                          onChange={e => {
-                            if (e.target.value === 'manual') {
-                              setShowManualTime(true);
-                              setUniformStart('');
-                              setUniformEnd('');
-                            } else {
-                              const [s, eTime] = e.target.value.split('-');
-                              if (s && eTime) {
-                                setUniformStart(s);
-                                setUniformEnd(eTime);
-                              }
-                            }
-                          }}
-                          className="w-full border border-slate-200 rounded-lg py-2 px-3 text-sm bg-slate-50 focus:ring-2 focus:ring-[#1D3A8A]/20"
-                        >
-                          <option value="-">Selecciona un horario sugerido...</option>
-                          {rhythm === 'SATURDAY' ? (
-                            <>
-                              <option value="08:00-10:50">08:00 a 10:50</option>
-                              <option value="11:00-13:50">11:00 a 13:50</option>
-                              <option value="14:00-16:50">14:00 a 16:50</option>
-                            </>
-                          ) : (
-                            Array.from({ length: 14 }).map((_, i) => {
-                              const hour = i + 8;
-                              const start = `${hour.toString().padStart(2, '0')}:00`;
-                              const end = `${hour.toString().padStart(2, '0')}:50`;
-                              return <option key={start} value={`${start}-${end}`}>{start} a {end}</option>;
-                            })
-                          )}
-                          <option value="manual">Otro (Ingreso manual)</option>
-                        </select>
-                      ) : (
-                        <div>
-                          <div className="flex gap-2 items-center">
-                            <input type="time" value={uniformStart}
-                              onChange={e => setUniformStart(e.target.value)}
-                              className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
-                            />
-                            <span className="text-slate-400 text-sm">a</span>
-                            <input type="time" value={uniformEnd}
-                              onChange={e => setUniformEnd(e.target.value)}
-                              className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
-                            />
-                          </div>
-                          <button type="button" onClick={() => setShowManualTime(false)} className="text-xs text-blue-600 mt-1 hover:underline">
-                            Volver a sugerencias
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {selectedDays.map(day => (
-                        <div key={day} className="flex items-center gap-2">
-                          <span className="w-10 text-xs font-bold text-slate-600">{day}</span>
-                          <input type="time"
-                            value={perDay[day]?.startTime || ''}
-                            onChange={e => setPerDay(prev => ({...prev, [day]: {...(prev[day] || {}), startTime: e.target.value}}))}
-                            className="flex-1 border border-slate-200 rounded-lg py-1 px-2 text-xs bg-slate-50"
-                          />
-                          <span className="text-slate-400 text-xs">a</span>
-                          <input type="time"
-                            value={perDay[day]?.endTime || ''}
-                            onChange={e => setPerDay(prev => ({...prev, [day]: {...(prev[day] || {}), endTime: e.target.value}}))}
-                            className="flex-1 border border-slate-200 rounded-lg py-1 px-2 text-xs bg-slate-50"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            <button type="submit" disabled={isSubmitting}
-              className="w-full py-3 rounded-xl font-bold text-white bg-[#1D3A8A] hover:bg-blue-800 transition-colors flex items-center justify-center gap-2 mt-2 disabled:opacity-50"
-            >
-              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : (editingId ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />)}
-              {editingId ? 'Guardar Cambios' : 'Crear Grupo'}
-            </button>
-          </form>
-        </div>
-
-        {/* ── Table ── */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm lg:col-span-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-2.5">
-              <Layers className="w-6 h-6 text-[#1D3A8A]" />
-              <h2 className="text-xl font-bold text-slate-800">Grupos Activos</h2>
-              <span className="text-xs font-extrabold bg-blue-50 text-[#1D3A8A] px-2.5 py-1 rounded-full border border-blue-200">
-                {filteredLevels.length} {filteredLevels.length === 1 ? 'grupo' : 'grupos'}
-              </span>
-            </div>
-
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             {/* Buscador de Grupos */}
-            <div className="relative w-full sm:w-80">
+            <div className="relative w-full sm:w-72">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={groupSearchTerm}
                 onChange={(e) => setGroupSearchTerm(e.target.value)}
-                placeholder="Buscar por grupo, nivel, profesor..."
+                placeholder="Buscar grupo, nivel, profesor..."
                 className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1D3A8A]/20 focus:border-[#1D3A8A] transition-all shadow-2xs"
               />
               {groupSearchTerm && (
                 <button
                   type="button"
                   onClick={() => setGroupSearchTerm('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors cursor-pointer"
                   title="Limpiar búsqueda"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
-          </div>
 
-          {loading ? (
+            {/* Botón Nuevo Grupo */}
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1D3A8A] hover:bg-blue-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all whitespace-nowrap cursor-pointer active:scale-98"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nuevo Grupo</span>
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
             <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 text-[#1D3A8A] animate-spin" /></div>
           ) : levels.length === 0 ? (
             <div className="text-center py-12">
@@ -778,9 +462,7 @@ export function GroupsManager() {
                     const rhy = RHYTHMS.find(r => r.value === level.rhythm);
                     const studentsList = groupStudents[level.id] || level.users || [];
                     const countUsers = level._count?.users || studentsList.length || 0;
-                    const startDateFormatted = level.startDate 
-                      ? new Date(level.startDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                      : '—';
+                    const startDateFormatted = formatStartDate(level.startDate);
 
                     return (
                         <tr key={level.id} className="hover:bg-slate-50/80 transition-colors">
@@ -822,7 +504,11 @@ export function GroupsManager() {
 
                           {/* Fecha de Inicio */}
                           <td className="py-4 px-4 whitespace-nowrap">
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 w-fit">
+                            <div className={`flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-lg border w-fit ${
+                              startDateFormatted !== '—'
+                                ? 'bg-blue-50/70 text-[#1D3A8A] border-blue-200/70 shadow-2xs'
+                                : 'bg-slate-50 text-slate-400 border-slate-200'
+                            }`}>
                               <Calendar className="w-3.5 h-3.5 text-[#1D3A8A]" />
                               <span>{startDateFormatted}</span>
                             </div>
@@ -910,7 +596,435 @@ export function GroupsManager() {
             </div>
           )}
         </div>
-      </div>
+
+      {/* ── Modal Popup: Crear / Editar Grupo ── */}
+      {isFormModalOpen && (
+        <div
+          onClick={closeFormModal}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col my-auto max-h-[92vh] cursor-default animate-in zoom-in-95 duration-200 overflow-hidden"
+          >
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 sticky top-0 z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#1D3A8A] text-white flex items-center justify-center font-bold shadow-md">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    {editingId ? 'Editar Grupo' : 'Nuevo Grupo'}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {editingId ? 'Modifica los parámetros y horario del grupo seleccionado.' : 'Completa la información para aperturar un nuevo grupo.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={closeFormModal}
+                className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                title="Cerrar modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body / Form */}
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-5 sm:p-6 space-y-4 overflow-y-auto max-h-[calc(92vh-140px)]">
+                {/* Name & Start Date */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                      Nombre del Grupo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required type="text" placeholder="Ej. Grupo París, Grupo Lyon..."
+                      value={name} onChange={e => setName(e.target.value)}
+                      className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-[#1D3A8A]" /> Fecha de Inicio <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      required
+                      type="date"
+                      value={startDate} onChange={e => setStartDate(e.target.value)}
+                      className="w-full border border-slate-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-[#1D3A8A]/20 bg-slate-50 text-sm cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {/* Modality selector */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">Modalidad</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {MODALITIES.map(m => (
+                      <button
+                        key={m.value} type="button"
+                        onClick={() => setModality(m.value)}
+                        className={`py-2 px-1 rounded-xl text-center transition-all text-sm border-2 cursor-pointer ${
+                          modality === m.value
+                            ? 'border-[#1D3A8A] bg-[#1D3A8A]/5 text-[#1D3A8A] font-bold'
+                            : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <span className="text-lg">{m.icon}</span>
+                        <p className="text-xs font-semibold">{m.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Level Code */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Nivel</label>
+                    <select value={levelCode} onChange={e => setLevelCode(e.target.value)}
+                      className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm">
+                      {LEVEL_CODES.map(c => <option key={c} value={c}>{c.replace('Basico', 'Básico ').replace('Inter', 'Intermedio ').replace('Avanz', 'Avanzado ')}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Max students */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Capacidad</label>
+                    <input
+                      type="number" min={1} max={20}
+                      value={maxStudents} onChange={e => setMaxStudents(Number(e.target.value))}
+                      disabled={modality !== 'GROUP'}
+                      className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+
+                {/* Rhythm (only for GROUP) */}
+                {modality === 'GROUP' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">Ritmo de Estudio</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {RHYTHMS.map(r => (
+                        <label key={r.value}
+                          className={`flex items-start gap-2.5 p-2.5 rounded-xl cursor-pointer border transition-all ${
+                            rhythm === r.value ? 'border-[#1D3A8A] bg-[#1D3A8A]/5' : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <input type="radio" name="rhythm" value={r.value}
+                            checked={rhythm === r.value}
+                            onChange={() => {
+                              setRhythm(r.value);
+                              if (r.value === 'SATURDAY') {
+                                setSelectedDays(['Sáb']);
+                              } else if (r.value === 'INTENSIVE') {
+                                setSelectedDays(['Lun', 'Mar', 'Mié', 'Jue', 'Vie']);
+                              } else if (r.value === 'REGULAR') {
+                                setSelectedDays(['Lun', 'Mié', 'Vie']);
+                              } else {
+                                setSelectedDays([]);
+                              }
+                            }}
+                            className="accent-[#1D3A8A] mt-0.5"
+                          />
+                          <div>
+                            <p className="text-xs font-bold text-slate-800">{r.label}</p>
+                            <p className="text-[11px] text-slate-500 leading-tight">{r.desc}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Teacher */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-1">
+                      <User className="w-3.5 h-3.5" /> Profesor Asignado <span className="text-red-500">*</span>
+                    </label>
+                    <select required value={teacherId} onChange={e => setTeacherId(e.target.value)}
+                      className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm">
+                      <option value="">Selecciona un profesor...</option>
+                      {teachers.map((t: any) => (
+                        <option key={t.id} value={t.id}>
+                          {t.firstName} {t.lastName} ({t.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Zoom Link */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-sm font-semibold text-slate-700 flex items-center gap-1">
+                        <Video className="w-3.5 h-3.5 text-[#2D8CFF]" /> Enlace Zoom <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex gap-1">
+                        <button type="button" onClick={() => setZoomMode('host')}
+                          className={`text-[11px] px-2 py-0.5 rounded-md font-semibold transition-all cursor-pointer ${zoomMode === 'host' ? 'bg-[#2D8CFF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                          Cuenta
+                        </button>
+                        <button type="button" onClick={() => setZoomMode('manual')}
+                          className={`text-[11px] px-2 py-0.5 rounded-md font-semibold transition-all cursor-pointer ${zoomMode === 'manual' ? 'bg-[#2D8CFF] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                          Manual
+                        </button>
+                      </div>
+                    </div>
+
+                    {zoomMode === 'host' ? (
+                      <>
+                        <select required={zoomMode === 'host'} value={zoomHostId} onChange={e => setZoomHostId(e.target.value)}
+                          className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm">
+                          <option value="">Selecciona cuenta de Zoom...</option>
+                          {zoomHosts.map((h: any) => (
+                            <option key={h.id} value={h.id}>
+                              🟢 {h.displayName} ({h.email.split('@')[0]})
+                              {h._count?.assignedGroups > 0 ? ` · ${h._count.assignedGroups} grupo(s)` : ''}
+                            </option>
+                          ))}
+                        </select>
+
+                        {!showAddZoom ? (
+                          <button type="button" onClick={() => setShowAddZoom(true)}
+                            className="mt-1.5 text-xs text-[#2D8CFF] hover:text-blue-700 flex items-center gap-1 font-semibold cursor-pointer">
+                            <Plus className="w-3 h-3" /> Agregar nueva cuenta Zoom
+                          </button>
+                        ) : (
+                          <div className="mt-2 p-3 border border-[#2D8CFF]/30 rounded-xl bg-blue-50/50 space-y-2">
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs font-bold text-[#2D8CFF]">Nueva Cuenta Zoom</p>
+                              <button type="button" onClick={() => { setShowAddZoom(false); setNewZoom({ displayName: '', email: '', permanentLink: '' }); }}
+                                className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <input type="text" placeholder="Nombre (Ej. Zoom 7)" value={newZoom.displayName}
+                              onChange={e => setNewZoom({ ...newZoom, displayName: e.target.value })}
+                              className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white" />
+                            <input type="email" placeholder="Email de Zoom" value={newZoom.email}
+                              onChange={e => setNewZoom({ ...newZoom, email: e.target.value })}
+                              className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white" />
+                            <input type="url" placeholder="https://zoom.us/j/..." value={newZoom.permanentLink}
+                              onChange={e => setNewZoom({ ...newZoom, permanentLink: e.target.value })}
+                              className="w-full border border-slate-200 rounded-lg py-1.5 px-2.5 text-xs bg-white font-mono" />
+                            <button type="button" disabled={addingZoom || !newZoom.displayName || !newZoom.email || !newZoom.permanentLink}
+                              onClick={async () => {
+                                setAddingZoom(true);
+                                try {
+                                  const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/hosts`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${session?.access_token}`, 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(newZoom),
+                                  });
+                                  if (res.ok) {
+                                    const created = await res.json();
+                                    setZoomHostId(created.id);
+                                    setShowAddZoom(false);
+                                    setNewZoom({ displayName: '', email: '', permanentLink: '' });
+                                    const zoomRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/zoom/permanent-links`, {
+                                      headers: { 'Authorization': `Bearer ${session?.access_token}` }
+                                    });
+                                    if (zoomRes.ok) setZoomHosts(await zoomRes.json());
+                                  } else {
+                                    const err = await res.json();
+                                    showError('Error al guardar', err.message);
+                                  }
+                                } catch { showError('Error de conexión'); }
+                                finally { setAddingZoom(false); }
+                              }}
+                              className="w-full py-1.5 rounded-lg text-xs font-bold bg-[#2D8CFF] text-white hover:bg-blue-600 transition-colors flex items-center justify-center gap-1 disabled:opacity-50 cursor-pointer">
+                              {addingZoom ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                              Guardar Enlace
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <input type="url" required={zoomMode === 'manual'} placeholder="https://zoom.us/j/..."
+                          value={zoomLink} onChange={e => setZoomLink(e.target.value)}
+                          className="w-full border border-slate-200 rounded-xl py-2 px-3 bg-slate-50 text-sm" />
+                        <p className="text-xs text-slate-400 mt-1">Pega un enlace de Zoom manualmente.</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Schedule */}
+                <div className="border-t border-dashed border-slate-200 pt-3">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-[#1D3A8A]" /> Horario de Clases <span className="text-red-500">*</span>
+                  </label>
+
+                  {/* Day picker */}
+                  {modality === 'GROUP' && rhythm === 'REGULAR' ? (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <button type="button" onClick={() => setSelectedDays(['Lun', 'Mié', 'Vie'])}
+                        className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${JSON.stringify(selectedDays) === JSON.stringify(['Lun', 'Mié', 'Vie']) ? 'bg-[#1D3A8A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                        Lunes, Miércoles y Viernes
+                      </button>
+                      <button type="button" onClick={() => setSelectedDays(['Mié', 'Jue', 'Vie'])}
+                        className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${JSON.stringify(selectedDays) === JSON.stringify(['Mié', 'Jue', 'Vie']) ? 'bg-[#1D3A8A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                        Miércoles, Jueves y Viernes
+                      </button>
+                    </div>
+                  ) : modality === 'GROUP' ? (
+                    <div className="flex items-center gap-2 mb-3">
+                      {selectedDays.map(day => (
+                        <div key={day} className="w-8 h-8 rounded-full font-bold text-xs bg-[#1D3A8A] text-white shadow-xs flex items-center justify-center cursor-default">
+                          {DAYS.find(d => d.key === day)?.label || day}
+                        </div>
+                      ))}
+                      <span className="text-xs text-slate-500 ml-1">(Días predefinidos por ritmo)</span>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 mb-3">
+                      {DAYS.map(d => (
+                        <button key={d.key} type="button" 
+                          onClick={() => toggleDay(d.key)}
+                          className={`w-8 h-8 rounded-full font-bold text-xs transition-all cursor-pointer ${
+                            selectedDays.includes(d.key)
+                              ? 'bg-[#1D3A8A] text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                          }`}
+                        >
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedDays.length > 0 && (
+                    <>
+                      <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                        <input type="checkbox" checked={sameTime}
+                          onChange={() => setSameTime(!sameTime)}
+                          className="accent-[#1D3A8A] w-4 h-4 cursor-pointer"
+                        />
+                        <span className="text-xs font-medium text-slate-600">Misma hora todos los días seleccionados</span>
+                      </label>
+
+                      {sameTime ? (
+                        <div>
+                          {!showManualTime ? (
+                            <select 
+                              value={`${uniformStart}-${uniformEnd}`}
+                              onChange={e => {
+                                if (e.target.value === 'manual') {
+                                  setShowManualTime(true);
+                                  setUniformStart('');
+                                  setUniformEnd('');
+                                } else {
+                                  const [s, eTime] = e.target.value.split('-');
+                                  if (s && eTime) {
+                                    setUniformStart(s);
+                                    setUniformEnd(eTime);
+                                  }
+                                }
+                              }}
+                              className="w-full border border-slate-200 rounded-lg py-2 px-3 text-sm bg-slate-50 focus:ring-2 focus:ring-[#1D3A8A]/20"
+                            >
+                              <option value="-">Selecciona un horario sugerido...</option>
+                              {rhythm === 'SATURDAY' ? (
+                                <>
+                                  <option value="08:00-10:50">08:00 a 10:50</option>
+                                  <option value="11:00-13:50">11:00 a 13:50</option>
+                                  <option value="14:00-16:50">14:00 a 16:50</option>
+                                </>
+                              ) : (
+                                Array.from({ length: 14 }).map((_, i) => {
+                                  const hour = i + 8;
+                                  const start = `${hour.toString().padStart(2, '0')}:00`;
+                                  const end = `${hour.toString().padStart(2, '0')}:50`;
+                                  return <option key={start} value={`${start}-${end}`}>{start} a {end}</option>;
+                                })
+                              )}
+                              <option value="manual">Otro (Ingreso manual)</option>
+                            </select>
+                          ) : (
+                            <div>
+                              <div className="flex gap-2 items-center">
+                                <input type="time" value={uniformStart}
+                                  onChange={e => setUniformStart(e.target.value)}
+                                  className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
+                                />
+                                <span className="text-slate-400 text-sm">a</span>
+                                <input type="time" value={uniformEnd}
+                                  onChange={e => setUniformEnd(e.target.value)}
+                                  className="flex-1 border border-slate-200 rounded-lg py-1.5 px-2 text-sm bg-slate-50"
+                                />
+                              </div>
+                              <button type="button" onClick={() => setShowManualTime(false)} className="text-xs text-blue-600 mt-1 hover:underline cursor-pointer">
+                                Volver a sugerencias
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {selectedDays.map(day => (
+                            <div key={day} className="flex items-center gap-2">
+                              <span className="w-10 text-xs font-bold text-slate-600">{day}</span>
+                              <input type="time"
+                                value={perDay[day]?.startTime || ''}
+                                onChange={e => setPerDay(prev => ({...prev, [day]: {...(prev[day] || {}), startTime: e.target.value}}))}
+                                className="flex-1 border border-slate-200 rounded-lg py-1 px-2 text-xs bg-slate-50"
+                              />
+                              <span className="text-slate-400 text-xs">a</span>
+                              <input type="time"
+                                value={perDay[day]?.endTime || ''}
+                                onChange={e => setPerDay(prev => ({...prev, [day]: {...(prev[day] || {}), endTime: e.target.value}}))}
+                                className="flex-1 border border-slate-200 rounded-lg py-1 px-2 text-xs bg-slate-50"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/90 flex justify-end items-center gap-3 sticky bottom-0">
+                <button
+                  type="button"
+                  onClick={closeFormModal}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-[#1D3A8A] hover:bg-blue-800 transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 active:scale-98 cursor-pointer"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : editingId ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>Guardar Cambios</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>Crear Grupo</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ── Slide-Over Modal: Alumnos del Grupo ── */}
       {selectedGroupForStudents && (

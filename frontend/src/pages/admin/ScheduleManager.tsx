@@ -140,7 +140,8 @@ export function ScheduleManager() {
     const zoomToUse = isZoomOverridden ? (formData.zoomHostId || null) : (formData.zoomHostId || selectedLevelData?.zoomHostId || null);
     if (zoomToUse) {
       const zoomClash = scheduledClasses.some(c => {
-        if (c.zoomHostId !== zoomToUse || c.id === editingId) return false;
+        const cHostId = c.zoomHostId || c.zoomHost?.id || c.module?.level?.zoomHostId;
+        if (cHostId !== zoomToUse || c.id === editingId) return false;
         const start1 = new Date(c.scheduledAt).getTime();
         const end1 = start1 + (c.durationExpected || 3600) * 1000;
         const start2 = scheduledAt.getTime();
@@ -175,16 +176,16 @@ export function ScheduleManager() {
         body.teacherId = formData.teacherId;
       }
 
-      // Include either zoomHostId (for API auto-create), group's permanent link, or manual URL
+      // Include either zoomHostId, group's permanent link, or manual URL
       const selectedLevelData = levels.find((l: any) => l.id === formData.levelId);
       const targetHostId = formData.zoomHostId || (!isZoomOverridden ? selectedLevelData?.zoomHostId : null);
       const selectedHost = zoomHosts.find((h: any) => h.id === targetHostId);
-      const hasS2SCredentials = !!(selectedHost?.accountId && selectedHost?.clientId && selectedHost?.clientSecret);
       const groupZoomLink = selectedLevelData?.zoomLink || selectedLevelData?.zoomHostGroup?.permanentLink || selectedHost?.permanentLink || null;
 
-      if (targetHostId && hasS2SCredentials) {
+      if (targetHostId) {
         body.zoomHostId = targetHostId;
-      } else if (formData.url) {
+      }
+      if (formData.url) {
         body.url = formData.url;
       } else if (groupZoomLink) {
         body.url = groupZoomLink;
@@ -222,23 +223,38 @@ export function ScheduleManager() {
   };
 
   const handleDelete = async (id: string) => {
+    // Instant optimistic UI feedback: remove immediately from list
+    setDeleteConfirm({ show: false, id: null });
+    setSelectedClassIds(prev => prev.filter(x => x !== id));
+    setScheduledClasses(prev => prev.filter(x => x.id !== id));
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${session?.access_token}` }
       });
-      if (res.ok) {
+      if (!res.ok) {
         fetchData();
-        setDeleteConfirm({show: false, id: null});
-        setSelectedClassIds(prev => prev.filter(x => x !== id));
+        setCustomAlert({ show: true, message: 'No se pudo eliminar la clase.', type: 'error' });
       }
     } catch (e) {
       console.error(e);
+      fetchData();
+      setCustomAlert({ show: true, message: 'Error de conexión al eliminar la clase.', type: 'error' });
     }
   };
 
   const handleBatchDelete = async () => {
     if (selectedClassIds.length === 0) return;
+    const idsToDelete = [...selectedClassIds];
+    const count = idsToDelete.length;
+
+    // Instant optimistic removal from UI
+    setBatchDeleteConfirm(false);
+    setSelectedClassIds([]);
+    setIsSelectionMode(false);
+    setScheduledClasses(prev => prev.filter(x => !idsToDelete.includes(x.id)));
+
     setIsBatchDeleting(true);
     try {
       let res = await fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/batch-delete`, {
@@ -247,42 +263,35 @@ export function ScheduleManager() {
           'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ids: selectedClassIds })
+        body: JSON.stringify({ ids: idsToDelete })
       });
 
       // Fallback resiliente si el backend remoto aún no tiene desplegado batch-delete
       if (res.status === 404) {
         await Promise.all(
-          selectedClassIds.map(id =>
+          idsToDelete.map(id =>
             fetch(`${import.meta.env.VITE_API_URL}/admin/schedule/${id}`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${session?.access_token}` }
             })
           )
         );
-        const count = selectedClassIds.length;
-        setSelectedClassIds([]);
-        setBatchDeleteConfirm(false);
         setCustomAlert({
           show: true,
           message: `¡Listo! Se han eliminado ${count} clases exitosamente.`,
           type: 'success'
         });
-        fetchData();
         return;
       }
 
       if (res.ok) {
-        const count = selectedClassIds.length;
-        setSelectedClassIds([]);
-        setBatchDeleteConfirm(false);
         setCustomAlert({
           show: true,
-          message: `¡Listo! Se han eliminado ${count} clases de un jalón exitosamente.`,
+          message: `¡Listo! Se han eliminado ${count} clases exitosamente.`,
           type: 'success'
         });
-        fetchData();
       } else {
+        fetchData();
         const error = await res.json().catch(() => ({}));
         setCustomAlert({
           show: true,
@@ -292,7 +301,12 @@ export function ScheduleManager() {
       }
     } catch (e) {
       console.error(e);
-      setCustomAlert({ show: true, message: 'Error de conexión con el servidor.', type: 'error' });
+      fetchData();
+      setCustomAlert({
+        show: true,
+        message: 'Error de conexión al eliminar clases en lote.',
+        type: 'error'
+      });
     } finally {
       setIsBatchDeleting(false);
     }
@@ -302,6 +316,8 @@ export function ScheduleManager() {
     const dt = new Date(cls.scheduledAt);
     const dateStr = dt.toISOString().split('T')[0];
     const timeStr = dt.toTimeString().substring(0, 5);
+    const resolvedZoomHostId = cls.zoomHostId || cls.zoomHost?.id || cls.module?.level?.zoomHostId || '';
+    const resolvedTeacherId = cls.teacherId || cls.teacher?.id || cls.module?.level?.teacherId || '';
 
     setFormData({
       levelId: cls.module?.levelId || '',
@@ -309,16 +325,16 @@ export function ScheduleManager() {
       moduleName: cls.module?.title || '',
       title: cls.title || '',
       url: cls.url || '',
-      zoomHostId: cls.zoomHost?.id || '',
-      teacherId: cls.teacher?.id || '',
+      zoomHostId: resolvedZoomHostId,
+      teacherId: resolvedTeacherId,
       scheduledAtDate: dateStr,
       scheduledAtTime: timeStr,
       durationExpected: cls.durationExpected || 3600
     });
     setEditingId(cls.id);
     setActiveTab('form');
-    setIsZoomOverridden(!!cls.zoomHost?.id);
-    setIsTeacherOverridden(!!cls.teacher?.id);
+    setIsZoomOverridden(!!cls.zoomHostId && cls.zoomHostId !== cls.module?.level?.zoomHostId);
+    setIsTeacherOverridden(!!cls.teacherId && cls.teacherId !== cls.module?.level?.teacherId);
   };
 
   const cancelEdit = () => {
@@ -385,7 +401,8 @@ export function ScheduleManager() {
     const end2 = start2 + Number(formData.durationExpected || 3600) * 1000;
 
     return scheduledClasses.some(c => {
-      if (c.zoomHostId !== hostId || c.id === editingId) return false;
+      const cHostId = c.zoomHostId || c.zoomHost?.id || c.module?.level?.zoomHostId;
+      if (cHostId !== hostId || c.id === editingId) return false;
       const start1 = new Date(c.scheduledAt).getTime();
       const end1 = start1 + (c.durationExpected || 3600) * 1000;
       return start1 < end2 && end1 > start2;
@@ -533,7 +550,8 @@ export function ScheduleManager() {
 
         if (!hasConflict && targetZoomId) {
           const zoomClash = scheduledClasses.some((c: any) => {
-            if (c.zoomHostId !== targetZoomId) return false;
+            const cHostId = c.zoomHostId || c.zoomHost?.id || c.module?.level?.zoomHostId;
+            if (cHostId !== targetZoomId) return false;
             const c1 = new Date(c.scheduledAt).getTime();
             const c2 = c1 + (c.durationExpected || 3600) * 1000;
             return sStart < c2 && sEnd > c1;
@@ -608,6 +626,46 @@ export function ScheduleManager() {
     lastActiveSession && recurringEndDate && recurringEndDate < lastActiveSession.dateStr
   );
 
+  // Helper para contar cuántas clases de la serie recurrente chocan con un Zoom específico
+  const getRecurringZoomConflicts = (hostId: string) => {
+    if (!generatedSessions.length) return 0;
+    const active = generatedSessions.filter(s => !s.isExcluded);
+    let conflictCount = 0;
+    for (const session of active) {
+      const sStart = new Date(session.isoString).getTime();
+      const sEnd = sStart + Number(recurringDuration || 3600) * 1000;
+      const clash = scheduledClasses.some((c: any) => {
+        const cHostId = c.zoomHostId || c.zoomHost?.id || c.module?.level?.zoomHostId;
+        if (cHostId !== hostId) return false;
+        const c1 = new Date(c.scheduledAt).getTime();
+        const c2 = c1 + (c.durationExpected || 3600) * 1000;
+        return sStart < c2 && sEnd > c1;
+      });
+      if (clash) conflictCount++;
+    }
+    return conflictCount;
+  };
+
+  // Helper para contar cuántas clases de la serie recurrente chocan con un Profesor específico
+  const getRecurringTeacherConflicts = (teacherId: string) => {
+    if (!generatedSessions.length) return 0;
+    const active = generatedSessions.filter(s => !s.isExcluded);
+    let conflictCount = 0;
+    for (const session of active) {
+      const sStart = new Date(session.isoString).getTime();
+      const sEnd = sStart + Number(recurringDuration || 3600) * 1000;
+      const clash = scheduledClasses.some((c: any) => {
+        const cTid = c.teacherId || c.module?.level?.teacherId;
+        if (cTid !== teacherId) return false;
+        const c1 = new Date(c.scheduledAt).getTime();
+        const c2 = c1 + (c.durationExpected || 3600) * 1000;
+        return sStart < c2 && sEnd > c1;
+      });
+      if (clash) conflictCount++;
+    }
+    return conflictCount;
+  };
+
   const handleBatchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.levelId) {
@@ -632,6 +690,17 @@ export function ScheduleManager() {
     const activeSessions = generatedSessions.filter(s => !s.isExcluded);
     if (activeSessions.length === 0) {
       setCustomAlert({ show: true, message: 'No hay ninguna sesión activa para programar. Revisa los días y rango seleccionados.', type: 'error' });
+      return;
+    }
+
+    const conflictingSessions = activeSessions.filter(s => s.hasConflict);
+    if (conflictingSessions.length > 0) {
+      const dates = conflictingSessions.map(s => `• ${s.dayName} ${s.formattedDate} (${s.conflictMessage})`).join('\n');
+      setCustomAlert({
+        show: true,
+        message: `No se pueden programar las clases porque hay ${conflictingSessions.length} fecha(s) que chocan con otra clase:\n\n${dates}\n\n💡 Tip: En la lista de fechas de abajo, haz clic en el botón "Excluir" en esa fecha para saltarla y crear las demás, o cambia el horario/Zoom.`,
+        type: 'error'
+      });
       return;
     }
 
@@ -1401,12 +1470,27 @@ export function ScheduleManager() {
                       <select
                         value={formData.zoomHostId}
                         onChange={e => setFormData({ ...formData, zoomHostId: e.target.value })}
-                        className="w-full border border-slate-200 rounded-xl py-1.5 px-2.5 text-xs bg-slate-50"
+                        className="w-full border border-slate-200 rounded-xl py-1.5 px-2.5 text-xs bg-slate-50 font-medium"
                       >
                         <option value="">Por defecto del grupo</option>
-                        {activeHosts.map((h: any) => (
-                          <option key={h.id} value={h.id}>{h.displayName}</option>
-                        ))}
+                        {(() => {
+                          const sortedHosts = [...activeHosts].sort((a, b) => {
+                            return getRecurringZoomConflicts(a.id) - getRecurringZoomConflicts(b.id);
+                          });
+                          return sortedHosts.map((h: any) => {
+                            const conflicts = getRecurringZoomConflicts(h.id);
+                            const isFree = conflicts === 0;
+                            return (
+                              <option 
+                                key={h.id} 
+                                value={h.id} 
+                                className={isFree ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-medium'}
+                              >
+                                {h.displayName} {isFree ? '✓ (100% Libre - 0 cruces)' : `⚠️ (Ocupado en ${conflicts} clase${conflicts > 1 ? 's' : ''})`}
+                              </option>
+                            );
+                          });
+                        })()}
                       </select>
                     </div>
                     <div>
@@ -1414,24 +1498,88 @@ export function ScheduleManager() {
                       <select
                         value={formData.teacherId}
                         onChange={e => setFormData({ ...formData, teacherId: e.target.value })}
-                        className="w-full border border-slate-200 rounded-xl py-1.5 px-2.5 text-xs bg-slate-50"
+                        className="w-full border border-slate-200 rounded-xl py-1.5 px-2.5 text-xs bg-slate-50 font-medium"
                       >
                         <option value="">Por defecto del grupo</option>
-                        {teachers.map((t: any) => (
-                          <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
-                        ))}
+                        {(() => {
+                          const sortedTeachers = [...teachers].sort((a, b) => {
+                            return getRecurringTeacherConflicts(a.id) - getRecurringTeacherConflicts(b.id);
+                          });
+                          return sortedTeachers.map((t: any) => {
+                            const conflicts = getRecurringTeacherConflicts(t.id);
+                            const isFree = conflicts === 0;
+                            return (
+                              <option 
+                                key={t.id} 
+                                value={t.id} 
+                                className={isFree ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-medium'}
+                              >
+                                {t.firstName} {t.lastName} {isFree ? '✓ (100% Libre - 0 cruces)' : `⚠️ (Ocupado en ${conflicts} clase${conflicts > 1 ? 's' : ''})`}
+                              </option>
+                            );
+                          });
+                        })()}
                       </select>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-50 rounded-xl p-2.5 text-xs text-slate-600 border border-slate-100 flex items-center justify-between">
-                    <span>
-                      👨‍🏫 <strong>{selectedLevel?.teacher ? `${selectedLevel.teacher.firstName} ${selectedLevel.teacher.lastName}` : 'Sin profesor asignado'}</strong>
-                    </span>
-                    <span>
-                      🎥 <strong>{selectedLevel?.zoomHostGroup?.displayName || 'Enlace permanente del grupo'}</strong>
-                    </span>
-                  </div>
+                  (() => {
+                    const defaultTeacherId = selectedLevel?.teacherId;
+                    const defaultZoomId = selectedLevel?.zoomHostId;
+                    const teacherConflicts = defaultTeacherId ? getRecurringTeacherConflicts(defaultTeacherId) : 0;
+                    const zoomConflicts = defaultZoomId ? getRecurringZoomConflicts(defaultZoomId) : 0;
+                    const hasAnyConflict = teacherConflicts > 0 || zoomConflicts > 0;
+
+                    return (
+                      <div className={`rounded-xl p-2.5 text-xs border transition-all ${
+                        hasAnyConflict ? 'bg-amber-50/70 border-amber-200 text-amber-900' : 'bg-slate-50 border-slate-100 text-slate-600'
+                      } flex flex-col sm:flex-row sm:items-center justify-between gap-2`}>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            👨‍🏫 <strong>{selectedLevel?.teacher ? `${selectedLevel.teacher.firstName} ${selectedLevel.teacher.lastName}` : 'Sin profesor asignado'}</strong>
+                            {defaultTeacherId && (
+                              teacherConflicts > 0 ? (
+                                <span className="text-[10px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded-full">
+                                  ⚠️ {teacherConflicts} cruce{teacherConflicts > 1 ? 's' : ''}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">
+                                  ✓ 100% Libre
+                                </span>
+                              )
+                            )}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            🎥 <strong>{selectedLevel?.zoomHostGroup?.displayName || zoomHosts.find((h: any) => h.id === selectedLevel?.zoomHostId)?.displayName || 'Zoom del grupo'}</strong>
+                            {defaultZoomId && (
+                              zoomConflicts > 0 ? (
+                                <span className="text-[10px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded-full">
+                                  ⚠️ {zoomConflicts} cruce{zoomConflicts > 1 ? 's' : ''}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">
+                                  ✓ 100% Libre
+                                </span>
+                              )
+                            )}
+                          </span>
+                        </div>
+
+                        {hasAnyConflict && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsZoomOverridden(true);
+                              setIsTeacherOverridden(true);
+                            }}
+                            className="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-white border border-blue-200 px-2 py-0.5 rounded-lg shadow-2xs self-start sm:self-auto cursor-pointer"
+                          >
+                            Elegir Zoom o Profesor disponible →
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()
                 )}
               </div>
 
@@ -1666,8 +1814,8 @@ export function ScheduleManager() {
 
               {/* — Zoom: Auto-detect from Group or Manual — */}
               {(() => {
-                const groupZoomLink = selectedLevel?.zoomLink || selectedLevel?.zoomHostGroup?.permanentLink || null;
-                const groupZoomName = selectedLevel?.zoomHostGroup?.displayName || null;
+                const groupZoomName = selectedLevel?.zoomHostGroup?.displayName || zoomHosts.find((h: any) => h.id === selectedLevel?.zoomHostId)?.displayName || null;
+                const groupZoomLink = selectedLevel?.zoomLink || selectedLevel?.zoomHostGroup?.permanentLink || zoomHosts.find((h: any) => h.id === selectedLevel?.zoomHostId)?.permanentLink || null;
                 const hasGroupZoom = !!groupZoomLink;
                 const overrideZoom = isZoomOverridden;
                 const defaultZoomOccupied = selectedLevel?.zoomHostId ? isZoomOccupied(selectedLevel.zoomHostId) : false;
@@ -2032,18 +2180,25 @@ export function ScheduleManager() {
                         <p className="text-xs text-slate-500">{new Date(cls.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                       </td>
                       <td className="p-3">
-                        {cls.zoomHost ? (
-                          <div className="flex items-center gap-1.5">
-                            <Video className="w-3.5 h-3.5 text-[#2D8CFF]" />
-                            <span className="text-xs text-[#2D8CFF] font-medium">{cls.zoomHost.displayName}</span>
-                          </div>
-                        ) : cls.url ? (
-                          <a href={cls.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                            <LinkIcon className="w-3 h-3" /> Manual
-                          </a>
-                        ) : (
-                          <span className="text-xs text-slate-400">—</span>
-                        )}
+                        {(() => {
+                          const hostDisplay = cls.zoomHost?.displayName || cls.module?.level?.zoomHostGroup?.displayName || zoomHosts.find((h: any) => h.id === (cls.zoomHostId || cls.module?.level?.zoomHostId))?.displayName;
+                          if (hostDisplay) {
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <Video className="w-3.5 h-3.5 text-[#2D8CFF]" />
+                                <span className="text-xs text-[#2D8CFF] font-medium">{hostDisplay}</span>
+                              </div>
+                            );
+                          }
+                          if (cls.url) {
+                            return (
+                              <a href={cls.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                                <LinkIcon className="w-3 h-3" /> Manual
+                              </a>
+                            );
+                          }
+                          return <span className="text-xs text-slate-400">—</span>;
+                        })()}
                       </td>
                       <td className="p-3 text-right">
                         <div className="flex justify-end gap-2">

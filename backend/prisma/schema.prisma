@@ -100,6 +100,7 @@ model Level {
   modality         ClassModality  @default(GROUP)
   rhythm           StudyRhythm?   // null para Individual/PartDuo (horario libre)
   schedule         String?        // Horario, e.g., "Lun, Mier, Vier · 10:00-12:00"
+  startDate        DateTime?      // Fecha de inicio del grupo
   maxStudents      Int            @default(8)
   zoomLink         String?        // Enlace FIJO permanente de Zoom (legacy, preferir zoomHostId)
   zoomHostId       String?        @db.Uuid
@@ -271,5 +272,8 @@ model AppSettings {
   googleAdsBudget Float    @default(10000) // MXN mensual
   metaAdsBudget   Float    @default(3000)  // MXN mensual
   schoolName      String   @default("Les Rois du Français")
+  heroSlides      Json?    // Slides del carrusel del Hero
+  teachers        Json?    // Tarjetas de profesores destacados
+  levelsData      Json?    // Información pedagógica y personajes de los 6 niveles
   updatedAt       DateTime @updatedAt
 }

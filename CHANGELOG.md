@@ -4,6 +4,43 @@ Todos los cambios notables realizados en el proyecto se documentan en este archi
 
 ---
 
+## [2026-09-08] - Módulo de Configuración Landing Page, Responsividad Móvil del Portal & Optimización de Carga
+
+### ⚙️ Módulo Administrador: Configuración Integral de la Landing Page (`/admin/settings`)
+- **Gestión Visual Completa:** Pestañas interactivas para configurar Hero Slideshow (4 diapositivas), Profesores Reales (3 perfiles) y Niveles Académicos (A1 a B2) con vista previa idéntica a la Landing Page.
+- **Subida de Archivos desde PC:** Selector de archivos local para subir imágenes directamente desde Windows/PC (`/admin/upload-image`), guardándose en WebP optimizado.
+- **Sistema de Seguridad y Deshacer:** Soporte de `Ctrl + Z`, botón para descartar cambios y botones ámbar para restaurar imágenes oficiales de fábrica en 1 clic.
+- **Sincronización en Tiempo Real:** Comunicación inter-pestañas mediante eventos de `storage` y `focus`, refrescando la Landing Page instantáneamente sin recargar manualmente.
+- **Persistencia en Supabase:** Almacenamiento singleton en el modelo `AppSettings` con endpoint público `GET /landing-config`.
+
+### 📱 Responsividad Móvil y Tablet en Todo el Portal
+- **Cabecera y Menú Lateral Deslizable:** Implementación de encabezado móvil con botón hamburguesa (`Menu`) y cajón deslizable (*Slide-Over Drawer* con botón `X`) en `AdminLayout`, `TeacherLayout`, `Layout` y `Sidebar`.
+- **Adaptabilidad de Pantalla:** Contenedores fluidos con márgenes responsivos (`p-4 sm:p-6 md:p-8`) que impiden desbordamientos horizontales en teléfonos y tablets.
+
+### ⚡ Optimización Extrema de Rendimiento de Imágenes
+- **Lazy Loading Asíncrono en 64 Imágenes:** Inclusión de `loading="lazy"` y `decoding="async"` en todas las imágenes debajo del Hero, bajando la transferencia inicial de 4.4 MB a < 160 KB.
+- **Preload Scanner en `<head>`:** Precarga anticipada de assets clave del Hero (`chateau_sunset_bg.webp`, `rey.webp`, `logo_official.webp`).
+- **Compresión WebP en Cliente:** Redimensionamiento automático a máx 1200px y codificación WebP al 85% en el navegador antes del envío al servidor.
+- **Caché Inmutable en Vercel CDN:** Cabeceras `Cache-Control: public, max-age=31536000, immutable` para `/imagenes-lp/` y `/assets/`.
+
+### 👑 Hero Section: Slideshow Continuo con 4 Personajes Reales
+- **Rotación Fluida:** 4 personajes oficiales (`rey.webp`, `hero_slide_1.webp`, `hero_slide_2.webp`, `hero_slide_3.webp`) ciclan cada 5s con transición cross-fade lenta de 1.6s sin saltos de maquetación ni recargas.
+
+### 📚 Escala de 6 Niveles Académicos Reales (`A1, A2, A2+, B1, B1+, B2`)
+- **Textos Institucionales:** Se incorporaron los 6 niveles y las descripciones pedagógicas de la institución.
+- **Tarjeta Azul Compacta (-45% Altura):** Sistema de pestañas interactivas tipo píldora (`🎯 4 Competencias Clave` y `📖 Enfoque del Nivel`) para mantener la tarjeta armónica y evitar desbordamiento vertical.
+
+### 🎨 Personaje Único por Nivel & Pulido Visual Quirúrgico
+- **6 Personajes Adaptados:** A1 (alumna con laptop y libros), A2 (alumno con sudadera azul y cuaderno), A2+ (alumna con corona y sudadera roja), B1 (alumno con corona y celular), B1+ (señor alegre con playera blanca y paliacate rojo), B2 (profesor francés en playera marinera).
+- **Ajustes de Escala y Composición:**
+  - Nivel A1: Agrandada al +18% (`scale: 1.18`) con contenedor de 480px.
+  - Nivel A2: Removida la línea vertical oscura en su costado y escalado al +15% (`scale: 1.15`).
+  - Nivel A2+: Reposicionada verticalmente (`margin-bottom: -46px`, `translate: 0 16px`) para emerger de la base como si estuviera sentada en el borde.
+  - Nivel B1+: Recuperada al 100% su playera blanca original mediante gradiente cromático, centrado y escalado al +14% (`scale: 1.14`).
+- **Limpieza Método MRAF:** Retirada la flecha azul curvada y centrado simétricamente el botón rojo *"QUIERO PROBAR EL MÉTODO 👑"*.
+
+---
+
 ## [2026-09-01] - Módulo Administrador: CRM Prospectos & Grupos Activos
 
 ### 🚀 Tarea 1: Módulo CRM / Prospectos (Paso 1) - COMPLETADO

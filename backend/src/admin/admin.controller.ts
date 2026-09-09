@@ -146,4 +146,9 @@ export class AdminController {
   updateSettings(@Body() body: any) {
     return this.adminService.updateSettings(body);
   }
+
+  @Post('upload-image')
+  uploadImage(@Body() body: { filename: string; base64: string }) {
+    return this.adminService.uploadImage(body.filename, body.base64);
+  }
 }

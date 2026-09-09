@@ -98,6 +98,9 @@ let AdminController = class AdminController {
     updateSettings(body) {
         return this.adminService.updateSettings(body);
     }
+    uploadImage(body) {
+        return this.adminService.uploadImage(body.filename, body.base64);
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -272,6 +275,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateSettings", null);
+__decorate([
+    (0, common_1.Post)('upload-image'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AdminController.prototype, "uploadImage", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

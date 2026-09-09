@@ -94,6 +94,7 @@ export declare class AdminService {
                 modality: import("@prisma/client").$Enums.ClassModality;
                 rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
                 schedule: string | null;
+                startDate: Date | null;
                 maxStudents: number;
                 zoomLink: string | null;
                 totalScoreTarget: number;
@@ -201,6 +202,7 @@ export declare class AdminService {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -216,6 +218,7 @@ export declare class AdminService {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -231,6 +234,7 @@ export declare class AdminService {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -246,6 +250,7 @@ export declare class AdminService {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -253,10 +258,10 @@ export declare class AdminService {
         teacherId: string | null;
     }>;
     private validateTeacherAvailability;
+    private validateZoomAvailability;
     batchScheduleClasses(data: any): Promise<{
         success: boolean;
         count: number;
-        classes: any[];
     }>;
     scheduleClass(data: any): Promise<{
         url: string | null;
@@ -286,6 +291,18 @@ export declare class AdminService {
         } | null;
         module: {
             level: {
+                zoomHostGroup: {
+                    id: string;
+                    email: string;
+                    isActive: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    displayName: string;
+                    permanentLink: string | null;
+                    accountId: string | null;
+                    clientId: string | null;
+                    clientSecret: string | null;
+                } | null;
                 users: {
                     id: string;
                     email: string;
@@ -302,6 +319,7 @@ export declare class AdminService {
                 modality: import("@prisma/client").$Enums.ClassModality;
                 rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
                 schedule: string | null;
+                startDate: Date | null;
                 maxStudents: number;
                 zoomLink: string | null;
                 totalScoreTarget: number;
@@ -411,6 +429,9 @@ export declare class AdminService {
         googleAdsBudget: number;
         metaAdsBudget: number;
         schoolName: string;
+        heroSlides: import("@prisma/client/runtime/client").JsonValue | null;
+        teachers: import("@prisma/client/runtime/client").JsonValue | null;
+        levelsData: import("@prisma/client/runtime/client").JsonValue | null;
     }>;
     updateSettings(data: any): Promise<{
         id: string;
@@ -418,5 +439,12 @@ export declare class AdminService {
         googleAdsBudget: number;
         metaAdsBudget: number;
         schoolName: string;
+        heroSlides: import("@prisma/client/runtime/client").JsonValue | null;
+        teachers: import("@prisma/client/runtime/client").JsonValue | null;
+        levelsData: import("@prisma/client/runtime/client").JsonValue | null;
+    }>;
+    uploadImage(filename: string, base64Data: string): Promise<{
+        url: string;
+        filename: string;
     }>;
 }

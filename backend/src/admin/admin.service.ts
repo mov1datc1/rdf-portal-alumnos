@@ -259,6 +259,7 @@ export class AdminService {
         modality: data.modality || 'GROUP',
         rhythm: data.rhythm || null,
         schedule: data.schedule || null,
+        startDate: data.startDate ? new Date(data.startDate) : null,
         maxStudents: data.maxStudents || 8,
         zoomLink: data.zoomLink || null,
         zoomHostId: data.zoomHostId || null,
@@ -299,6 +300,7 @@ export class AdminService {
     if (data.modality !== undefined) updateData.modality = data.modality;
     if (data.rhythm !== undefined) updateData.rhythm = data.rhythm;
     if (data.schedule !== undefined) updateData.schedule = data.schedule;
+    if (data.startDate !== undefined) updateData.startDate = data.startDate ? new Date(data.startDate) : null;
     if (data.maxStudents !== undefined) updateData.maxStudents = data.maxStudents;
     if (data.zoomLink !== undefined) updateData.zoomLink = data.zoomLink;
     if (data.zoomHostId !== undefined) updateData.zoomHostId = data.zoomHostId || null;
@@ -375,6 +377,39 @@ export class AdminService {
     }
   }
 
+  private async validateZoomAvailability(zoomHostId: string, scheduledStart: Date, scheduledEnd: Date, excludeClassId?: string) {
+    if (!zoomHostId) return;
+
+    const overlappingClasses = await this.prisma.resource.findMany({
+      where: {
+        type: 'LIVE_CLASS',
+        id: excludeClassId ? { not: excludeClassId } : undefined,
+        OR: [
+          { zoomHostId: zoomHostId },
+          { module: { level: { zoomHostId: zoomHostId } } }
+        ]
+      },
+      include: { module: { include: { level: true } }, zoomHost: true }
+    });
+
+    for (const cls of overlappingClasses) {
+      if (!cls.scheduledAt) continue;
+      
+      const actualZoomHostId = cls.zoomHostId || cls.module?.level?.zoomHostId;
+      if (actualZoomHostId !== zoomHostId) continue;
+
+      const clsStart = new Date(cls.scheduledAt);
+      const clsEnd = new Date(clsStart.getTime() + (cls.durationExpected || 3600) * 1000);
+      if (scheduledStart < clsEnd && scheduledEnd > clsStart) {
+        const hostName = cls.zoomHost?.displayName || 'esta cuenta de Zoom';
+        throw new HttpException(
+          `Esa cuenta de Zoom (${hostName}) ya está ocupada en ese mismo horario por otra clase (${cls.title}). No se pueden cruzar.`,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
+  }
+
   // ── Schedule ──
 
   async batchScheduleClasses(data: any) {
@@ -422,7 +457,60 @@ export class AdminService {
       }
     }
 
-    const createdResources: any[] = [];
+    // Fast single-query conflict validation for the entire batch date range
+    const validDates = classes.map((c: any) => new Date(c.scheduledAt).getTime()).filter((t: number) => !isNaN(t));
+    if (validDates.length > 0) {
+      const minStart = new Date(Math.min(...validDates));
+      const maxEnd = new Date(Math.max(...validDates) + Number(durationExpected) * 1000);
+
+      const existingClasses = await this.prisma.resource.findMany({
+        where: {
+          type: 'LIVE_CLASS',
+          scheduledAt: { gte: new Date(minStart.getTime() - 86400000), lte: maxEnd },
+          OR: [
+            ...(zoomHostId ? [{ zoomHostId }, { module: { level: { zoomHostId } } }] : []),
+            ...(teacherId ? [{ teacherId }, { module: { level: { teacherId } } }] : [])
+          ]
+        },
+        include: { module: { include: { level: true } }, zoomHost: true, teacher: true }
+      });
+
+      for (const item of classes) {
+        if (!item.scheduledAt) continue;
+        const scheduledStart = new Date(item.scheduledAt);
+        const scheduledEnd = new Date(scheduledStart.getTime() + Number(durationExpected) * 1000);
+
+        for (const cls of existingClasses) {
+          if (!cls.scheduledAt) continue;
+          const clsStart = new Date(cls.scheduledAt);
+          const clsEnd = new Date(clsStart.getTime() + (cls.durationExpected || 3600) * 1000);
+
+          if (scheduledStart < clsEnd && scheduledEnd > clsStart) {
+            const actualZoomHostId = cls.zoomHostId || cls.module?.level?.zoomHostId;
+            if (zoomHostId && actualZoomHostId === zoomHostId) {
+              const hostName = cls.zoomHost?.displayName || 'esta sala de Zoom';
+              const clashDate = scheduledStart.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short' });
+              throw new HttpException(
+                `El día ${clashDate} la cuenta de Zoom (${hostName}) ya está ocupada por otra clase (${cls.title}). Excluye esa fecha o cambia el horario/Zoom.`,
+                HttpStatus.BAD_REQUEST
+              );
+            }
+
+            const actualTeacherId = cls.teacherId || cls.module?.level?.teacherId;
+            if (teacherId && actualTeacherId === teacherId) {
+              const teacherName = cls.teacher ? `${cls.teacher.firstName} ${cls.teacher.lastName}` : 'el profesor';
+              const clashDate = scheduledStart.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: 'short' });
+              throw new HttpException(
+                `El día ${clashDate} el profesor (${teacherName}) ya tiene una clase asignada (${cls.title}). Excluye esa fecha o cambia de profesor.`,
+                HttpStatus.BAD_REQUEST
+              );
+            }
+          }
+        }
+      }
+    }
+
+    const resourcesToInsert: any[] = [];
     const moduleCache: Record<string, string> = {};
 
     for (const item of classes) {
@@ -450,32 +538,46 @@ export class AdminService {
       }
 
       const scheduledStart = new Date(item.scheduledAt);
-      const res = await this.prisma.resource.create({
-        data: {
-          title: item.title,
-          url: item.url || zoomJoinUrl,
-          type: 'LIVE_CLASS',
-          moduleId: itemModuleId,
-          teacherId: teacherId || null,
-          scheduledAt: scheduledStart,
-          durationExpected: Number(durationExpected),
-          zoomHostId: zoomHostId || null,
-        }
+      resourcesToInsert.push({
+        title: item.title,
+        url: item.url || zoomJoinUrl,
+        type: 'LIVE_CLASS',
+        moduleId: itemModuleId,
+        teacherId: teacherId || null,
+        scheduledAt: scheduledStart,
+        durationExpected: Number(durationExpected),
+        zoomHostId: zoomHostId || null,
       });
-      createdResources.push(res);
     }
+
+    await this.prisma.resource.createMany({
+      data: resourcesToInsert,
+    });
 
     return {
       success: true,
-      count: createdResources.length,
-      classes: createdResources
+      count: resourcesToInsert.length,
     };
   }
 
   async scheduleClass(data: any) {
     let zoomMeetingId: string | null = null;
     let zoomJoinUrl: string | null = data.url || null;
-    const zoomHostId: string | null = data.zoomHostId || null;
+    let zoomHostId: string | null = data.zoomHostId || null;
+
+    // Fallback Zoom host and link from Level if not provided
+    if (data.levelId && (!zoomHostId || !zoomJoinUrl)) {
+      const level = await this.prisma.level.findUnique({
+        where: { id: data.levelId },
+        include: { zoomHostGroup: true }
+      });
+      if (!zoomHostId && level?.zoomHostId) {
+        zoomHostId = level.zoomHostId;
+      }
+      if (!zoomJoinUrl) {
+        zoomJoinUrl = level?.zoomLink || level?.zoomHostGroup?.permanentLink || null;
+      }
+    }
 
     if (zoomHostId && this.zoomService) {
       try {
@@ -491,15 +593,6 @@ export class AdminService {
       } catch (err: any) {
         console.error('Zoom meeting creation failed, falling back:', err?.message || err);
       }
-    }
-
-    // Fallback Zoom link from Level if url is still null
-    if (!zoomJoinUrl && data.levelId) {
-      const level = await this.prisma.level.findUnique({
-        where: { id: data.levelId },
-        include: { zoomHostGroup: true }
-      });
-      zoomJoinUrl = level?.zoomLink || level?.zoomHostGroup?.permanentLink || null;
     }
 
     // Find or create the module by name or default
@@ -552,11 +645,17 @@ export class AdminService {
       if (level?.teacherId) teacherId = level.teacherId;
     }
 
+    const scheduledStart = new Date(data.scheduledAt);
+    const scheduledEnd = new Date(scheduledStart.getTime() + (data.durationExpected || 3600) * 1000);
+
     // TEACHER OVERLAP CHECK
     if (teacherId) {
-      const scheduledStart = new Date(data.scheduledAt);
-      const scheduledEnd = new Date(scheduledStart.getTime() + (data.durationExpected || 3600) * 1000);
       await this.validateTeacherAvailability(teacherId, scheduledStart, scheduledEnd);
+    }
+
+    // ZOOM OVERLAP CHECK
+    if (zoomHostId) {
+      await this.validateZoomAvailability(zoomHostId, scheduledStart, scheduledEnd);
     }
 
     return this.prisma.resource.create({
@@ -566,7 +665,7 @@ export class AdminService {
         type: 'LIVE_CLASS',
         moduleId: moduleId,
         teacherId: teacherId || null,
-        scheduledAt: new Date(data.scheduledAt),
+        scheduledAt: scheduledStart,
         durationExpected: data.durationExpected || 3600,
         zoomMeetingId,
         zoomHostId,
@@ -582,6 +681,7 @@ export class AdminService {
           include: { 
             level: { 
               include: { 
+                zoomHostGroup: true,
                 users: { 
                   select: { id: true, firstName: true, lastName: true, email: true, phone: true } 
                 } 
@@ -599,7 +699,9 @@ export class AdminService {
   async deleteScheduledClass(id: string) {
     const resource = await this.prisma.resource.findUnique({ where: { id } });
     if (resource?.zoomMeetingId && resource?.zoomHostId && this.zoomService) {
-      await this.zoomService.deleteMeeting(resource.zoomHostId, resource.zoomMeetingId);
+      this.zoomService.deleteMeeting(resource.zoomHostId, resource.zoomMeetingId).catch(err => {
+        console.warn('Background Zoom meeting deletion error:', err?.message || err);
+      });
     }
     await this.prisma.attendance.deleteMany({ where: { resourceId: id } });
     await this.prisma.userProgress.deleteMany({ where: { resourceId: id } });
@@ -608,14 +710,10 @@ export class AdminService {
 
   async batchDeleteScheduledClasses(ids: string[]) {
     if (!ids || ids.length === 0) return { count: 0 };
-    for (const id of ids) {
-      try {
-        await this.deleteScheduledClass(id);
-      } catch (e) {
-        console.error(`Error deleting scheduled class ${id}:`, e);
-      }
-    }
-    return { count: ids.length };
+    await this.prisma.attendance.deleteMany({ where: { resourceId: { in: ids } } });
+    await this.prisma.userProgress.deleteMany({ where: { resourceId: { in: ids } } });
+    const result = await this.prisma.resource.deleteMany({ where: { id: { in: ids } } });
+    return { count: result.count };
   }
 
   async updateScheduledClass(id: string, data: any) {
@@ -624,6 +722,7 @@ export class AdminService {
     if (!currentClass) throw new Error('Clase no encontrada');
 
     const teacherId = data.teacherId !== undefined ? data.teacherId : (currentClass.teacherId || currentClass.module?.level?.teacherId);
+    const zoomHostId = data.zoomHostId !== undefined ? data.zoomHostId : (currentClass.zoomHostId || currentClass.module?.level?.zoomHostId);
     const scheduledStart = data.scheduledAt ? new Date(data.scheduledAt) : (currentClass.scheduledAt ? new Date(currentClass.scheduledAt) : new Date());
     const duration = data.durationExpected || currentClass.durationExpected || 3600;
     const scheduledEnd = new Date(scheduledStart.getTime() + duration * 1000);
@@ -631,6 +730,11 @@ export class AdminService {
     // TEACHER OVERLAP CHECK
     if (teacherId) {
       await this.validateTeacherAvailability(teacherId, scheduledStart, scheduledEnd, id);
+    }
+
+    // ZOOM OVERLAP CHECK
+    if (zoomHostId) {
+      await this.validateZoomAvailability(zoomHostId, scheduledStart, scheduledEnd, id);
     }
 
     return this.prisma.resource.update({
@@ -642,6 +746,7 @@ export class AdminService {
         moduleId: data.moduleId,
         scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
         teacherId: data.teacherId !== undefined ? data.teacherId : undefined,
+        zoomHostId: data.zoomHostId !== undefined ? data.zoomHostId : undefined,
       }
     });
   }
@@ -687,8 +792,41 @@ export class AdminService {
     let settings = await this.prisma.appSettings.findUnique({ where: { id: 'global' } });
     if (!settings) {
       settings = await this.prisma.appSettings.create({
-        data: { id: 'global', googleAdsBudget: 10000, metaAdsBudget: 3000 }
+        data: {
+          id: 'global',
+          schoolName: 'Les Rois du Français',
+          googleAdsBudget: 10000,
+          metaAdsBudget: 3000,
+          heroSlides: DEFAULT_HERO_SLIDES,
+          teachers: DEFAULT_TEACHERS,
+          levelsData: DEFAULT_LEVELS,
+        }
       });
+    } else {
+      // Ensure missing JSON fields are populated with defaults
+      let updated = false;
+      const updateData: any = {};
+      if (!settings.heroSlides) {
+        updateData.heroSlides = DEFAULT_HERO_SLIDES;
+        settings.heroSlides = DEFAULT_HERO_SLIDES as any;
+        updated = true;
+      }
+      if (!settings.teachers) {
+        updateData.teachers = DEFAULT_TEACHERS;
+        settings.teachers = DEFAULT_TEACHERS as any;
+        updated = true;
+      }
+      if (!settings.levelsData) {
+        updateData.levelsData = DEFAULT_LEVELS;
+        settings.levelsData = DEFAULT_LEVELS as any;
+        updated = true;
+      }
+      if (updated) {
+        await this.prisma.appSettings.update({
+          where: { id: 'global' },
+          data: updateData
+        });
+      }
     }
     return settings;
   }
@@ -700,4 +838,184 @@ export class AdminService {
       create: { id: 'global', ...data },
     });
   }
+
+  async uploadImage(filename: string, base64Data: string) {
+    const fs = require('fs');
+    const path = require('path');
+
+    if (!base64Data) {
+      throw new HttpException('No se proporcionaron datos de imagen', HttpStatus.BAD_REQUEST);
+    }
+
+    const matches = base64Data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    const buffer = matches ? Buffer.from(matches[2], 'base64') : Buffer.from(base64Data, 'base64');
+
+    const ext = path.extname(filename || '') || '.webp';
+    const base = path.basename(filename || 'image', ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const safeFilename = `upload_${Date.now()}_${base}${ext}`;
+
+    const uploadsDir = path.resolve(process.cwd(), '../frontend/public/imagenes-lp/uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const fullPath = path.join(uploadsDir, safeFilename);
+    fs.writeFileSync(fullPath, buffer);
+
+    return {
+      url: `/imagenes-lp/uploads/${safeFilename}`,
+      filename: safeFilename
+    };
+  }
 }
+
+const DEFAULT_HERO_SLIDES = [
+  { id: 'slide-1', src: '/imagenes-lp/rey.webp', alt: 'Rey Oficial Les Rois du Français', active: true },
+  { id: 'slide-2', src: '/imagenes-lp/hero_slide_1.webp', alt: 'Reina con Corona Les Rois du Français', active: true },
+  { id: 'slide-3', src: '/imagenes-lp/hero_slide_2.webp', alt: 'Estudiante con Celular Les Rois du Français', active: true },
+  { id: 'slide-4', src: '/imagenes-lp/hero_slide_3.webp', alt: 'Comunidad Les Rois du Français', active: true }
+];
+
+const DEFAULT_TEACHERS = [
+  {
+    id: 'jean-luc',
+    name: 'Jean-Luc',
+    role: 'Le Roi du Fun & Conversación',
+    city: 'París, Francia',
+    exp: '8 años de experiencia',
+    image: '/imagenes-lp/teacher_royal_jean_luc.webp',
+    badge: 'Actitud Royal',
+    hashtag: '#ReyDelFrancés',
+    quote: '¡Bonjour! Mi misión es que hables francés con total confianza, soltura y cero miedo a equivocarte.',
+    bullets: ['100% Hablante Nativo de París', 'Especialista en Metodología MRAF® y Fluidez', 'Clases interactivas en vivo con grupos máx. 8']
+  },
+  {
+    id: 'sophie',
+    name: 'Sophie',
+    role: 'La Reine de la Culture & Estilo',
+    city: 'Lyon, Francia',
+    exp: '6 años de experiencia',
+    image: '/imagenes-lp/teacher_royal_sophie.webp',
+    badge: 'Cero Aburrimiento',
+    hashtag: '#FrancésDivertido',
+    quote: '¡C\'est la vie! Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.',
+    bullets: ['Nativa de Lyon, Francia', 'Rotación de acentos y cultura francófona viva', 'Práctica comunicativa para viajes y vida diaria']
+  },
+  {
+    id: 'pierre',
+    name: 'Pierre',
+    role: 'El Gran Canciller del Francés',
+    city: 'Burdeos, Francia',
+    exp: '10 años de experiencia',
+    image: '/imagenes-lp/teacher_royal_pierre.webp',
+    badge: 'Savoir-Faire Royal',
+    hashtag: '#AprendeComoRey',
+    quote: '¡Le français, c\'est cool! Olvídate de las clases tradicionales y aburridas. Tu coronación en francés empieza aquí.',
+    bullets: ['Evaluador de Exámenes Escritos y Orales', 'Dominio del idioma sin estrés ni tecnicismos', 'Puntualidad y atención 100% personalizada']
+  }
+];
+
+const DEFAULT_LEVELS = {
+  A1: {
+    code: 'A1',
+    sub: 'Básico 1',
+    subLabel: 'Básico 1',
+    levelTag: 'Básico 1 – Fundamentos • 4 Meses',
+    titleLine1: 'Fundamentos del francés.',
+    titleLine2: '¡Empieza a hablar!',
+    desc: 'En este nivel, los estudiantes se introducen en los fundamentos del francés. Aprenden el alfabeto, la pronunciación básica, la familia, la hora, la descripción física y las frases esenciales para la comunicación diaria. El objetivo principal es desarrollar la capacidad de comprender y usar expresiones cotidianas y frases sencillas para satisfacer necesidades inmediatas. Los alumnos empiezan a formar oraciones simples y a familiarizarse con la gramática elemental.',
+    bullets: [
+      { icon: 'chat', text: 'Presentación personal, saludos y situaciones cotidianas' },
+      { icon: 'trophy', text: 'Desarrollo de las 4 competencias: habla, escucha, lectura y escritura' },
+      { icon: 'book', text: '4 unidades (~1 mes c/u) con libro de actividades 100% gratis' },
+      { icon: 'people', text: 'Examen escrito y oral al finalizar con certificación oficial' }
+    ],
+    characterImage: '/imagenes-lp/level_char_a1.webp',
+    characterAlt: 'Alumna aprendiendo fundamentos de francés con libros y laptop - Nivel A1'
+  },
+  A2: {
+    code: 'A2',
+    sub: 'Básico 2',
+    subLabel: 'Básico 2',
+    levelTag: 'Básico 2 – Supervivencia y Rutina • 4 Meses',
+    titleLine1: 'Profundiza tu comunicación.',
+    titleLine2: '¡Conéctate con Francia!',
+    desc: 'El nivel Básico 2 profundiza en los conocimientos adquiridos previamente. Los estudiantes amplían su vocabulario y mejoran su capacidad de comunicación en situaciones más variadas. Se enfocan en construir oraciones más complejas en presente y pasado y en comprender conversaciones sencillas. Este nivel refuerza la comprensión auditiva y la expresión oral, permitiendo a los alumnos interactuar en contextos cotidianos con mayor confianza.',
+    bullets: [
+      { icon: 'chat', text: 'Conversación sobre rutina diaria, compras, viajes y entorno' },
+      { icon: 'people', text: 'Clases en vivo por Zoom con grupos reducidos (máx. 8 alumnos)' },
+      { icon: 'trophy', text: 'Rotación con profesores nativos de distintas regiones de Francia' },
+      { icon: 'book', text: '4 unidades temáticas, evaluación oral y escrita con certificado' }
+    ],
+    characterImage: '/imagenes-lp/level_char_a2.webp',
+    characterAlt: 'Alumno practicando rutina y comunicación en francés - Nivel A2'
+  },
+  'A2+': {
+    code: 'A2+',
+    sub: 'Intermedio 1',
+    subLabel: 'Intermedio 1',
+    levelTag: 'Intermedio 1 – Exploración y Fluidez • 4 Meses',
+    titleLine1: 'Explora temas complejos.',
+    titleLine2: '¡Gana fluidez y precisión!',
+    desc: 'En el nivel Intermedio 1, los estudiantes ya tienen una base sólida y empiezan a explorar temas más complejos. Se trabaja intensamente en la gramática y en la ampliación del vocabulario (los pasatiempos, los deportes, ir al médico, invitar a alguien a salir...). Los alumnos aprenden a expresarse con mayor fluidez y precisión, pudiendo hablar sobre experiencias personales, describir eventos y expresar opiniones en presente, pasado y futuro. La comprensión de textos escritos más largos y complejos también es un objetivo clave en este nivel.',
+    bullets: [
+      { icon: 'chat', text: 'Autonomía para viajar y desenvolverte en países francófonos' },
+      { icon: 'people', text: 'Expresión fluida de opiniones, ambiciones, proyectos y relatos' },
+      { icon: 'book', text: '4 unidades de estudio práctico con material pedagógico gratuito' },
+      { icon: 'trophy', text: 'Acreditación oficial mediante examen oral y escrito final' }
+    ],
+    characterImage: '/imagenes-lp/level_char_a2_plus.webp',
+    characterAlt: 'Alumna con corona ganando fluidez y soltura en francés - Nivel A2+'
+  },
+  B1: {
+    code: 'B1',
+    sub: 'Intermedio 2',
+    subLabel: 'Intermedio 2',
+    levelTag: 'Intermedio 2 – Consolidación y Debate • 4 Meses',
+    titleLine1: 'Consolida tu autonomía.',
+    titleLine2: '¡Debate y exprésate!',
+    desc: 'Este nivel está diseñado para consolidar y expandir las habilidades intermedias. Los estudiantes trabajan en la comprensión y producción de textos más detallados y en la participación en conversaciones más fluidas. Se enfoca en el desarrollo de habilidades para debatir temas abstractos y complejos (vocabulario del trabajo, describir una historia en pasado...), así como en la mejora de la pronunciación y la entonación. Los alumnos también se familiarizan con expresiones idiomáticas y el lenguaje formal e informal.',
+    bullets: [
+      { icon: 'chat', text: 'Conversaciones espontáneas en contextos laborales y sociales' },
+      { icon: 'trophy', text: 'Dominio de estructuras complejas con método MRAF® sin rodeos' },
+      { icon: 'people', text: 'Inmersión cultural con múltiples acentos regionales franceses' },
+      { icon: 'book', text: 'Certificado de nivel intermedio y pase directo a nivel Avanzado' }
+    ],
+    characterImage: '/imagenes-lp/level_char_b1.webp',
+    characterAlt: 'Alumno con corona debatiendo y consolidando su francés - Nivel B1'
+  },
+  'B1+': {
+    code: 'B1+',
+    sub: 'Avanzado 1',
+    subLabel: 'Avanzado 1',
+    levelTag: 'Avanzado 1 – Argumentación y Dominio • 4 Meses',
+    titleLine1: 'Argumenta con claridad.',
+    titleLine2: '¡Comunica con soltura!',
+    desc: 'En el nivel Avanzado 1, los estudiantes alcanzan un alto grado de competencia en el idioma. Son capaces de comprender y producir textos detallados y bien estructurados sobre temas complejos. Se les enseña a argumentar con claridad y coherencia, utilizando una variedad de estructuras gramaticales y vocabulario avanzado. La interacción en discusiones formales e informales se convierte en una parte esencial del aprendizaje.',
+    bullets: [
+      { icon: 'chat', text: 'Debates sobre temas complejos, culturales, profesionales y abstractos' },
+      { icon: 'people', text: 'Comprensión auditiva completa de nativos y modismos cotidianos' },
+      { icon: 'book', text: '4 unidades avanzadas con dinámicas interactivas y roleplays' },
+      { icon: 'trophy', text: 'Examen oral y escrito riguroso con certificado avalado' }
+    ],
+    characterImage: '/imagenes-lp/level_char_b1_plus.webp',
+    characterAlt: 'Profesor entusiasta con bandana y guiño royal - Nivel B1+'
+  },
+  B2: {
+    code: 'B2',
+    sub: 'Avanzado 2',
+    subLabel: 'Avanzado 2',
+    levelTag: 'Avanzado 2 – Perfeccionamiento y Certificación • 4 Meses',
+    titleLine1: 'Fluidez y precisión nativa.',
+    titleLine2: '¡Sé un verdadero rey!',
+    desc: 'El nivel Avanzado 2 es el más alto ofrecido por Les Rois du Français. Aquí, los estudiantes perfeccionan sus habilidades lingüísticas, alcanzando una fluidez y precisión casi nativas. Son capaces de comprender prácticamente todo lo que leen y escuchan, y pueden expresarse de manera espontánea, muy fluida y precisa, incluso en situaciones complejas. Este nivel también prepara a los estudiantes para exámenes de certificación avanzada y para el uso del francés en entornos profesionales y académicos.',
+    bullets: [
+      { icon: 'chat', text: 'Bilingüismo y precisión comunicativa equivalente a hablante nativo' },
+      { icon: 'trophy', text: 'Certificación de máxima maestría y graduación oficial de la escuela' },
+      { icon: 'people', text: 'Argumentación espontánea, negociación y expresión de alto nivel' },
+      { icon: 'book', text: 'Maestría total de la lengua, modismos, cultura y humor francés' }
+    ],
+    characterImage: '/imagenes-lp/french_guy_pointing.webp',
+    characterAlt: 'Profesor de francés en boina señalando la maestría total - Nivel B2'
+  }
+};

@@ -93,6 +93,7 @@ export declare class AdminController {
                 modality: import("@prisma/client").$Enums.ClassModality;
                 rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
                 schedule: string | null;
+                startDate: Date | null;
                 maxStudents: number;
                 zoomLink: string | null;
                 totalScoreTarget: number;
@@ -202,6 +203,7 @@ export declare class AdminController {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -217,6 +219,7 @@ export declare class AdminController {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -232,6 +235,7 @@ export declare class AdminController {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -247,6 +251,7 @@ export declare class AdminController {
         modality: import("@prisma/client").$Enums.ClassModality;
         rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
         schedule: string | null;
+        startDate: Date | null;
         maxStudents: number;
         zoomLink: string | null;
         totalScoreTarget: number;
@@ -261,7 +266,6 @@ export declare class AdminController {
     batchScheduleClasses(body: any): Promise<{
         success: boolean;
         count: number;
-        classes: any[];
     }>;
     scheduleClass(body: any): Promise<{
         url: string | null;
@@ -291,6 +295,18 @@ export declare class AdminController {
         } | null;
         module: {
             level: {
+                zoomHostGroup: {
+                    id: string;
+                    email: string;
+                    isActive: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    displayName: string;
+                    permanentLink: string | null;
+                    accountId: string | null;
+                    clientId: string | null;
+                    clientSecret: string | null;
+                } | null;
                 users: {
                     id: string;
                     email: string;
@@ -307,6 +323,7 @@ export declare class AdminController {
                 modality: import("@prisma/client").$Enums.ClassModality;
                 rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
                 schedule: string | null;
+                startDate: Date | null;
                 maxStudents: number;
                 zoomLink: string | null;
                 totalScoreTarget: number;
@@ -413,6 +430,9 @@ export declare class AdminController {
         googleAdsBudget: number;
         metaAdsBudget: number;
         schoolName: string;
+        heroSlides: import("@prisma/client/runtime/client").JsonValue | null;
+        teachers: import("@prisma/client/runtime/client").JsonValue | null;
+        levelsData: import("@prisma/client/runtime/client").JsonValue | null;
     }>;
     updateSettings(body: any): Promise<{
         id: string;
@@ -420,5 +440,15 @@ export declare class AdminController {
         googleAdsBudget: number;
         metaAdsBudget: number;
         schoolName: string;
+        heroSlides: import("@prisma/client/runtime/client").JsonValue | null;
+        teachers: import("@prisma/client/runtime/client").JsonValue | null;
+        levelsData: import("@prisma/client/runtime/client").JsonValue | null;
+    }>;
+    uploadImage(body: {
+        filename: string;
+        base64: string;
+    }): Promise<{
+        url: string;
+        filename: string;
     }>;
 }

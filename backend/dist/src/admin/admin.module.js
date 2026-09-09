@@ -20,6 +20,7 @@ exports.AdminModule = AdminModule = __decorate([
         imports: [zoom_module_1.ZoomModule],
         controllers: [admin_controller_1.AdminController],
         providers: [admin_service_1.AdminService, prisma_service_1.PrismaService],
+        exports: [admin_service_1.AdminService],
     })
 ], AdminModule);
 //# sourceMappingURL=admin.module.js.map

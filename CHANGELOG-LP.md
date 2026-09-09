@@ -5,6 +5,50 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.2.0] — 2026-09-08
+
+### Optimización Extrema de Carga de Imágenes (Carga Instantánea < 100ms)
+- **Lazy Loading Nativo Asíncrono en 64 Imágenes:** Atributos `loading="lazy"` y `decoding="async"` implementados en todas las imágenes debajo del Hero, reduciendo el payload de entrada de 4.4 MB a menos de 160 KB.
+- **Preload Scanner en `<head>`:** Precarga prioritaria de `chateau_sunset_bg.webp`, `rey.webp` y `logo_official.webp` en `frontend/index.html`.
+- **Caché Inmutable en Vercel CDN:** Cabeceras `Cache-Control: public, max-age=31536000, immutable` para `/imagenes-lp/(.*)` y `/assets/(.*)`.
+- **Compresor Automático en Cliente (`SettingsManager.tsx`):** Conversión automática a WebP al 85% de calidad y redimensión a máx 1200px en subidas desde PC.
+
+### Hero Section: Carrusel Dinámico con 4 Personajes Reales (Cross-Fade VIP)
+- **4 Personajes Reales en Rotación Continua:**
+  - `rey.webp`: El Rey oficial de la escuela.
+  - `hero_slide_1.webp`: Chica sonriente sosteniendo su corona real (*chica agarrandose la corona*).
+  - `hero_slide_2.webp`: Chico sorprendido con celular y corona (*chico sonriente para el hero*).
+  - `hero_slide_3.webp`: Dos chicos chocando puños con atuendo real (*dos chicos chocandola hero*).
+- **Animación Cross-Fade Fluida:** Transición suave de 1.6 segundos con CSS Grid superpuesto, eliminando saltos o descuadres de layout.
+
+### Escala Académica Oficial de 6 Niveles Reales (`A1, A2, A2+, B1, B1+, B2`)
+- **Adaptación Exacta de Textos Institucionales:**
+  - **A1:** Básico 1 – Fundamentos • 4 Meses (Alfabeto, hora, saludos y situaciones cotidianas).
+  - **A2:** Básico 2 – Supervivencia y Rutina • 4 Meses (Presente, pasado, compras y viajes).
+  - **A2+:** Intermedio 1 – Exploración y Fluidez • 4 Meses (Gramática profunda, relatos y proyectos).
+  - **B1:** Intermedio 2 – Consolidación y Debate • 4 Meses (Debates, modismos y método MRAF).
+  - **B1+:** Avanzado 1 – Argumentación y Dominio • 4 Meses (Roleplays, debates abstractos y fluidez oral).
+  - **B2:** Avanzado 2 – Perfeccionamiento y Certificación • 4 Meses (Bilingüismo y maestría total).
+- **Optimización de Tarjeta Azul (-45% de Altura):**
+  - Implementación de pestañas internas interactivas (`🎯 4 Competencias Clave` / `📖 Enfoque del Nivel`) con estética de cristal y acento rojo carmesí.
+  - Mantiene toda la información pedagógica oficial visible y accesible sin sobrecargar la altura vertical.
+
+### Personaje Único y Exclusivo por cada Nivel con Refinamientos de Escala
+- **Procesamiento y Limpieza de Falsos Fondos de Ajedrez a WebP:**
+  - **Nivel A1:** Chica sonriendo con laptop y libros de francés (`level_char_a1.webp`). Recorte fino de márgenes vacíos y escalado al +18% (`scale: 1.18`, contenedor de 480px) para máxima presencia visual.
+  - **Nivel A2:** Chico con sudadera azul y cuaderno (`level_char_a2.webp`). Eliminación quirúrgica de la línea vertical lateral del artefacto de origen (columnas 439-440) y escalado al +15% (`scale: 1.15`).
+  - **Nivel A2+:** Chica sorprendida con sudadera roja y corona (`level_char_a2_plus.webp`). Calibración precisa (`margin-bottom: -24px`, `translate: 0 6px`, `max-height: 390px`) alineada a ras del marco inferior del cuadro azul.
+  - **Nivel B1:** Chico con corona y celular (`level_char_b1.webp`). Restauración fiel de la playera interior visible bajo la sudadera roja a blanco puro y sólido (eliminando la transparencia que dejaba traslucir el azul de la tarjeta) y escalado al +8% (`scale: 1.08`).
+  - **Nivel B1+:** Señor alegre con paliacate rojo (`level_char_b1_plus.webp`). Extracción y segmentación neuronal de alta fidelidad con BRIA RMBG 2.0, logrando una playera de algodón 100% blanca sólida, limpia y sin huecos ni artefactos negros/cebra, preservando el cabello rizado y su pañoleta roja con antialiasing natural.
+  - **Nivel B2:** El icónico profesor de francés en playera marinera y boina roja (`french_guy_pointing.webp`).
+- **Micro-animación de Entrada:** Cada personaje aparece con una transición de elevación y fade-in suave (`.lrd-character-fade-in`) al cambiar de nivel.
+
+### Limpieza de Gráficos en Sección Método MRAF
+- **Remoción de Flecha Azul:** Retirado el trazo curvado que bajaba hacia el botón debajo de *"Solo necesitas empezar"* tanto en `mraf_bottom_cta_hd.webp` como en su versión `.png`.
+- **Botón Centrado:** Eliminado el desfase `padding-left: 40px` en `.lrd-cta-btn-arrow-row`, dejando el botón rojo *"QUIERO PROBAR EL MÉTODO 👑"* simétricamente centrado.
+
+---
+
 ## [3.0.0] — 2026-09-04
 
 ### Optimización Masiva de Rendimiento Web (WebP de Alta Fidelidad & Preloads)

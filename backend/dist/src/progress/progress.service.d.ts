@@ -14,6 +14,7 @@ export declare class ProgressService {
                     modality: import("@prisma/client").$Enums.ClassModality;
                     rhythm: import("@prisma/client").$Enums.StudyRhythm | null;
                     schedule: string | null;
+                    startDate: Date | null;
                     maxStudents: number;
                     zoomLink: string | null;
                     totalScoreTarget: number;

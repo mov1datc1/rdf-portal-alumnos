@@ -29,11 +29,11 @@ export declare class PaymentsService {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        startDate: Date;
         levelId: string;
         userId: string;
         planType: string;
         monthlyFee: number;
-        startDate: Date;
         endDate: Date | null;
     })[]>;
     createEnrollment(data: any): Promise<{
@@ -49,11 +49,11 @@ export declare class PaymentsService {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        startDate: Date;
         levelId: string;
         userId: string;
         planType: string;
         monthlyFee: number;
-        startDate: Date;
         endDate: Date | null;
     }>;
     updateEnrollment(id: string, data: any): Promise<{
@@ -61,11 +61,11 @@ export declare class PaymentsService {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        startDate: Date;
         levelId: string;
         userId: string;
         planType: string;
         monthlyFee: number;
-        startDate: Date;
         endDate: Date | null;
     }>;
     deleteEnrollment(id: string): Promise<{
@@ -73,11 +73,11 @@ export declare class PaymentsService {
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        startDate: Date;
         levelId: string;
         userId: string;
         planType: string;
         monthlyFee: number;
-        startDate: Date;
         endDate: Date | null;
     }>;
     getAllPayments(): Promise<({
@@ -96,11 +96,11 @@ export declare class PaymentsService {
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
+            startDate: Date;
             levelId: string;
             userId: string;
             planType: string;
             monthlyFee: number;
-            startDate: Date;
             endDate: Date | null;
         };
     } & {
@@ -193,11 +193,11 @@ export declare class PaymentsService {
                     isActive: boolean;
                     createdAt: Date;
                     updatedAt: Date;
+                    startDate: Date;
                     levelId: string;
                     userId: string;
                     planType: string;
                     monthlyFee: number;
-                    startDate: Date;
                     endDate: Date | null;
                 };
             } & {

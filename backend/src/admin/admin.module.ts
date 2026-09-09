@@ -8,6 +8,7 @@ import { ZoomModule } from '../zoom/zoom.module';
   imports: [ZoomModule],
   controllers: [AdminController],
   providers: [AdminService, PrismaService],
+  exports: [AdminService],
 })
 export class AdminModule {}
 

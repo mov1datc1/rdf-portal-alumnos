@@ -4224,16 +4224,35 @@
   gap: 6px;
 }
 
-/* Right Side: Prince Character Positioned Far Right */
+/* Right Side: Hero Character Slideshow Positioned Far Right */
 .lrd-hero-right-prince {
   flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
+  display: grid;
+  grid-template-areas: "hero-character";
+  justify-items: end;
+  align-items: end;
   position: relative;
   margin-right: -10px;
   pointer-events: none;
   z-index: 6;
+  min-height: 570px;
+}
+
+.lrd-hero-slide-item {
+  grid-area: hero-character;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1), transform 1.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.6s;
+  transform: scale(0.97);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lrd-hero-slide-item.active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  z-index: 2;
 }
 
 .lrd-king-img-prominent {
@@ -4294,8 +4313,9 @@
 
   .lrd-hero-right-prince {
     margin-right: 0;
-    justify-content: center;
+    justify-items: center;
     width: 100%;
+    min-height: 420px;
   }
 
   .lrd-king-img-prominent {
@@ -7778,7 +7798,7 @@
   display: flex;
   justify-content: center;
   margin-top: 10px;
-  padding-left: 40px;
+  padding-left: 0;
   position: relative;
   z-index: 5;
 }
@@ -8238,12 +8258,91 @@
   font-size: 2.5rem;
 }
 
+/* Pestañas Interactivas dentro de la Tarjeta Azul */
+.lrd-level-inner-tabs-wrap {
+  margin: 8px 0 16px 0;
+}
+
+.lrd-level-inner-tabs {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 4px;
+  border-radius: 40px;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lrd-level-inner-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 30px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #CBD5E1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lrd-level-inner-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lrd-level-inner-tab.active {
+  background: #D92534;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(217, 37, 52, 0.45);
+}
+
+.lrd-level-tab-content-container {
+  min-height: 120px;
+  margin-bottom: 22px;
+}
+
+.lrd-level-enfoque-box {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+}
+
+.lrd-level-official-desc-clean {
+  font-size: 0.94rem;
+  line-height: 1.62;
+  color: #F1F5F9;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid #D59B28;
+  padding: 14px 20px;
+  border-radius: 0 14px 14px 0;
+  margin: 0;
+  font-weight: 400;
+  max-width: 680px;
+}
+
+.lrd-tab-fade-in {
+  animation: lrdTabFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes lrdTabFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Bullets 2x2 */
 .lrd-level-bullets-2x2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 20px;
-  margin-bottom: 22px;
+  margin-bottom: 0;
 }
 
 .lrd-bullet-item-dark {
@@ -8319,7 +8418,7 @@
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
 }
 
-/* Dark Card Right (Profesor) */
+/* Dark Card Right (Personaje Único del Nivel) */
 .lrd-card-dark-right {
   position: relative;
   display: flex;
@@ -8331,18 +8430,85 @@
   position: relative;
   z-index: 3;
   width: 100%;
-  max-width: 580px;
-  margin-top: -85px;
-  margin-bottom: -32px;
-  transform: scale(1.12);
-  transform-origin: bottom center;
+  max-width: 440px;
+  height: 380px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-top: -30px;
+  margin-bottom: -28px;
 }
 
 .lrd-french-guy-img {
-  width: 100%;
+  max-width: 100%;
+  max-height: 390px;
+  width: auto;
   height: auto;
   display: block;
   object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.48));
+}
+
+.lrd-character-fade-in {
+  animation: lrdCharFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes lrdCharFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Ajustes Individuales y Escalas de Cada Personaje de Nivel */
+.lrd-char-wrap-a1 {
+  max-width: 480px;
+}
+.lrd-char-wrap-a1 .lrd-french-guy-img {
+  max-height: 420px;
+  scale: 1.18;
+  transform-origin: bottom center;
+}
+
+.lrd-char-wrap-a2 .lrd-french-guy-img {
+  max-height: 420px;
+  scale: 1.15;
+  transform-origin: bottom center;
+}
+
+.lrd-char-wrap-a2-plus {
+  margin-bottom: -26px;
+}
+.lrd-char-wrap-a2-plus .lrd-french-guy-img {
+  max-height: 390px;
+  scale: 1.05;
+  translate: 0 7px;
+  transform-origin: bottom center;
+}
+
+.lrd-char-wrap-b1 .lrd-french-guy-img {
+  max-height: 405px;
+  scale: 1.08;
+  transform-origin: bottom center;
+}
+
+.lrd-char-wrap-b1-plus {
+  max-width: 480px;
+}
+.lrd-char-wrap-b1-plus .lrd-french-guy-img {
+  max-height: 420px;
+  scale: 1.14;
+  translate: 0 6px;
+  transform-origin: bottom center;
+}
+
+.lrd-char-wrap-b2 .lrd-french-guy-img {
+  max-height: 395px;
 }
 
 /* On Y Va Gold Text */
