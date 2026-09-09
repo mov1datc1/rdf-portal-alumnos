@@ -173,7 +173,7 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'people', text: 'Argumentación espontánea, negociación y expresión de alto nivel' },
       { icon: 'book', text: 'Maestría total de la lengua, modismos, cultura y humor francés' }
     ],
-    characterImage: '/imagenes-lp/french_guy_pointing.webp?v=1111',
+    characterImage: '/imagenes-lp/french_guy_pointing.webp',
     characterAlt: 'Profesor de francés en boina señalando la maestría total - Nivel B2'
   }
 };
@@ -302,6 +302,18 @@ export function LandingPage() {
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
+
+  // Preload all 6 level character silhouettes immediately into browser memory for 0ms lag-free tabs
+  useEffect(() => {
+    const levelKeys = ['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2'];
+    levelKeys.forEach((lvlKey) => {
+      const charImg = levelsData[lvlKey]?.characterImage || DEFAULT_LEVELS[lvlKey]?.characterImage;
+      if (charImg) {
+        const img = new Image();
+        img.src = charImg;
+      }
+    });
+  }, [levelsData]);
 
   // Auto-cycle hero character slides every 5 seconds with slow smooth cross-fade
   useEffect(() => {
@@ -1221,8 +1233,12 @@ export function LandingPage() {
                 {/* Contenido Derecho: Personaje Exclusivo de Cada Nivel */}
                 <div className="lrd-card-dark-right">
                   <div className={`lrd-french-guy-photo-wrap lrd-char-wrap-${activeLevel.toLowerCase().replace('+', '-plus')}`}>
-                    <img loading="lazy" decoding="async" key={activeLevel}
-                      src={`${activeLvl.characterImage || '/imagenes-lp/french_guy_pointing.webp'}?v=20260908d`}
+                    <img
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                      key={activeLevel}
+                      src={activeLvl.characterImage || '/imagenes-lp/french_guy_pointing.webp'}
                       alt={activeLvl.characterAlt || 'Personaje de Nivel Les Rois du Français'}
                       className={`lrd-french-guy-img lrd-character-fade-in lrd-char-img-${activeLevel.toLowerCase().replace('+', '-plus')}`}
                     />

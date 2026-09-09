@@ -94,10 +94,22 @@ export function SettingsManager() {
   const [teachers, setTeachers] = useState<any[]>(DEFAULT_TEACHERS);
   const [levelsData, setLevelsData] = useState<Record<string, any>>(DEFAULT_LEVELS);
 
+  // History memory for instant undo / revert to previous image
+  const [previousHeroImages, setPreviousHeroImages] = useState<Record<number, string>>({});
+  const [previousTeacherImages, setPreviousTeacherImages] = useState<Record<string, string>>({});
+  const [previousLevelImages, setPreviousLevelImages] = useState<Record<string, string>>({});
+
   // Sub-selection states
   const [selectedTeacherIndex, setSelectedTeacherIndex] = useState<number>(0);
   const [selectedLevelKey, setSelectedLevelKey] = useState<string>('A1');
   const [previewLevelTab, setPreviewLevelTab] = useState<'competencias' | 'enfoque'>('competencias');
+
+  // Preload all default assets into browser cache for instant 0ms tab switching
+  useEffect(() => {
+    DEFAULT_HERO_SLIDE_IMAGES.forEach(src => { const img = new Image(); img.src = src; });
+    Object.values(DEFAULT_TEACHER_IMAGES).forEach(src => { const img = new Image(); img.src = src; });
+    Object.values(DEFAULT_LEVEL_CHAR_IMAGES).forEach(src => { const img = new Image(); img.src = src; });
+  }, []);
 
   const session = useAuthStore(state => state.session);
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -223,32 +235,38 @@ export function SettingsManager() {
   // Cache of instant base64 data for uploaded URLs to guarantee 0ms preview without 404 delays
   const [previewOverrides, setPreviewOverrides] = useState<Record<string, string>>({});
 
-  const getImageSrc = (url?: string) => {
-    if (!url) return '';
+  const getImageSrc = (url?: string, fallback = '') => {
+    if (!url) return fallback;
     if (previewOverrides[url]) return previewOverrides[url];
+    try {
+      const cached = sessionStorage.getItem('rdf_preview_' + url);
+      if (cached) return cached;
+    } catch (_) {}
     return url;
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = e.currentTarget;
-    const retryCount = Number(img.dataset.retryCount || '0');
-    if (retryCount === 0) {
-      img.dataset.retryCount = '1';
-      setTimeout(() => {
-        const clean = img.src.split('?')[0];
-        img.src = `${clean}?r=${Date.now()}`;
-      }, 300);
-    } else if (retryCount === 1) {
-      img.dataset.retryCount = '2';
-      setTimeout(() => {
-        try {
-          const pathname = new URL(img.src, window.location.origin).pathname;
-          img.src = `${apiUrl}${pathname}?r=${Date.now()}`;
-        } catch {
-          // ignore
+  const handleImageError = (fallbackOrEvent?: string | React.SyntheticEvent<HTMLImageElement>, explicitFallback = '') => {
+    if (fallbackOrEvent && typeof fallbackOrEvent === 'object' && 'currentTarget' in fallbackOrEvent) {
+      const e = fallbackOrEvent as React.SyntheticEvent<HTMLImageElement>;
+      const img = e.currentTarget;
+      if (!img.dataset.hasFailed) {
+        img.dataset.hasFailed = 'true';
+        if (explicitFallback && img.src !== explicitFallback) {
+          img.src = explicitFallback;
         }
-      }, 300);
+      }
+      return;
     }
+    const fallbackUrl = typeof fallbackOrEvent === 'string' ? fallbackOrEvent : explicitFallback;
+    return (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const img = e.currentTarget;
+      if (!img.dataset.hasFailed) {
+        img.dataset.hasFailed = 'true';
+        if (fallbackUrl && img.src !== fallbackUrl) {
+          img.src = fallbackUrl;
+        }
+      }
+    };
   };
 
   const markDirty = () => {
@@ -371,24 +389,33 @@ export function SettingsManager() {
 
           if (res.ok) {
             const data = await res.json();
-            // Cache base64 override immediately for instantaneous preview without 404 latency
             setPreviewOverrides(prev => ({
               ...prev,
               [data.url]: base64,
             }));
+            try {
+              sessionStorage.setItem('rdf_preview_' + data.url, base64);
+            } catch (_) {}
             onSuccess(data.url);
-            showSuccess('¡Imagen optimizada!', `Se optimizó a WebP ultraligero y se cargó exitosamente.`);
+            showSuccess('¡Imagen cargada!', `Se optimizó a WebP y se actualizó la vista previa. Haz clic en "Guardar Configuración" para aplicar.`);
             markDirty();
           } else {
-            // Fallback to base64 so user is never blocked
+            // Fallback directo a base64 para garantizar preview 100% inmediata
+            setPreviewOverrides(prev => ({
+              ...prev,
+              [base64]: base64,
+            }));
             onSuccess(base64);
-            showSuccess('¡Imagen cargada!', `Se cargó en vista previa.`);
+            showSuccess('¡Imagen cargada!', `Se actualizó la foto en la vista previa. Haz clic en "Guardar Configuración" para aplicar.`);
             markDirty();
           }
         } catch (err) {
-          console.error('Error uploading image to server:', err);
+          setPreviewOverrides(prev => ({
+            ...prev,
+            [base64]: base64,
+          }));
           onSuccess(base64);
-          showSuccess('¡Imagen cargada!', `Se cargó en vista previa.`);
+          showSuccess('¡Imagen cargada!', `Se actualizó la foto en la vista previa. Haz clic en "Guardar Configuración" para aplicar.`);
           markDirty();
         } finally {
           setUploadingTarget(null);
@@ -485,16 +512,33 @@ export function SettingsManager() {
 
   // ── Hero Slide Handlers ──
   const handleHeroSlideChange = (index: number, field: string, value: any) => {
+    if (field === 'src') {
+      const currentSrc = heroSlides[index]?.src || DEFAULT_HERO_SLIDE_IMAGES[index];
+      if (currentSrc && currentSrc !== value) {
+        setPreviousHeroImages(prev => ({ ...prev, [index]: currentSrc }));
+      }
+    }
     const updated = [...heroSlides];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = { ...(DEFAULT_HERO_SLIDES[index] || {}), ...updated[index], [field]: value };
     setHeroSlides(updated);
     markDirty();
   };
 
   // ── Teacher Handlers ──
   const handleTeacherChange = (index: number, field: string, value: any) => {
+    const teacherId = teachers[index]?.id || DEFAULT_TEACHERS[index]?.id;
+    if (field === 'image' && teacherId) {
+      const currentImg = teachers[index]?.image || DEFAULT_TEACHERS[index]?.image;
+      if (currentImg && currentImg !== value) {
+        setPreviousTeacherImages(prev => ({ ...prev, [teacherId]: currentImg }));
+      }
+    }
     const updated = [...teachers];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = {
+      ...(DEFAULT_TEACHERS[index] || {}),
+      ...updated[index],
+      [field]: value
+    };
     setTeachers(updated);
     markDirty();
   };
@@ -526,9 +570,16 @@ export function SettingsManager() {
 
   // ── Level Handlers ──
   const handleLevelChange = (lvlKey: string, field: string, value: any) => {
+    if (field === 'characterImage') {
+      const currentImg = levelsData[lvlKey]?.characterImage || DEFAULT_LEVELS[lvlKey]?.characterImage;
+      if (currentImg && currentImg !== value) {
+        setPreviousLevelImages(prev => ({ ...prev, [lvlKey]: currentImg }));
+      }
+    }
     setLevelsData(prev => ({
       ...prev,
       [lvlKey]: {
+        ...(DEFAULT_LEVELS[lvlKey] || {}),
         ...prev[lvlKey],
         [field]: value
       }
@@ -797,10 +848,10 @@ export function SettingsManager() {
                 <div className="relative w-full h-52 rounded-xl overflow-hidden bg-gradient-to-b from-[#001B50] to-[#0A2668] flex items-end justify-center p-2 border border-slate-200 shadow-inner">
                   <img
                     key={slide.src}
-                    src={getImageSrc(slide.src)}
+                    src={getImageSrc(slide.src, DEFAULT_HERO_SLIDE_IMAGES[idx])}
                     alt={slide.alt || `Slide ${idx + 1}`}
                     className="max-h-full max-w-full object-contain filter drop-shadow-xl transition-all"
-                    onError={handleImageError}
+                    onError={handleImageError(DEFAULT_HERO_SLIDE_IMAGES[idx])}
                   />
                   <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-[10px] text-white font-mono px-2 py-0.5 rounded">
                     Preview en vivo
@@ -842,17 +893,29 @@ export function SettingsManager() {
                     {uploadingTarget === `Diapositiva #${idx + 1}` ? 'Subiendo imagen...' : '📁 Subir imagen desde tu PC'}
                   </button>
 
-                  {/* Single-click restore button if image differs from default */}
-                  {slide.src !== DEFAULT_HERO_SLIDE_IMAGES[idx] && (
-                    <button
-                      type="button"
-                      onClick={() => handleHeroSlideChange(idx, 'src', DEFAULT_HERO_SLIDE_IMAGES[idx])}
-                      className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs mt-2 cursor-pointer"
-                      title="Restaurar a la imagen oficial por defecto"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> Volver a la imagen original de Diapositiva #{idx + 1}
-                    </button>
-                  )}
+                  {/* Action buttons for Undo previous / Restore factory default */}
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                    {previousHeroImages[idx] && previousHeroImages[idx] !== slide.src && (
+                      <button
+                        type="button"
+                        onClick={() => handleHeroSlideChange(idx, 'src', previousHeroImages[idx])}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        title="Volver a la foto que tenías antes de este cambio"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver a foto anterior
+                      </button>
+                    )}
+                    {slide.src !== DEFAULT_HERO_SLIDE_IMAGES[idx] && (
+                      <button
+                        type="button"
+                        onClick={() => handleHeroSlideChange(idx, 'src', DEFAULT_HERO_SLIDE_IMAGES[idx])}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        title="Restaurar a la imagen oficial por defecto"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar oficial #{idx + 1}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Custom Path/URL */}
@@ -934,9 +997,9 @@ export function SettingsManager() {
               >
                 <img
                   key={teacher.image}
-                  src={getImageSrc(teacher.image)}
+                  src={getImageSrc(teacher.image, DEFAULT_TEACHER_IMAGES[teacher.id] || '/imagenes-lp/teacher_royal_jean_luc.webp')}
                   alt={teacher.name}
-                  onError={handleImageError}
+                  onError={handleImageError(DEFAULT_TEACHER_IMAGES[teacher.id] || '/imagenes-lp/teacher_royal_jean_luc.webp')}
                   className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm"
                 />
                 <div className="text-left">
@@ -1073,17 +1136,29 @@ export function SettingsManager() {
                   {uploadingTarget === `Prof. ${currentTeacher?.name}` ? 'Subiendo foto...' : `📁 Subir foto de ${currentTeacher?.name} desde tu PC`}
                 </button>
 
-                {/* Single-click restore button if image differs from default */}
-                {currentTeacher?.image !== DEFAULT_TEACHER_IMAGES[currentTeacher?.id] && (
-                  <button
-                    type="button"
-                    onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', DEFAULT_TEACHER_IMAGES[currentTeacher?.id])}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs mt-2 cursor-pointer"
-                    title="Restaurar a la foto oficial original"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> Volver a la foto oficial de Prof. {currentTeacher?.name}
-                  </button>
-                )}
+                {/* Botones de acción: Deshacer cambio / Restaurar oficial */}
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  {previousTeacherImages[currentTeacher?.id] && previousTeacherImages[currentTeacher?.id] !== currentTeacher?.image && (
+                    <button
+                      type="button"
+                      onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', previousTeacherImages[currentTeacher?.id])}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Volver a la foto que tenías antes de este cambio"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver a la foto anterior (Deshacer)
+                    </button>
+                  )}
+                  {currentTeacher?.image !== DEFAULT_TEACHER_IMAGES[currentTeacher?.id] && (
+                    <button
+                      type="button"
+                      onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', DEFAULT_TEACHER_IMAGES[currentTeacher?.id])}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Restaurar a la foto oficial original de fábrica"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar foto oficial ({currentTeacher?.name})
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Teacher Quote */}
@@ -1157,9 +1232,9 @@ export function SettingsManager() {
                   <div className="relative">
                     <img
                       key={currentTeacher?.image}
-                      src={getImageSrc(currentTeacher?.image)}
+                      src={getImageSrc(currentTeacher?.image, DEFAULT_TEACHER_IMAGES[currentTeacher?.id] || '/imagenes-lp/teacher_royal_jean_luc.webp')}
                       alt={currentTeacher?.name}
-                      onError={handleImageError}
+                      onError={handleImageError(DEFAULT_TEACHER_IMAGES[currentTeacher?.id] || '/imagenes-lp/teacher_royal_jean_luc.webp')}
                       className="w-20 h-20 rounded-2xl object-cover border-4 border-slate-100 shadow-md"
                     />
                     <span className="absolute -bottom-1 -right-1 bg-[#D92534] text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow">
@@ -1385,17 +1460,29 @@ export function SettingsManager() {
                   {uploadingTarget === `Personaje Nivel ${selectedLevelKey}` ? 'Subiendo personaje...' : `📁 Subir personaje de Nivel ${selectedLevelKey} desde tu PC`}
                 </button>
 
-                {/* Single-click restore button if image differs from default */}
-                {currentLevel?.characterImage !== DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] && (
-                  <button
-                    type="button"
-                    onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey])}
-                    className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs mt-2 cursor-pointer"
-                    title="Restaurar al personaje oficial original"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> Volver al personaje original de Nivel {selectedLevelKey}
-                  </button>
-                )}
+                {/* Botones de acción: Deshacer cambio / Restaurar personaje oficial */}
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  {previousLevelImages[selectedLevelKey] && previousLevelImages[selectedLevelKey] !== currentLevel?.characterImage && (
+                    <button
+                      type="button"
+                      onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', previousLevelImages[selectedLevelKey])}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Volver al personaje que tenías antes de este cambio"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver al personaje anterior
+                    </button>
+                  )}
+                  {currentLevel?.characterImage !== DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] && (
+                    <button
+                      type="button"
+                      onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey])}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Restaurar a la silueta oficial original de fábrica"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar personaje oficial ({selectedLevelKey})
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Alt description for character image */}
@@ -1537,9 +1624,9 @@ export function SettingsManager() {
                 <div className="relative w-full h-44 rounded-2xl bg-gradient-to-t from-black/40 to-transparent flex items-end justify-center overflow-hidden border border-white/10">
                   <img
                     key={currentLevel?.characterImage}
-                    src={getImageSrc(currentLevel?.characterImage)}
+                    src={getImageSrc(currentLevel?.characterImage, DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] || '/imagenes-lp/level_char_a1.webp')}
                     alt={currentLevel?.characterAlt || 'Personaje'}
-                    onError={handleImageError}
+                    onError={handleImageError(DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] || '/imagenes-lp/level_char_a1.webp')}
                     className="max-h-full object-contain filter drop-shadow-2xl transition-all"
                   />
                   <div className="absolute bottom-2 left-3 bg-black/60 backdrop-blur-sm text-[10px] text-white px-2 py-0.5 rounded">
