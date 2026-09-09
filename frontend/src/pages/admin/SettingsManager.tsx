@@ -17,7 +17,13 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import { supabase } from '../../lib/supabase';
 import { showSuccess, showError } from '../../utils/alerts';
+import {
+  DEFAULT_HERO_SLIDES,
+  DEFAULT_TEACHERS,
+  DEFAULT_LEVELS,
+} from '../../constants/landingDefaults';
 
 // Official default image lookup tables for instant restore / reset
 const DEFAULT_HERO_SLIDE_IMAGES = [
@@ -84,9 +90,9 @@ export function SettingsManager() {
   const [schoolName, setSchoolName] = useState('Les Rois du Français');
   const [googleAdsBudget, setGoogleAdsBudget] = useState(10000);
   const [metaAdsBudget, setMetaAdsBudget] = useState(3000);
-  const [heroSlides, setHeroSlides] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [levelsData, setLevelsData] = useState<Record<string, any>>({});
+  const [heroSlides, setHeroSlides] = useState<any[]>(DEFAULT_HERO_SLIDES);
+  const [teachers, setTeachers] = useState<any[]>(DEFAULT_TEACHERS);
+  const [levelsData, setLevelsData] = useState<Record<string, any>>(DEFAULT_LEVELS);
 
   // Sub-selection states
   const [selectedTeacherIndex, setSelectedTeacherIndex] = useState<number>(0);
@@ -102,27 +108,115 @@ export function SettingsManager() {
 
   const [savedSnapshot, setSavedSnapshot] = useState<any>(null);
 
-  // Fetch initial settings
+  // Fetch initial settings with resilient fallbacks (API -> Public config -> Supabase -> Factory Defaults)
   useEffect(() => {
-    if (!session) return;
-    fetch(`${apiUrl}/admin/settings`, { headers })
-      .then(r => r.json())
-      .then(data => {
-        if (data) {
-          setSchoolName(data.schoolName || 'Les Rois du Français');
-          setGoogleAdsBudget(data.googleAdsBudget ?? 10000);
-          setMetaAdsBudget(data.metaAdsBudget ?? 3000);
-          if (Array.isArray(data.heroSlides)) setHeroSlides(data.heroSlides);
-          if (Array.isArray(data.teachers)) setTeachers(data.teachers);
-          if (data.levelsData && typeof data.levelsData === 'object') setLevelsData(data.levelsData);
-          setSavedSnapshot(JSON.parse(JSON.stringify(data)));
+    let isMounted = true;
+    const loadSettings = async () => {
+      try {
+        let data: any = null;
+
+        // 1. Intentar endpoint autenticado admin
+        if (session?.access_token) {
+          try {
+            const res = await fetch(`${apiUrl}/admin/settings`, { headers });
+            if (res.ok) {
+              data = await res.json();
+            }
+          } catch (_) {}
         }
-      })
-      .catch(err => {
-        console.error('Error fetching settings:', err);
-        showError('No se pudo cargar la configuración');
-      })
-      .finally(() => setLoading(false));
+
+        // 2. Fallback al endpoint público si el admin falló o no está autenticado
+        if (!data || data.statusCode) {
+          try {
+            const pubRes = await fetch(`${apiUrl}/landing-config?t=${Date.now()}`);
+            if (pubRes.ok) {
+              data = await pubRes.json();
+            }
+          } catch (_) {}
+        }
+
+        // 3. Fallback directo a Supabase (indispensable en Vercel si el backend local no está expuesto)
+        if (!data || data.statusCode) {
+          try {
+            const { data: sbData } = await supabase
+              .from('AppSettings')
+              .select('*')
+              .eq('id', 'global')
+              .maybeSingle();
+            if (sbData) {
+              data = sbData;
+            }
+          } catch (_) {}
+        }
+
+        if (isMounted && data && typeof data === 'object' && !data.statusCode) {
+          if (data.schoolName) setSchoolName(data.schoolName);
+          if (data.googleAdsBudget != null) setGoogleAdsBudget(data.googleAdsBudget);
+          if (data.metaAdsBudget != null) setMetaAdsBudget(data.metaAdsBudget);
+
+          // Combinar con defaults para garantizar que ningún campo quede vacío o roto
+          if (Array.isArray(data.heroSlides) && data.heroSlides.length > 0) {
+            const mergedSlides = data.heroSlides.map((s: any, idx: number) => ({
+              ...(DEFAULT_HERO_SLIDES[idx] || {}),
+              ...s
+            }));
+            setHeroSlides(mergedSlides);
+          } else {
+            setHeroSlides(DEFAULT_HERO_SLIDES);
+          }
+
+          if (Array.isArray(data.teachers) && data.teachers.length > 0) {
+            const mergedTeachers = data.teachers.map((t: any, idx: number) => ({
+              ...(DEFAULT_TEACHERS[idx] || {}),
+              ...t
+            }));
+            setTeachers(mergedTeachers);
+          } else {
+            setTeachers(DEFAULT_TEACHERS);
+          }
+
+          if (data.levelsData && typeof data.levelsData === 'object' && Object.keys(data.levelsData).length > 0) {
+            const mergedLevels: Record<string, any> = { ...DEFAULT_LEVELS };
+            Object.keys(DEFAULT_LEVELS).forEach(lvlKey => {
+              if (data.levelsData[lvlKey]) {
+                mergedLevels[lvlKey] = {
+                  ...DEFAULT_LEVELS[lvlKey],
+                  ...data.levelsData[lvlKey]
+                };
+              }
+            });
+            setLevelsData(mergedLevels);
+          } else {
+            setLevelsData(DEFAULT_LEVELS);
+          }
+
+          setSavedSnapshot(JSON.parse(JSON.stringify(data)));
+        } else if (isMounted) {
+          // Si todo falló, usar datos oficiales completos de fábrica
+          setSchoolName('Les Rois du Français');
+          setGoogleAdsBudget(10000);
+          setMetaAdsBudget(3000);
+          setHeroSlides(DEFAULT_HERO_SLIDES);
+          setTeachers(DEFAULT_TEACHERS);
+          setLevelsData(DEFAULT_LEVELS);
+          setSavedSnapshot({
+            schoolName: 'Les Rois du Français',
+            googleAdsBudget: 10000,
+            metaAdsBudget: 3000,
+            heroSlides: DEFAULT_HERO_SLIDES,
+            teachers: DEFAULT_TEACHERS,
+            levelsData: DEFAULT_LEVELS,
+          });
+        }
+      } catch (err) {
+        console.warn('Using default settings fallback:', err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    loadSettings();
+    return () => { isMounted = false; };
   }, [session]);
 
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
@@ -309,38 +403,21 @@ export function SettingsManager() {
 
   // Restore all Hero slides to official factory defaults
   const restoreAllHeroToDefault = () => {
-    const updated = heroSlides.map((s, idx) => ({
-      ...s,
-      src: DEFAULT_HERO_SLIDE_IMAGES[idx] || s.src,
-    }));
-    setHeroSlides(updated);
+    setHeroSlides(JSON.parse(JSON.stringify(DEFAULT_HERO_SLIDES)));
     markDirty();
     showSuccess('Hero restaurado', 'Se restablecieron las 4 diapositivas a las imágenes oficiales. Haz clic en "Guardar" para aplicar.');
   };
 
   // Restore all Teachers to official factory defaults
   const restoreAllTeachersToDefault = () => {
-    const updated = teachers.map(t => ({
-      ...t,
-      image: DEFAULT_TEACHER_IMAGES[t.id] || t.image,
-    }));
-    setTeachers(updated);
+    setTeachers(JSON.parse(JSON.stringify(DEFAULT_TEACHERS)));
     markDirty();
     showSuccess('Profesores restaurados', 'Se restablecieron las fotos de todos los profesores a las oficiales. Haz clic en "Guardar" para aplicar.');
   };
 
   // Restore all Level characters to official factory defaults
   const restoreAllLevelsToDefault = () => {
-    const updated = { ...levelsData };
-    Object.keys(DEFAULT_LEVEL_CHAR_IMAGES).forEach(lvlKey => {
-      if (updated[lvlKey]) {
-        updated[lvlKey] = {
-          ...updated[lvlKey],
-          characterImage: DEFAULT_LEVEL_CHAR_IMAGES[lvlKey],
-        };
-      }
-    });
-    setLevelsData(updated);
+    setLevelsData(JSON.parse(JSON.stringify(DEFAULT_LEVELS)));
     markDirty();
     showSuccess('Niveles restaurados', 'Se restablecieron los personajes de todos los niveles a las siluetas oficiales. Haz clic en "Guardar" para aplicar.');
   };
@@ -357,13 +434,37 @@ export function SettingsManager() {
         levelsData,
       };
 
-      const res = await fetch(`${apiUrl}/admin/settings`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(payload),
-      });
+      let saved = false;
 
-      if (res.ok) {
+      // 1. Intentar endpoint autenticado en backend
+      try {
+        const res = await fetch(`${apiUrl}/admin/settings`, {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          saved = true;
+        }
+      } catch (_) {}
+
+      // 2. Fallback resiliente directo a Supabase si el backend no responde (ej. deploy en Vercel)
+      if (!saved) {
+        try {
+          const { error } = await supabase
+            .from('AppSettings')
+            .upsert({
+              id: 'global',
+              ...payload,
+              updatedAt: new Date().toISOString()
+            });
+          if (!error) {
+            saved = true;
+          }
+        } catch (_) {}
+      }
+
+      if (saved) {
         showSuccess('¡Configuración guardada!', 'Los cambios se han sincronizado en la base de datos y en la Landing Page pública.');
         setSavedSnapshot(JSON.parse(JSON.stringify(payload)));
         setHasUnsavedChanges(false);
@@ -373,8 +474,7 @@ export function SettingsManager() {
           // ignore
         }
       } else {
-        const err = await res.json().catch(() => ({}));
-        showError('Error al guardar', err.message || 'Ocurrió un error en el servidor');
+        showError('Error al guardar', 'No se pudo sincronizar la configuración con el servidor ni con la base de datos.');
       }
     } catch (e) {
       showError('Error de conexión', 'No se pudo conectar con el servidor.');
@@ -454,8 +554,14 @@ export function SettingsManager() {
     );
   }
 
-  const currentTeacher = teachers[selectedTeacherIndex] || teachers[0];
-  const currentLevel = levelsData[selectedLevelKey] || {};
+  const currentTeacher = {
+    ...(DEFAULT_TEACHERS[selectedTeacherIndex] || DEFAULT_TEACHERS[0] || {}),
+    ...(teachers[selectedTeacherIndex] || teachers[0] || {})
+  };
+  const currentLevel = {
+    ...(DEFAULT_LEVELS[selectedLevelKey] || {}),
+    ...(levelsData[selectedLevelKey] || {})
+  };
 
   return (
     <div className="space-y-6 max-w-6xl pb-20">

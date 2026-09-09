@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import './LandingPage.css';
 import { useAuthStore } from '../store/authStore';
+import { supabase } from '../lib/supabase';
 
 const FacebookIcon = ({ size = 14, color = '#FFFFFF' }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -240,28 +241,44 @@ export function LandingPage() {
   useEffect(() => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-    const loadConfig = () => {
-      fetch(`${apiUrl}/landing-config?t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
-      })
-        .then(res => (res.ok ? res.json() : null))
-        .then(cfg => {
-          if (!cfg) return;
-          if (Array.isArray(cfg.heroSlides) && cfg.heroSlides.length > 0) {
-            const active = cfg.heroSlides.filter((s: any) => s.active !== false);
-            if (active.length > 0) setHeroSlides(active);
-          }
-          if (Array.isArray(cfg.teachers) && cfg.teachers.length > 0) {
-            setTeachers(cfg.teachers);
-          }
-          if (cfg.levelsData && typeof cfg.levelsData === 'object' && Object.keys(cfg.levelsData).length > 0) {
-            setLevelsData(prev => ({ ...prev, ...cfg.levelsData }));
-          }
-        })
-        .catch(err => {
-          console.warn('Using default landing settings:', err);
+    const loadConfig = async () => {
+      let cfg: any = null;
+      try {
+        const res = await fetch(`${apiUrl}/landing-config?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
         });
+        if (res.ok) {
+          cfg = await res.json();
+        }
+      } catch (_) {}
+
+      // Fallback directo a Supabase si el backend no responde (ej. deploy en Vercel)
+      if (!cfg || cfg.statusCode) {
+        try {
+          const { data: sbData } = await supabase
+            .from('AppSettings')
+            .select('*')
+            .eq('id', 'global')
+            .maybeSingle();
+          if (sbData) {
+            cfg = sbData;
+          }
+        } catch (_) {}
+      }
+
+      if (cfg && typeof cfg === 'object') {
+        if (Array.isArray(cfg.heroSlides) && cfg.heroSlides.length > 0) {
+          const active = cfg.heroSlides.filter((s: any) => s.active !== false);
+          if (active.length > 0) setHeroSlides(active);
+        }
+        if (Array.isArray(cfg.teachers) && cfg.teachers.length > 0) {
+          setTeachers(cfg.teachers);
+        }
+        if (cfg.levelsData && typeof cfg.levelsData === 'object' && Object.keys(cfg.levelsData).length > 0) {
+          setLevelsData(prev => ({ ...prev, ...cfg.levelsData }));
+        }
+      }
     };
 
     loadConfig();
