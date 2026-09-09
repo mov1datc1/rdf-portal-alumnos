@@ -86,15 +86,98 @@ export function SettingsManager() {
   const [saving, setSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Form State
-  const [schoolName, setSchoolName] = useState('Les Rois du Français');
-  const [googleAdsBudget, setGoogleAdsBudget] = useState(10000);
-  const [metaAdsBudget, setMetaAdsBudget] = useState(3000);
-  const [heroSlides, setHeroSlides] = useState<any[]>(DEFAULT_HERO_SLIDES);
-  const [teachers, setTeachers] = useState<any[]>(DEFAULT_TEACHERS);
-  const [levelsData, setLevelsData] = useState<Record<string, any>>(DEFAULT_LEVELS);
+  // Helper to read cached settings synchronously so there is 0ms flash of defaults
+  const getInitialCachedSettings = () => {
+    try {
+      const cached = localStorage.getItem('rdf_saved_settings_cache');
+      if (cached) return JSON.parse(cached);
+    } catch (_) {}
+    return null;
+  };
+  const cachedInitial = getInitialCachedSettings();
 
-  // History memory for instant undo / revert to previous image (persisted in localStorage across reloads & navigation)
+  // Form State
+  const [schoolName, setSchoolName] = useState(cachedInitial?.schoolName || 'Les Rois du Français');
+  const [googleAdsBudget, setGoogleAdsBudget] = useState(cachedInitial?.googleAdsBudget ?? 10000);
+  const [metaAdsBudget, setMetaAdsBudget] = useState(cachedInitial?.metaAdsBudget ?? 3000);
+  const [heroSlides, setHeroSlides] = useState<any[]>(() => {
+    if (cachedInitial?.heroSlides && Array.isArray(cachedInitial.heroSlides) && cachedInitial.heroSlides.length > 0) {
+      return cachedInitial.heroSlides.map((s: any, idx: number) => ({
+        ...(DEFAULT_HERO_SLIDES[idx] || {}),
+        ...s
+      }));
+    }
+    return DEFAULT_HERO_SLIDES;
+  });
+  const [teachers, setTeachers] = useState<any[]>(() => {
+    if (cachedInitial?.teachers && Array.isArray(cachedInitial.teachers) && cachedInitial.teachers.length > 0) {
+      return cachedInitial.teachers.map((t: any, idx: number) => ({
+        ...(DEFAULT_TEACHERS[idx] || {}),
+        ...t
+      }));
+    }
+    return DEFAULT_TEACHERS;
+  });
+  const [levelsData, setLevelsData] = useState<Record<string, any>>(() => {
+    if (cachedInitial?.levelsData && typeof cachedInitial.levelsData === 'object' && Object.keys(cachedInitial.levelsData).length > 0) {
+      const merged: Record<string, any> = { ...DEFAULT_LEVELS };
+      Object.keys(DEFAULT_LEVELS).forEach(lvlKey => {
+        if (cachedInitial.levelsData[lvlKey]) {
+          merged[lvlKey] = { ...DEFAULT_LEVELS[lvlKey], ...cachedInitial.levelsData[lvlKey] };
+        }
+      });
+      return merged;
+    }
+    return DEFAULT_LEVELS;
+  });
+
+  // Persistent Custom Images Memory (Permanent memory of user's uploaded custom photos)
+  const [customTeacherImages, setCustomTeacherImages] = useState<Record<string, string>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('rdf_custom_teacher_images') || '{}');
+      DEFAULT_TEACHERS.forEach(dt => {
+        const currentT = cachedInitial?.teachers?.find((t: any) => t.id === dt.id);
+        if (currentT?.image && currentT.image !== DEFAULT_TEACHER_IMAGES[dt.id]) {
+          saved[dt.id] = currentT.image;
+        }
+      });
+      return saved;
+    } catch {
+      return {};
+    }
+  });
+
+  const [customHeroImages, setCustomHeroImages] = useState<Record<number, string>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('rdf_custom_hero_images') || '{}');
+      DEFAULT_HERO_SLIDE_IMAGES.forEach((defSrc, idx) => {
+        const slide = cachedInitial?.heroSlides?.[idx];
+        if (slide?.src && slide.src !== defSrc) {
+          saved[idx] = slide.src;
+        }
+      });
+      return saved;
+    } catch {
+      return {};
+    }
+  });
+
+  const [customLevelImages, setCustomLevelImages] = useState<Record<string, string>>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('rdf_custom_level_images') || '{}');
+      Object.keys(DEFAULT_LEVEL_CHAR_IMAGES).forEach(key => {
+        const lvl = cachedInitial?.levelsData?.[key];
+        if (lvl?.characterImage && lvl.characterImage !== DEFAULT_LEVEL_CHAR_IMAGES[key]) {
+          saved[key] = lvl.characterImage;
+        }
+      });
+      return saved;
+    } catch {
+      return {};
+    }
+  });
+
+  // History memory for instant undo / revert to immediate previous image
   const [previousHeroImages, setPreviousHeroImages] = useState<Record<number, string>>(() => {
     try {
       return JSON.parse(localStorage.getItem('rdf_previous_hero_images') || '{}');
@@ -136,47 +219,66 @@ export function SettingsManager() {
     'Content-Type': 'application/json'
   };
 
-  const [savedSnapshot, setSavedSnapshot] = useState<any>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState<any>(cachedInitial);
 
-  // Fetch initial settings with resilient fallbacks (API -> Public config -> Supabase -> Factory Defaults)
+  // Fetch initial settings with Supabase-first priority and 0ms cache backing
   useEffect(() => {
     let isMounted = true;
     const loadSettings = async () => {
       try {
         let data: any = null;
 
-        // 1. Intentar endpoint autenticado admin
-        if (session?.access_token) {
-          try {
-            const res = await fetch(`${apiUrl}/admin/settings`, { headers });
-            if (res.ok) {
-              data = await res.json();
-            }
-          } catch (_) {}
-        }
+        // 1. Supabase directo (prioridad #1 absoluta: ~50ms, disponible 24/7 y fuente de verdad)
+        try {
+          const { data: sbData, error: sbErr } = await supabase
+            .from('AppSettings')
+            .select('*')
+            .eq('id', 'global')
+            .maybeSingle();
+          if (!sbErr && sbData && typeof sbData === 'object' && !sbData.statusCode) {
+            data = sbData;
+          }
+        } catch (_) {}
 
-        // 2. Fallback al endpoint público si el admin falló o no está autenticado
+        // 2. Fallback backend admin o landing-config con timeout rápido si Supabase no respondió
         if (!data || data.statusCode) {
           try {
-            const pubRes = await fetch(`${apiUrl}/landing-config?t=${Date.now()}`);
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 2000);
+            const pubRes = await fetch(`${apiUrl}/landing-config?t=${Date.now()}`, {
+              signal: controller.signal,
+              headers: { 'Cache-Control': 'no-cache' }
+            });
+            clearTimeout(timer);
             if (pubRes.ok) {
-              data = await pubRes.json();
+              const pubJson = await pubRes.json();
+              if (pubJson && !pubJson.statusCode) {
+                data = pubJson;
+              }
             }
           } catch (_) {}
         }
 
-        // 3. Fallback directo a Supabase (indispensable en Vercel si el backend local no está expuesto)
-        if (!data || data.statusCode) {
+        // 3. Fallback a endpoint autenticado admin con timeout rápido
+        if ((!data || data.statusCode) && session?.access_token) {
           try {
-            const { data: sbData } = await supabase
-              .from('AppSettings')
-              .select('*')
-              .eq('id', 'global')
-              .maybeSingle();
-            if (sbData) {
-              data = sbData;
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 2000);
+            const res = await fetch(`${apiUrl}/admin/settings`, { headers, signal: controller.signal });
+            clearTimeout(timer);
+            if (res.ok) {
+              const resJson = await res.json();
+              if (resJson && !resJson.statusCode) {
+                data = resJson;
+              }
             }
           } catch (_) {}
+        }
+
+        // 4. Si la red falló, recurrir al cache de localStorage
+        if (!data || data.statusCode) {
+          const cached = getInitialCachedSettings();
+          if (cached) data = cached;
         }
 
         if (isMounted && data && typeof data === 'object' && !data.statusCode) {
@@ -191,8 +293,16 @@ export function SettingsManager() {
               ...s
             }));
             setHeroSlides(mergedSlides);
-          } else {
-            setHeroSlides(DEFAULT_HERO_SLIDES);
+            setCustomHeroImages(prev => {
+              const next = { ...prev };
+              mergedSlides.forEach((s: any, idx: number) => {
+                if (s.src && s.src !== DEFAULT_HERO_SLIDE_IMAGES[idx]) {
+                  next[idx] = s.src;
+                }
+              });
+              try { localStorage.setItem('rdf_custom_hero_images', JSON.stringify(next)); } catch (_) {}
+              return next;
+            });
           }
 
           if (Array.isArray(data.teachers) && data.teachers.length > 0) {
@@ -201,8 +311,16 @@ export function SettingsManager() {
               ...t
             }));
             setTeachers(mergedTeachers);
-          } else {
-            setTeachers(DEFAULT_TEACHERS);
+            setCustomTeacherImages(prev => {
+              const next = { ...prev };
+              mergedTeachers.forEach((t: any) => {
+                if (t.id && t.image && t.image !== DEFAULT_TEACHER_IMAGES[t.id]) {
+                  next[t.id] = t.image;
+                }
+              });
+              try { localStorage.setItem('rdf_custom_teacher_images', JSON.stringify(next)); } catch (_) {}
+              return next;
+            });
           }
 
           if (data.levelsData && typeof data.levelsData === 'object' && Object.keys(data.levelsData).length > 0) {
@@ -216,13 +334,25 @@ export function SettingsManager() {
               }
             });
             setLevelsData(mergedLevels);
-          } else {
-            setLevelsData(DEFAULT_LEVELS);
+            setCustomLevelImages(prev => {
+              const next = { ...prev };
+              Object.keys(mergedLevels).forEach(lvlKey => {
+                const img = mergedLevels[lvlKey]?.characterImage;
+                if (img && img !== DEFAULT_LEVEL_CHAR_IMAGES[lvlKey]) {
+                  next[lvlKey] = img;
+                }
+              });
+              try { localStorage.setItem('rdf_custom_level_images', JSON.stringify(next)); } catch (_) {}
+              return next;
+            });
           }
 
           setSavedSnapshot(JSON.parse(JSON.stringify(data)));
-        } else if (isMounted) {
-          // Si todo falló, usar datos oficiales completos de fábrica
+          try {
+            localStorage.setItem('rdf_saved_settings_cache', JSON.stringify(data));
+          } catch (_) {}
+        } else if (isMounted && !cachedInitial) {
+          // Solo usar fábrica si es la primera vez absoluta y no hay nada en cache
           setSchoolName('Les Rois du Français');
           setGoogleAdsBudget(10000);
           setMetaAdsBudget(3000);
@@ -239,15 +369,29 @@ export function SettingsManager() {
           });
         }
       } catch (err) {
-        console.warn('Using default settings fallback:', err);
+        console.warn('Error loading settings, keeping cache:', err);
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
     loadSettings();
-    return () => { isMounted = false; };
-  }, [session]);
+
+    // Sincronización en tiempo real entre pestañas y al volver a enfocar la ventana
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'rdf_landing_config_updated') {
+        loadSettings();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', loadSettings);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', loadSettings);
+    };
+  }, []);
 
   const [uploadingTarget, setUploadingTarget] = useState<string | null>(null);
   // Cache of instant base64 data for uploaded URLs to guarantee 0ms preview without 404 delays
@@ -448,6 +592,15 @@ export function SettingsManager() {
 
   // Restore all Hero slides to official factory defaults
   const restoreAllHeroToDefault = () => {
+    heroSlides.forEach((s, idx) => {
+      if (s.src && s.src !== DEFAULT_HERO_SLIDE_IMAGES[idx]) {
+        setCustomHeroImages(prev => {
+          const next = { ...prev, [idx]: s.src };
+          try { localStorage.setItem('rdf_custom_hero_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+      }
+    });
     setHeroSlides(JSON.parse(JSON.stringify(DEFAULT_HERO_SLIDES)));
     markDirty();
     showSuccess('Hero restaurado', 'Se restablecieron las 4 diapositivas a las imágenes oficiales. Haz clic en "Guardar" para aplicar.');
@@ -455,6 +608,16 @@ export function SettingsManager() {
 
   // Restore all Teachers to official factory defaults
   const restoreAllTeachersToDefault = () => {
+    teachers.forEach(t => {
+      const teacherId = t.id;
+      if (t.image && t.image !== DEFAULT_TEACHER_IMAGES[teacherId]) {
+        setCustomTeacherImages(prev => {
+          const next = { ...prev, [teacherId]: t.image };
+          try { localStorage.setItem('rdf_custom_teacher_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+      }
+    });
     setTeachers(JSON.parse(JSON.stringify(DEFAULT_TEACHERS)));
     markDirty();
     showSuccess('Profesores restaurados', 'Se restablecieron las fotos de todos los profesores a las oficiales. Haz clic en "Guardar" para aplicar.');
@@ -462,6 +625,16 @@ export function SettingsManager() {
 
   // Restore all Level characters to official factory defaults
   const restoreAllLevelsToDefault = () => {
+    Object.keys(levelsData).forEach(lvlKey => {
+      const img = levelsData[lvlKey]?.characterImage;
+      if (img && img !== DEFAULT_LEVEL_CHAR_IMAGES[lvlKey]) {
+        setCustomLevelImages(prev => {
+          const next = { ...prev, [lvlKey]: img };
+          try { localStorage.setItem('rdf_custom_level_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+      }
+    });
     setLevelsData(JSON.parse(JSON.stringify(DEFAULT_LEVELS)));
     markDirty();
     showSuccess('Niveles restaurados', 'Se restablecieron los personajes de todos los niveles a las siluetas oficiales. Haz clic en "Guardar" para aplicar.');
@@ -514,6 +687,7 @@ export function SettingsManager() {
         setSavedSnapshot(JSON.parse(JSON.stringify(payload)));
         setHasUnsavedChanges(false);
         try {
+          localStorage.setItem('rdf_saved_settings_cache', JSON.stringify(payload));
           localStorage.setItem('rdf_landing_config_updated', String(Date.now()));
         } catch {
           // ignore
@@ -539,6 +713,13 @@ export function SettingsManager() {
           return next;
         });
       }
+      if (value && value !== DEFAULT_HERO_SLIDE_IMAGES[index]) {
+        setCustomHeroImages(prev => {
+          const next = { ...prev, [index]: value };
+          try { localStorage.setItem('rdf_custom_hero_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+      }
     }
     const updated = [...heroSlides];
     updated[index] = { ...(DEFAULT_HERO_SLIDES[index] || {}), ...updated[index], [field]: value };
@@ -555,6 +736,13 @@ export function SettingsManager() {
         setPreviousTeacherImages(prev => {
           const next = { ...prev, [teacherId]: currentImg };
           try { localStorage.setItem('rdf_previous_teacher_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+      }
+      if (value && value !== DEFAULT_TEACHER_IMAGES[teacherId]) {
+        setCustomTeacherImages(prev => {
+          const next = { ...prev, [teacherId]: value };
+          try { localStorage.setItem('rdf_custom_teacher_images', JSON.stringify(next)); } catch (_) {}
           return next;
         });
       }
@@ -602,6 +790,13 @@ export function SettingsManager() {
         setPreviousLevelImages(prev => {
           const next = { ...prev, [lvlKey]: currentImg };
           try { localStorage.setItem('rdf_previous_level_images', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+      }
+      if (value && value !== DEFAULT_LEVEL_CHAR_IMAGES[lvlKey]) {
+        setCustomLevelImages(prev => {
+          const next = { ...prev, [lvlKey]: value };
+          try { localStorage.setItem('rdf_custom_level_images', JSON.stringify(next)); } catch (_) {}
           return next;
         });
       }
@@ -923,19 +1118,9 @@ export function SettingsManager() {
                     {uploadingTarget === `Diapositiva #${idx + 1}` ? 'Subiendo imagen...' : '📁 Subir imagen desde tu PC'}
                   </button>
 
-                  {/* Action buttons for Undo previous / Restore factory default */}
+                  {/* Action buttons for Undo previous / Restore factory default / Return to custom */}
                   <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
-                    {previousHeroImages[idx] && previousHeroImages[idx] !== slide.src && (
-                      <button
-                        type="button"
-                        onClick={() => handleHeroSlideChange(idx, 'src', previousHeroImages[idx])}
-                        className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
-                        title="Volver a la foto que tenías antes de este cambio"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver a foto anterior
-                      </button>
-                    )}
-                    {slide.src !== DEFAULT_HERO_SLIDE_IMAGES[idx] ? (
+                    {slide.src !== DEFAULT_HERO_SLIDE_IMAGES[idx] && (
                       <button
                         type="button"
                         onClick={() => handleHeroSlideChange(idx, 'src', DEFAULT_HERO_SLIDE_IMAGES[idx])}
@@ -944,12 +1129,34 @@ export function SettingsManager() {
                       >
                         <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar oficial #{idx + 1}
                       </button>
-                    ) : (
-                      !previousHeroImages[idx] && (
-                        <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
-                          <Check className="w-3.5 h-3.5 text-emerald-600" /> Foto oficial activa
-                        </span>
-                      )
+                    )}
+                    {slide.src === DEFAULT_HERO_SLIDE_IMAGES[idx] && customHeroImages[idx] && (
+                      <button
+                        type="button"
+                        onClick={() => handleHeroSlideChange(idx, 'src', customHeroImages[idx])}
+                        className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        title="Volver a poner tu imagen personalizada"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> ↩️ Volver a foto personalizada
+                      </button>
+                    )}
+                    {previousHeroImages[idx] &&
+                     previousHeroImages[idx] !== slide.src &&
+                     previousHeroImages[idx] !== DEFAULT_HERO_SLIDE_IMAGES[idx] &&
+                     previousHeroImages[idx] !== customHeroImages[idx] && (
+                      <button
+                        type="button"
+                        onClick={() => handleHeroSlideChange(idx, 'src', previousHeroImages[idx])}
+                        className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        title="Volver a la foto que tenías antes de este cambio"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Deshacer cambio
+                      </button>
+                    )}
+                    {slide.src === DEFAULT_HERO_SLIDE_IMAGES[idx] && !customHeroImages[idx] && (
+                      <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
+                        <Check className="w-3.5 h-3.5 text-emerald-600" /> Foto oficial activa
+                      </span>
                     )}
                   </div>
                 </div>
@@ -1172,19 +1379,10 @@ export function SettingsManager() {
                   {uploadingTarget === `Prof. ${currentTeacher?.name}` ? 'Subiendo foto...' : `📁 Subir foto de ${currentTeacher?.name} desde tu PC`}
                 </button>
 
-                {/* Botones de acción: Deshacer cambio / Restaurar oficial */}
+                {/* Botones de acción: Deshacer cambio / Restaurar oficial / Volver a personalizada */}
                 <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                  {previousTeacherImages[currentTeacher?.id] && previousTeacherImages[currentTeacher?.id] !== currentTeacher?.image && (
-                    <button
-                      type="button"
-                      onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', previousTeacherImages[currentTeacher?.id])}
-                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
-                      title="Volver a la foto que tenías antes de este cambio"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver a la foto anterior (Deshacer)
-                    </button>
-                  )}
-                  {currentTeacher?.image !== DEFAULT_TEACHER_IMAGES[currentTeacher?.id] ? (
+                  {/* Si la foto actual NO es la oficial de fábrica: botón para restaurar la oficial */}
+                  {currentTeacher?.image !== DEFAULT_TEACHER_IMAGES[currentTeacher?.id] && (
                     <button
                       type="button"
                       onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', DEFAULT_TEACHER_IMAGES[currentTeacher?.id])}
@@ -1193,12 +1391,40 @@ export function SettingsManager() {
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar foto oficial ({currentTeacher?.name})
                     </button>
-                  ) : (
-                    !previousTeacherImages[currentTeacher?.id] && (
-                      <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
-                        <Check className="w-3.5 h-3.5 text-emerald-600" /> Foto oficial activa ({currentTeacher?.name})
-                      </span>
-                    )
+                  )}
+
+                  {/* Si la foto actual ES la oficial pero hay foto personalizada: botón para volver a la personalizada */}
+                  {currentTeacher?.image === DEFAULT_TEACHER_IMAGES[currentTeacher?.id] && customTeacherImages[currentTeacher?.id] && (
+                    <button
+                      type="button"
+                      onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', customTeacherImages[currentTeacher?.id])}
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Volver a poner tu foto personalizada subida"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> ↩️ Volver a tu foto personalizada
+                    </button>
+                  )}
+
+                  {/* Si hay una foto anterior diferente a la actual, a la oficial y a la personalizada: Deshacer */}
+                  {previousTeacherImages[currentTeacher?.id] &&
+                   previousTeacherImages[currentTeacher?.id] !== currentTeacher?.image &&
+                   previousTeacherImages[currentTeacher?.id] !== DEFAULT_TEACHER_IMAGES[currentTeacher?.id] &&
+                   previousTeacherImages[currentTeacher?.id] !== customTeacherImages[currentTeacher?.id] && (
+                    <button
+                      type="button"
+                      onClick={() => handleTeacherChange(selectedTeacherIndex, 'image', previousTeacherImages[currentTeacher?.id])}
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Volver a la foto que tenías antes de este cambio"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Deshacer cambio
+                    </button>
+                  )}
+
+                  {/* Indicador de foto oficial activa si no hay foto personalizada registrada */}
+                  {currentTeacher?.image === DEFAULT_TEACHER_IMAGES[currentTeacher?.id] && !customTeacherImages[currentTeacher?.id] && (
+                    <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
+                      <Check className="w-3.5 h-3.5 text-emerald-600" /> Foto oficial activa ({currentTeacher?.name})
+                    </span>
                   )}
                 </div>
               </div>
@@ -1502,19 +1728,10 @@ export function SettingsManager() {
                   {uploadingTarget === `Personaje Nivel ${selectedLevelKey}` ? 'Subiendo personaje...' : `📁 Subir personaje de Nivel ${selectedLevelKey} desde tu PC`}
                 </button>
 
-                {/* Botones de acción: Deshacer cambio / Restaurar personaje oficial */}
+                {/* Botones de acción: Deshacer cambio / Restaurar oficial / Volver a personalizada */}
                 <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-                  {previousLevelImages[selectedLevelKey] && previousLevelImages[selectedLevelKey] !== currentLevel?.characterImage && (
-                    <button
-                      type="button"
-                      onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', previousLevelImages[selectedLevelKey])}
-                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
-                      title="Volver al personaje que tenías antes de este cambio"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Volver al personaje anterior
-                    </button>
-                  )}
-                  {currentLevel?.characterImage !== DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] ? (
+                  {/* Si el personaje actual NO es el oficial de fábrica: botón para restaurar */}
+                  {currentLevel?.characterImage !== DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] && (
                     <button
                       type="button"
                       onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey])}
@@ -1523,12 +1740,40 @@ export function SettingsManager() {
                     >
                       <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar personaje oficial ({selectedLevelKey})
                     </button>
-                  ) : (
-                    !previousLevelImages[selectedLevelKey] && (
-                      <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
-                        <Check className="w-3.5 h-3.5 text-emerald-600" /> Silueta oficial activa ({selectedLevelKey})
-                      </span>
-                    )
+                  )}
+
+                  {/* Si el personaje actual ES el oficial pero hay personaje personalizado: botón para volver */}
+                  {currentLevel?.characterImage === DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] && customLevelImages[selectedLevelKey] && (
+                    <button
+                      type="button"
+                      onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', customLevelImages[selectedLevelKey])}
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Volver a poner tu personaje personalizado"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> ↩️ Volver a personaje personalizado
+                    </button>
+                  )}
+
+                  {/* Si hay un personaje anterior diferente al actual, al oficial y al personalizado: Deshacer */}
+                  {previousLevelImages[selectedLevelKey] &&
+                   previousLevelImages[selectedLevelKey] !== currentLevel?.characterImage &&
+                   previousLevelImages[selectedLevelKey] !== DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] &&
+                   previousLevelImages[selectedLevelKey] !== customLevelImages[selectedLevelKey] && (
+                    <button
+                      type="button"
+                      onClick={() => handleLevelChange(selectedLevelKey, 'characterImage', previousLevelImages[selectedLevelKey])}
+                      className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      title="Volver al personaje que tenías antes de este cambio"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Deshacer cambio
+                    </button>
+                  )}
+
+                  {/* Indicador de silueta oficial activa si no hay personaje personalizado registrado */}
+                  {currentLevel?.characterImage === DEFAULT_LEVEL_CHAR_IMAGES[selectedLevelKey] && !customLevelImages[selectedLevelKey] && (
+                    <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1 py-1">
+                      <Check className="w-3.5 h-3.5 text-emerald-600" /> Silueta oficial activa ({selectedLevelKey})
+                    </span>
                   )}
                 </div>
               </div>
