@@ -4,6 +4,20 @@ Todos los cambios notables realizados en el proyecto se documentan en este archi
 
 ---
 
+## [2026-09-08 v2] - Persistencia Resiliente de Fotos en Portal Administrador & Carga Supabase-First
+
+### 🛡️ Resiliencia y Cero Parpadeo de Fábrica en Portal Administrador (`/admin/settings`)
+- **Carga Supabase-First Asíncrona (~50ms):** Prioridad directa de lectura contra Supabase table `AppSettings`, desacoplándose de endpoints locales de backend y evitando cancelaciones o timeouts en despliegues Vercel.
+- **Caché Síncrono 0ms en localStorage (`rdf_saved_settings_cache`):** Inicialización inmediata al montar el componente, garantizando que al recargar la página o cambiar de módulo administrativo jamás se "quite" la foto configurada ni se resetee a los valores de fábrica.
+- **Memoria Permanente de Fotos Personalizadas (`customTeacherImages`, `customHeroImages`, `customLevelImages`):** Las fotos subidas por el usuario quedan resguardadas en el almacenamiento del navegador de forma persistente.
+- **Botones Inteligentes de Acción Dual:**
+  - `🔄 Restaurar foto oficial de fábrica`: Permite regresar a la foto original oficial en cualquier momento.
+  - `↩️ Volver a tu foto personalizada`: Si se restauró la foto oficial, el sistema recuerda la foto subida y ofrece un botón morado para volver a ella con 1 solo clic.
+  - `↩️ Deshacer cambio`: Revierte el cambio inmediato.
+- **Sincronización en Tiempo Real Inter-Pestañas:** Integración de escuchadores `storage` y `focus` para replicar cambios al instante en cualquier ventana o pestaña abierta del portal o la Landing Page.
+
+---
+
 ## [2026-09-08] - Módulo de Configuración Landing Page, Responsividad Móvil del Portal & Optimización de Carga
 
 ### ⚙️ Módulo Administrador: Configuración Integral de la Landing Page (`/admin/settings`)

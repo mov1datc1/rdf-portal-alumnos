@@ -5,6 +5,20 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.2.1] — 2026-09-08
+
+### Persistencia Resiliente & Sincronización Supabase-First en Configuración de Landing Page
+- **Arquitectura de Carga Supabase-First (~50ms):** El módulo de configuración administrativa (`/admin/settings`) ahora consulta directamente a la tabla singleton `AppSettings` en Supabase con máxima prioridad, eliminando cuelgues por llamadas a endpoints locales (`http://localhost:3000`) en despliegues sobre Vercel.
+- **Caché Síncrono 0ms en localStorage (`rdf_saved_settings_cache`):** Inicialización de estados inmediata desde el almacenamiento local del navegador, erradicando cualquier parpadeo de imágenes de fábrica al recargar o navegar entre módulos del portal.
+- **Memoria Permanente de Imágenes Personalizadas (`customTeacherImages`, `customHeroImages`, `customLevelImages`):** Conservación indefinida de las fotos subidas por el administrador en `localStorage`, evitando que se pierdan o sobreescriban al alternar entre opciones.
+- **Botones Inteligentes de Acción Dual:**
+  - `🔄 Restaurar foto oficial de fábrica`: Restablece el recurso original del profesor, diapositiva o nivel.
+  - `↩️ Volver a tu foto personalizada`: Permite re-aplicar en 1 solo clic la foto personalizada previamente subida sin necesidad de volver a buscar el archivo en la computadora.
+  - `↩️ Deshacer último cambio`: Reversión inmediata al estado anterior si se cometió una equivocación.
+- **Sincronización Bidireccional en Tiempo Real:** Adición de escuchadores de eventos `storage` (`rdf_landing_config_updated`) y `focus` de ventana para sincronización simultánea entre pestañas abiertas.
+
+---
+
 ## [3.2.0] — 2026-09-08
 
 ### Optimización Extrema de Carga de Imágenes (Carga Instantánea < 100ms)
