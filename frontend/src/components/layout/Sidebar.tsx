@@ -5,13 +5,13 @@ import { supabase } from '../../lib/supabase';
 import { useAuthStore } from '../../store/authStore';
 
 const navItems = [
-  { icon: Home, label: 'Inicio', path: '/' },
-  { icon: Calendar, label: 'Mis Clases', path: '/clases' },
-  { icon: Clock, label: 'Progreso', path: '/progreso' },
-  { icon: BarChart2, label: 'Estadísticas', path: '/estadisticas' },
-  { icon: Headphones, label: 'Recursos', path: '/recursos' },
-  { icon: Video, label: 'Video Francés', path: '/video' },
-  { icon: Settings, label: 'Mi Perfil', path: '/perfil' },
+  { icon: Home, label: 'Inicio', path: '/dashboard', end: true },
+  { icon: Calendar, label: 'Mis Clases', path: '/dashboard/clases' },
+  { icon: Clock, label: 'Progreso', path: '/dashboard/progreso' },
+  { icon: BarChart2, label: 'Estadísticas', path: '/dashboard/estadisticas' },
+  { icon: Headphones, label: 'Recursos', path: '/dashboard/recursos' },
+  { icon: Video, label: 'Video Francés', path: '/dashboard/video' },
+  { icon: Settings, label: 'Mi Perfil', path: '/dashboard/perfil' },
 ];
 
 interface SidebarProps {
@@ -55,6 +55,7 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.end}
             onClick={onCloseMobile}
             className={({ isActive }) =>
               cn(

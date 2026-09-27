@@ -1,0 +1,5 @@
+# Temporary scratch & local backup directories
+scratch/
+backups_landing/
+frontend/public/imagenes-lp/backup_before_new_laptops/
+.DS_Store

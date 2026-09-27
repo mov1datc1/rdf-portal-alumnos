@@ -7,54 +7,48 @@ export interface LevelData {
   titleLine2: string;
   iconDoodle: string;
   desc: string;
-  bullets: Array<{ icon: string; text: string }>;
+  bullets: Array<{ icon: string; title?: string; text: string }>;
   characterImage: string;
   characterAlt: string;
+  ctaText?: string;
+  durationBadge?: string;
 }
 
 export const DEFAULT_HERO_SLIDES = [
-  { id: 'slide-1', src: '/imagenes-lp/rey.webp', alt: 'Rey Oficial Les Rois du Français', active: true },
-  { id: 'slide-2', src: '/imagenes-lp/hero_slide_1.webp', alt: 'Reina con Corona Les Rois du Français', active: true },
-  { id: 'slide-3', src: '/imagenes-lp/hero_slide_2.webp', alt: 'Estudiante con Celular Les Rois du Français', active: true },
-  { id: 'slide-4', src: '/imagenes-lp/hero_slide_3.webp', alt: 'Comunidad Les Rois du Français', active: true }
+  { id: 'slide-1', src: '/imagenes-lp/hero_slide_3.webp', alt: 'Jóvenes Estudiantes Les Rois du Français', active: true },
+  { id: 'slide-2', src: '/imagenes-lp/rey.webp', alt: 'Rey Oficial Les Rois du Français', active: true },
+  { id: 'slide-3', src: '/imagenes-lp/hero_slide_1.webp', alt: 'Reina con Corona Les Rois du Français', active: true },
+  { id: 'slide-4', src: '/imagenes-lp/hero_slide_2.webp', alt: 'Estudiante con Celular Les Rois du Français', active: true }
 ];
+
 
 export const DEFAULT_TEACHERS = [
   {
     id: 'jean-luc',
     name: 'Jean-Luc',
-    role: 'Le Roi du Fun & Conversación',
-    city: 'París, Francia',
-    exp: '8 años de experiencia',
+    role: 'Profesor nativo de francés',
+    specialty: 'CONVERSACIÓN Y FLUIDEZ',
+    city: 'París',
     image: '/imagenes-lp/teacher_royal_jean_luc.webp',
-    badge: 'Actitud Royal',
-    hashtag: '#ReyDelFrancés',
-    quote: '¡Bonjour! Mi misión es que hables francés con total confianza, soltura y cero miedo a equivocarte.',
-    bullets: ['100% Hablante Nativo de París', 'Especialista en Metodología MRAF® y Fluidez', 'Clases interactivas en vivo con grupos máx. 8']
+    quote: 'Mi objetivo es que pierdas el miedo y empieces a expresarte en francés con naturalidad.'
   },
   {
     id: 'sophie',
     name: 'Sophie',
-    role: 'La Reine de la Culture & Estilo',
-    city: 'Lyon, Francia',
-    exp: '6 años de experiencia',
+    role: 'Profesora nativa de francés',
+    specialty: 'CULTURA Y VIDA COTIDIANA',
+    city: 'Lyon',
     image: '/imagenes-lp/teacher_royal_sophie.webp',
-    badge: 'Cero Aburrimiento',
-    hashtag: '#FrancésDivertido',
-    quote: "¡C'est la vie! Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.",
-    bullets: ['Nativa de Lyon, Francia', 'Rotación de acentos y cultura francófona viva', 'Práctica comunicativa para viajes y vida diaria']
+    quote: 'Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.'
   },
   {
     id: 'pierre',
     name: 'Pierre',
-    role: 'El Gran Canciller del Francés',
-    city: 'Burdeos, Francia',
-    exp: '10 años de experiencia',
+    role: 'Profesor nativo de francés',
+    specialty: 'ESTRUCTURA Y PRÁCTICA ORAL',
+    city: 'Burdeos',
     image: '/imagenes-lp/teacher_royal_pierre.webp',
-    badge: 'Savoir-Faire Royal',
-    hashtag: '#AprendeComoRey',
-    quote: "¡Le français, c'est cool! Olvídate de las clases tradicionales y aburridas. Tu coronación en francés empieza aquí.",
-    bullets: ['Evaluador de Exámenes Escritos y Orales', 'Dominio del idioma sin estrés ni tecnicismos', 'Puntualidad y atención 100% personalizada']
+    quote: 'Olvídate de las clases aburridas; practicaremos para que hables con soltura y seguridad desde el primer día.'
   }
 ];
 
@@ -74,8 +68,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'book', text: '4 unidades (~1 mes c/u) con libro de actividades 100% gratis' },
       { icon: 'people', text: 'Examen escrito y oral al finalizar con certificación oficial' }
     ],
-    characterImage: '/imagenes-lp/level_char_a1.webp',
-    characterAlt: 'Alumna aprendiendo fundamentos de francés con libros y laptop - Nivel A1'
+    characterImage: '/imagenes-lp/estudiante_con_portatil_y_auriculares.webp',
+    characterAlt: 'Chica adolescente con audífonos blancos, laptop y cuaderno - Nivel A1'
   },
   A2: {
     code: 'A2',
@@ -92,8 +86,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'trophy', text: 'Rotación con profesores nativos de distintas regiones de Francia' },
       { icon: 'book', text: '4 unidades temáticas, evaluación oral y escrita con certificado' }
     ],
-    characterImage: '/imagenes-lp/level_char_a2.webp',
-    characterAlt: 'Alumno practicando rutina y comunicación en francés - Nivel A2'
+    characterImage: '/imagenes-lp/estudiante_sonriente_con_mochila_y_cuadernos.webp',
+    characterAlt: 'Chico adolescente con sudadera azul, mochila, cuadernos y celular - Nivel A2'
   },
   'A2+': {
     code: 'A2+',
@@ -110,8 +104,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'book', text: '4 unidades de estudio práctico con material pedagógico gratuito' },
       { icon: 'trophy', text: 'Acreditación oficial mediante examen oral y escrito final' }
     ],
-    characterImage: '/imagenes-lp/level_char_a2_plus.webp',
-    characterAlt: 'Alumna con corona ganando fluidez y soltura en francés - Nivel A2+'
+    characterImage: '/imagenes-lp/estudiante_celebrando_frente_al_portatil.webp',
+    characterAlt: 'Joven con camisa verde, laptop y cuaderno - Nivel A2+'
   },
   B1: {
     code: 'B1',
@@ -128,8 +122,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'people', text: 'Inmersión cultural con múltiples acentos regionales franceses' },
       { icon: 'book', text: 'Certificado de nivel intermedio y pase directo a nivel Avanzado' }
     ],
-    characterImage: '/imagenes-lp/level_char_b1.webp',
-    characterAlt: 'Alumno con corona debatiendo y consolidando su francés - Nivel B1'
+    characterImage: '/imagenes-lp/joven_conversando_con_portatil_y_cuaderno.webp',
+    characterAlt: 'Joven adulto con camisa azul, laptop y libreta conversando - Nivel B1'
   },
   'B1+': {
     code: 'B1+',
@@ -146,8 +140,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'book', text: '4 unidades avanzadas con dinámicas interactivas y roleplays' },
       { icon: 'trophy', text: 'Examen oral y escrito riguroso con certificado avalado' }
     ],
-    characterImage: '/imagenes-lp/level_char_b1_plus.webp',
-    characterAlt: 'Profesor entusiasta con bandana y guiño royal - Nivel B1+'
+    characterImage: '/imagenes-lp/profesora_remota_explicando_ante_su_portatil.webp',
+    characterAlt: 'Alumna adulta en clase online con laptop y libreta - Nivel B1+'
   },
   B2: {
     code: 'B2',
@@ -164,7 +158,43 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'people', text: 'Argumentación espontánea, negociación y expresión de alto nivel' },
       { icon: 'book', text: 'Maestría total de la lengua, modismos, cultura y humor francés' }
     ],
-    characterImage: '/imagenes-lp/french_guy_pointing.webp',
-    characterAlt: 'Profesor de francés en boina señalando la maestría total - Nivel B2'
+    characterImage: '/imagenes-lp/hombre_estudiando_con_portatil_y_libros.webp',
+    characterAlt: 'Hombre adulto con lentes, laptop, libros y libreta - Nivel B2'
+  },
+  'B2-C1': {
+    code: 'B2-C1',
+    sub: 'Perfeccionamiento',
+    subLabel: 'Perfeccionamiento',
+    levelTag: 'Perfeccionamiento • Conversación y certificación',
+    durationBadge: '4 meses',
+    titleLine1: 'Perfecciona tu francés.',
+    titleLine2: 'Habla, argumenta y certifícate.',
+    iconDoodle: '/imagenes-lp/diamond_doodle_c2.webp',
+    desc: 'Este nivel está dirigido a alumnos con una base sólida de francés que desean perfeccionar su comunicación mediante conversación avanzada y práctica orientada a exámenes oficiales.',
+    bullets: [
+      {
+        icon: 'chat',
+        title: 'CONVERSACIÓN AVANZADA',
+        text: 'Debates y conversación sobre actualidad, cultura, estudios y trabajo.'
+      },
+      {
+        icon: 'people',
+        title: 'FLUIDEZ Y PRECISIÓN',
+        text: 'Mejora pronunciación, vocabulario y naturalidad al expresarte.'
+      },
+      {
+        icon: 'trophy',
+        title: 'PREPARACIÓN PARA EXÁMENES',
+        text: 'Ejercicios prácticos para DELF, DALF, TCF y certificaciones oficiales.'
+      },
+      {
+        icon: 'book',
+        title: 'PRÁCTICA ORAL Y ESCRITA',
+        text: 'Comprensión, expresión oral, escritura y simulaciones de examen.'
+      }
+    ],
+    characterImage: '/imagenes-lp/estudiante_conversacion_perfeccionamiento_b2_c1.webp',
+    characterAlt: 'Alumna en clase de conversación y perfeccionamiento B2-C1',
+    ctaText: 'QUIERO PERFECCIONAR MI FRANCÉS'
   }
 };

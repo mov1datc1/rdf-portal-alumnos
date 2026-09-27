@@ -27,10 +27,10 @@ import {
 
 // Official default image lookup tables for instant restore / reset
 const DEFAULT_HERO_SLIDE_IMAGES = [
+  '/imagenes-lp/hero_slide_3.webp',
   '/imagenes-lp/rey.webp',
   '/imagenes-lp/hero_slide_1.webp',
   '/imagenes-lp/hero_slide_2.webp',
-  '/imagenes-lp/hero_slide_3.webp',
 ];
 
 const DEFAULT_TEACHER_IMAGES: Record<string, string> = {
@@ -40,12 +40,13 @@ const DEFAULT_TEACHER_IMAGES: Record<string, string> = {
 };
 
 const DEFAULT_LEVEL_CHAR_IMAGES: Record<string, string> = {
-  A1: '/imagenes-lp/level_char_a1.webp',
-  A2: '/imagenes-lp/level_char_a2.webp',
-  'A2+': '/imagenes-lp/level_char_a2_plus.webp',
-  B1: '/imagenes-lp/level_char_b1.webp',
-  'B1+': '/imagenes-lp/level_char_b1_plus.webp',
-  B2: '/imagenes-lp/french_guy_pointing.webp',
+  A1: '/imagenes-lp/estudiante_con_portatil_y_auriculares.webp',
+  A2: '/imagenes-lp/estudiante_sonriente_con_mochila_y_cuadernos.webp',
+  'A2+': '/imagenes-lp/estudiante_celebrando_frente_al_portatil.webp',
+  B1: '/imagenes-lp/joven_conversando_con_portatil_y_cuaderno.webp',
+  'B1+': '/imagenes-lp/profesora_remota_explicando_ante_su_portatil.webp',
+  B2: '/imagenes-lp/hombre_estudiando_con_portatil_y_libros.webp',
+  'B2-C1': '/imagenes-lp/estudiante_conversacion_perfeccionamiento_b2_c1.webp',
 };
 
 // Preset options for easy selection in admin
@@ -65,12 +66,12 @@ const TEACHER_IMAGE_PRESETS = [
 ];
 
 const LEVEL_CHAR_PRESETS = [
-  { label: 'Alumna Libros y Laptop (A1)', value: '/imagenes-lp/level_char_a1.webp' },
-  { label: 'Alumno Casual Rutina (A2)', value: '/imagenes-lp/level_char_a2.webp' },
-  { label: 'Alumna Corona Sorprendida (A2+)', value: '/imagenes-lp/level_char_a2_plus.webp' },
-  { label: 'Alumno Corona Sudadera Roja (B1)', value: '/imagenes-lp/level_char_b1.webp' },
-  { label: 'Profesor Bandana y Guiño (B1+)', value: '/imagenes-lp/level_char_b1_plus.webp' },
-  { label: 'Profesor Boina Señalando (B2)', value: '/imagenes-lp/french_guy_pointing.webp' },
+  { label: 'Chica con Audífonos y Laptop (A1)', value: '/imagenes-lp/estudiante_con_portatil_y_auriculares.webp' },
+  { label: 'Chico con Mochila y Cuadernos (A2)', value: '/imagenes-lp/estudiante_sonriente_con_mochila_y_cuadernos.webp' },
+  { label: 'Joven con Camisa Verde y Cuaderno (A2+)', value: '/imagenes-lp/estudiante_celebrando_frente_al_portatil.webp' },
+  { label: 'Joven con Camisa Azul y Laptop (B1)', value: '/imagenes-lp/joven_conversando_con_portatil_y_cuaderno.webp' },
+  { label: 'Profesora con Blazer Beige (B1+)', value: '/imagenes-lp/profesora_remota_explicando_ante_su_portatil.webp' },
+  { label: 'Hombre Maduro con Lentes y Libros (B2)', value: '/imagenes-lp/hombre_estudiando_con_portatil_y_libros.webp' },
 ];
 
 const BULLET_ICON_OPTIONS = [
@@ -1595,7 +1596,7 @@ export function SettingsManager() {
           </div>
           {/* Stepper Selection Buttons */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2'].map(lvlKey => {
+            {['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2', 'B2-C1'].map(lvlKey => {
               const lvl = levelsData[lvlKey] || {};
               const isActive = selectedLevelKey === lvlKey;
               return (

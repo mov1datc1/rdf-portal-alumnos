@@ -10,7 +10,7 @@ interface Message {
 }
 
 export function ChatbotPanel() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const session = useAuthStore(state => state.session);
   const user = useAuthStore(state => state.user);
   const firstName = user?.user_metadata?.firstName || 'Alumno';

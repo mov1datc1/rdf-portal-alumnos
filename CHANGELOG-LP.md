@@ -5,6 +5,663 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.5.20] — 2026-09-26
+
+### Optimización Final de Carga, Rendimiento de Imágenes y Recursos Críticos
+- **1. Saneamiento de Recursos Críticos y Preloads en `index.html`:**
+  - Erradicados 7 preloads obsoletos e innecesarios (`rey.webp`, `french_guy_pointing.webp` y 5 imágenes de personajes de niveles) que congestionaban la red inicial con más de 1.2 MB de datos antes de pintar el Hero.
+  - Restringidos los preloads exclusivamente a los 4 activos visuales del primer viewport:
+    - `/imagenes-lp/chateau_sunset_bg.webp` (Fondo del castillo al atardecer)
+    - `/imagenes-lp/logo_official.webp` (Logotipo oficial Les Rois du Français)
+    - `/imagenes-lp/hero_slide_1.webp` (Ilustración principal de los príncipes)
+    - `/imagenes-lp/hero_crown_red.webp` (Corona oficial del badge VIP)
+- **2. Priorización de Red en el DOM (`LandingPage.tsx`):**
+  - Incorporado `fetchPriority="high"` y `decoding="async"` al fondo del castillo, logotipo del header y corona del hero.
+  - Implementado `fetchPriority={idx === 0 ? 'high' : 'low'}` y `loading={idx === 0 ? 'eager' : 'lazy'}` en el carrusel de personajes del Hero para garantizar renderizado instantáneo del primer slide sin competir con recursos secundarios.
+  - Carga inmediata y anticipada (`loading="eager"`, `fetchPriority="high"`) en las tarjetas de profesores para Sophie y Pierre, evitando marcos vacíos o retrasos al desplazarse en pantallas táctiles y móviles.
+  - Carga diferida nativa (`loading="lazy"` y `decoding="async"`) verificada y activa en todos los recursos decorativos e informativos debajo del primer viewport.
+- **3. Integridad Visual y Cero Pérdida de Calidad:**
+  - Conservación al 100% de la nitidez visual en rostros, miradas, textos, pantallas de laptops, portal académico y profesores.
+  - Conservación absoluta de canales alfa y transparencias en todos los elementos recortados.
+  - Cero alteración de dimensiones visuales, aspectos de forma ni sustitución de imágenes aprobadas.
+- **4. Auditoría Automatizada y Control de Calidad:**
+  - Inspección integral con Puppeteer: 0 imágenes rotas (`naturalWidth === 0`), 0 errores de consola y 0 solicitudes fallidas / 404s.
+  - Build de producción (`npm run build`) validado con éxito total (`tsc -b && vite build` en 7.08s).
+
+---
+
+## [3.5.19] — 2026-09-26
+
+### Optimización Responsive Integral para Tablet y Móvil (Escritorio, 1080px, 1024px, 768px, 480px, 375px)
+- **1. Header, Navegación y Menú Drawer:**
+  - Breakpoint del menú móvil ajustado de 899px a 1080px para tablet horizontal, erradicando desbordes laterales.
+  - Corregido contraste del drawer móvil (eliminado texto blanco heredado sobre fondo blanco; enlaces con `#001844`, fondo `#F8FAFC` y borde `#E2E8F0`).
+  - Ocultamiento estricto (`display: none !important`) del drawer inactivo en resoluciones <= 1080px para evitar coordenadas fantasma fuera de pantalla.
+  - Padding superior del drawer ajustado a 72px para evitar cualquier interferencia táctil con el botón hamburguesa / cerrar.
+  - Botón "MI CUENTA" en header adaptado dinámicamente (`.lrd-btn-header-account-pill`) para pantallas táctiles.
+- **2. Hero Principal (#hero):**
+  - Erradicado el espacio vacío excesivo de ~250-300px entre las viñetas ("Sin compromiso", "Grupos reducidos", "Clases en vivo") y la ilustración de los personajes reales en móvil y tablet.
+  - En tablets (`<= 768px`) y móviles (`<= 480px`), la altura del contenedor se ajusta de forma orgánica (`min-height: unset; height: auto / 230px`), logrando que los príncipes queden perfectamente encuadrados y pegados con ritmo natural.
+  - Botones "COMENZAR AHORA" y "VER VIDEO" con ancho táctil completo y altura mínima cómoda de 46px.
+- **3. Sección del Método MRAF (#metodo):**
+  - Cuadrícula de tarjetas M, R, A, F adaptada: 4 columnas en desktop, cuadrícula equilibrada 2x2 en tablet horizontal/vertical (`<= 992px`) y 1 columna en móvil (`<= 640px`).
+  - Distintivo de edad ("DESDE LOS 12 AÑOS · SIN LÍMITE DE EDAD") con `max-width: 92vw` y envoltura defensiva para evitar cortes en pantallas muy estrechas.
+  - Bloque conclusivo de los 3 principios (Conversación Real, Interacción Constante, Participación Activa) con tarjetas legibles y botones CTA de ancho táctil ideal.
+- **4. Sección de Profesores (#profesores):**
+  - Solucionada la carga diferida (`loading="lazy"` a `loading="eager"` con `fetchPriority="high"`) para que las fotografías de Sophie y Pierre nunca aparezcan como recuadros vacíos al desplazarse en móvil.
+  - Altura del contenedor de foto con escalado fluido (`clamp(280px, 75vw, 360px)`) para evitar estiramientos o cortes en pantallas pequeñas.
+  - Disposición en tablet: 2 columnas superiores y tercer profesor centrado con ancho simétrico; en móvil: 1 columna ordenada.
+- **5. Portal Académico (#portal-alumno) y Clase Real (#clase-en-vivo):**
+  - En móvil y tablet, la columna de texto utiliza `display: contents`, priorizando encabezado -> reproductor/mockup del portal -> lista de beneficios -> conclusión.
+  - Marco del navegador con URL `portal.lesroisdufrancais.com` y distintivo "INCLUIDO CON TU EXPERIENCIA" nítidos y sin recortes.
+- **6. Niveles (#cursos):**
+  - En tablet vertical (`768px`), las 4 competencias se muestran en cuadrícula 2x2 en lugar de 1 sola columna forzada, reduciendo la altura de la tarjeta en ~160px.
+  - Resuelto conflicto de especificidad CSS en imágenes de alumnos (`.lrd-french-guy-photo-wrap .lrd-french-guy-img`) para limitar la altura a 270px en tablet y 220px en móvil, eliminando el vacío azul debajo del sello dorado "Petit à petit".
+  - Barra de niveles (A1 a B2-C1) con scroll horizontal táctil y touch targets mínimos de 44px.
+- **7. Precios, Horarios y Modalidades (#precios):**
+  - **Tablet Horizontal (861px - 1080px):** Erradicado el colapso prematuro a 1 columna. Sabatino, Regular e Intensivo se mantienen en 3 columnas elegantes y proporcionadas; Clases Particulares y Part Duo se despliegan en 2 columnas simétricas con tarjetas 1:1.
+  - **Tablet Vertical y Móvil (<= 860px):** Apilado limpio en 1 columna centrada (`max-width: 520px`).
+  - Identidad de color intacta: Sabatino = Azul marino (`#001844`), Regular = Dorado (`#D59B28`), Intensivo = Rojo (`#D92534`), Particulares = Rojo (`#D92534`), Part Duo = Dorado (`#D59B28`).
+  - Opciones de horario y turnos (`.lrd-opt-pill`) con área táctil cómoda de mínimo 44px de alto para fácil pulsación con el pulgar.
+  - Bloque DELF / DALF / TCF, banner multi-mes con descuentos interactivos (15%, 20%, 25%) y garantía de satisfacción 100% legibles sin solapamientos.
+- **8. Testimonios (#testimonios), CTAs y Footer (#contacto):**
+  - Testimonios en 3 columnas en tablet horizontal (`861px - 1080px`) y apilado fluido en 1 columna en <= 860px.
+  - Footer con cuadrícula 2 columnas + newsletter en tablet, y columna única en móvil con formulario de ancho completo.
+  - **Auditoría Puppeteer:** 0 desbordes horizontales (`hasOverflow: false`) en 1200px, 1024px, 768px, 480px y 375px.
+
+---
+
+## [3.5.18] — 2026-09-26
+
+### Pulido y Redondeo Orgánico de Orillas de Imágenes de Niveles (#cursos)
+- **1. Erradicación de Cortes Cuadrados en Bloques de Libros:**
+  - En los niveles **A1, A2+, B1 y B2**, los recortes de origen presentaban esquinas rectas a 90° y líneas de corte vertical/horizontal en la pila de libros/cuadernos del lado izquierdo.
+  - Se aplicó un modelado y esculpido orgánico con radio de curvatura suave (filete de 60px a 70px) en el ángulo inferior izquierdo de la pila de libros, transformando la esquina recta en una curvatura limpia y natural.
+- **2. Suavizado y Antialiasing de Orillas:**
+  - Incorporada transición alfa antialiasing de precisión (3.5px a 4px con función smoothstep cúbica) a lo largo de las orillas rectas donde se removió la mesa o el límite del lienzo.
+  - La sombra dinámica CSS (`filter: drop-shadow(...)`) ahora envuelve armoniosamente la curva redondeada en lugar de proyectar una silueta rectangular o cuadrada sobre el fondo azul marino `#001b50`.
+- **3. Conservación Total de Elementos y Nitidez:**
+  - Preservados al 100% los estudiantes, laptops, pantallas, libreta, audífonos, tazas y estuches sin ningún tipo de desenfoque ni veladura.
+  - Generados los formatos de producción optimizados en WebP y PNG (calidad 95) en `frontend/public/imagenes-lp/` con alias correspondientes y cache-buster actualizado (`?v=20260926_polished`).
+- **4. Sin Modificaciones Estructurales:**
+  - Intactos los textos, diseño, botones, colores y estructura de las tarjetas en todas las resoluciones (1920px, 1366px, 1024px y 390px móvil).
+
+---
+
+## [3.5.17] — 2026-09-26
+
+### Restauración Definitiva de Fotografías de Niveles y Encuadre Responsivo (#cursos)
+- **1. Sustitución Completa por las Versiones Nuevas Oficiales:**
+  - **Nivel A1 (`niña de 12 años (2).png`):** Alumna con audífonos, libreta, estuche, libros y laptop completa con puertos y teclado sin ningún recorte.
+  - **Nivel A2:** Preservado el estudiante con mochila y celular (`estudiante_sonriente_con_mochila_y_cuadernos.webp`).
+  - **Nivel A2+ (`muchacha joven.png`):** Joven en chaqueta verde celebrando con laptop completa, pantalla, touchpad y libreta.
+  - **Nivel B1 (`chico adulto.png`):** Alumno con camisa azul, taza de café, libreta y laptop completa en plano natural.
+  - **Nivel B1+ (`profesora_remota_explicando_ante_su_portatil`):** Alumna adulta en clase remota con laptop completa, libreta y fondo transparente limpio sin bloque de mesa.
+  - **Nivel B2 (`hombre mayor.png`):** Hombre adulto con lentes, libros de texto, libreta y laptop completa con puertos y teclado visibles.
+  - **Nivel B2-C1 (`estudiante_conversacion_perfeccionamiento_b2_c1`):** Alumna en perfeccionamiento con libreta, AirPod y laptop completa sin cortes en lateral ni fondo.
+- **2. Optimización y Generación de Formatos:**
+  - Generadas versiones optimizadas en **WebP** y **PNG** de alta calidad (calidad 95) en `frontend/public/imagenes-lp/` y sus alias oficiales `level_char_*.webp`.
+  - Añadido mecanismo de cache-busting en `LandingPage.tsx` (`?v=20260926`) para garantizar que ningún navegador retenga en memoria las versiones antiguas de baja resolución (819x1024).
+- **3. Blindaje Responsivo y Separación Elegante de Bordes:**
+  - Ajustado `.lrd-french-guy-photo-wrap` con `margin-bottom: 0` y `max-height: 365px` para garantizar que la imagen mantenga un colchón natural de separación respecto al borde inferior de la tarjeta (`padding-bottom: 32px`).
+  - Erradicado cualquier desborde o recorte en resoluciones intermedias de laptops y tablets (1024px, 1280px, 1366px, 1920px y móviles).
+  - Eliminado solapamiento entre la base de la laptop y el sticker flotante de *J'❤️ LE FRANÇAIS*.
+- **4. Preservación Estricta:**
+  - Intactos el diseño, textos, botones, colores y estructura de las tarjetas de nivel y del resto de la landing page.
+
+---
+
+## [3.5.16] — 2026-09-25
+
+### Franja Informativa de Conclusión del Método MRAF®: 3 Principios Clave (#metodo)
+- **1. Franja Compacta de Conclusión (`.lrd-mraf-conclusion-box`):**
+  - Incorporado bloque conclusivo compacto y refinado justo debajo de las 4 tarjetas M / R / A / F y antes del bloque de cierre motivacional/CTA.
+  - **Texto Introductorio:** *«Un método intuitivo donde aprendes francés usándolo: conversación, interacción y participación activa en cada clase.»* (`#001844` con `font-weight: 650`).
+- **2. Los 3 Principios Fundamentales en Rejilla Responsiva:**
+  - **Conversación Real:** Ícono SVG `MessageSquare` en acento rojo (`#D92534`) con descripción *«Hablas francés desde el primer día.»*.
+  - **Interacción Constante:** Ícono SVG `MessageCircle` en acento dorado (`#D59B28`) con descripción *«Preguntas, respondes y recibes correcciones.»*.
+  - **Participación Activa:** Ícono SVG `Sparkles` en acento dorado (`#D59B28`) con descripción *«Practicas, opinas y te involucras en cada sesión.»*.
+- **3. Comportamiento y Estética:**
+  - En desktop: disposición horizontal en 3 columnas compactas con hover suave y micro-elevación (`transform: translateY(-2px)`).
+  - En móvil: apilamiento vertical ergonómico (`grid-template-columns: 1fr`).
+  - Paleta: texto oficial en azul marino `#001844`, fondos blancos limpios y acentos sutiles en rojo y oro. Cero grises y cero emojis Unicode.
+- **4. Preservación Absoluta:**
+  - Intacta la imagen oficial del título del método, barra MRAF®, badge de edad «Desde los 12 años · Sin límite de edad», ilustraciones de fondo y resto de la landing.
+
+---
+
+## [3.5.15] — 2026-09-25
+
+### Simplificación Visual y Apertura de Aire en Distintivo de Edad del Método (#metodo)
+- **1. Depuración Minimalista:**
+  - Eliminada la frase explicativa secundaria (*«Un método diseñado para adolescentes y adultos...»*) para dejar una estética más limpia, sobria y premium.
+  - Conservado únicamente el badge central: `DESDE LOS 12 AÑOS · SIN LÍMITE DE EDAD` (`#001844`, peso 850) con su ícono SVG `Users` en acento dorado (`#D59B28`), borde dorado sutil y fondo blanco puro.
+- **2. Espaciado y Ritmo Vertical Mejorado:**
+  - Incrementado el aire visual superior con `margin-top: 26px` respecto a la barra ilustrada oficial de MRAF®.
+  - Incrementado el aire visual inferior con `margin-bottom: 42px` respecto al inicio de las tarjetas interactivas M / R / A / F.
+  - Erradicada la sensación de saturación visual, logrando que el badge respire con distinción y elegancia.
+- **3. Preservación Integral:**
+  - Sin alteraciones en títulos, tarjetas M-R-A-F, grabados e ilustraciones de fondo ni resto de secciones.
+
+---
+
+## [3.5.14] — 2026-09-25
+
+### Distintivo Informativo de Rango de Edad en Método MRAF® (#metodo)
+- **1. Integración en Encabezado del Método (`.lrd-mraf-age-badge-wrap`):**
+  - Incorporado distintivo integrado bajo el título ilustrado oficial de MRAF® y antes de las 4 tarjetas interactivas M-R-A-F.
+  - **Píldora Principal:** `DESDE LOS 12 AÑOS · SIN LÍMITE DE EDAD` (`#001844` con `font-weight: 850`), acompañada de ícono SVG `Users` en acento dorado (`#D59B28`), fondo blanco limpio (`#FFFFFF`), borde dorado sutil (`rgba(213, 155, 40, 0.45)`) y sombra suave.
+  - **Frase Descriptiva:** Párrafo complementario centrado en azul marino oficial: *«Un método diseñado para adolescentes y adultos que quieren aprender francés de forma práctica y comunicativa.»* (`#001844` con `font-weight: 550`).
+- **2. Adaptabilidad Responsive:**
+  - En móviles, el distintivo se adapta de forma centrada (`.lrd-mraf-age-pill`) manteniendo una jerarquía visual armónica sin competir con las tarjetas.
+- **3. Preservación Integral:**
+  - Sin alteraciones en estructura del método, textos actuales, tarjetas M/R/A/F, imágenes, botones ni precios.
+
+---
+
+## [3.5.13] — 2026-09-25
+
+### Corrección y Funcionalidad de Desplazamiento Suave en Enlace «Contacto» (#contacto)
+- **1. Asignación de Anchor ID de Destino:**
+  - Asignado `id="contacto"` al contenedor principal del pie de página (`<footer className="lrd-footer-dark-new" id="contacto">`), que contiene la columna oficial **CONTÁCTANOS** (teléfono/WhatsApp `222 343 7074`, correo `info@lesroisdufrancais.com`, ubicación `Clases 100% Online · Sede: Puebla, México` y redes sociales).
+- **2. Navegación Fluida y Cierre Automático en Móvil:**
+  - Implementada función controladora `handleNavAnchorClick(e, 'contacto')`:
+    - En móvil: cierra de inmediato el menú lateral/desplegable (`setIsMobileMenuOpen(false)`).
+    - Desplaza la ventana suavemente hacia `#contacto` (`element.scrollIntoView({ behavior: 'smooth' })`).
+    - Actualiza el hash de navegación sin recargar la página ni abrir nuevas pestañas.
+- **3. Compensación de Cabecera y Scroll Suave Global:**
+  - Agregada regla global `html { scroll-behavior: smooth; }` en `LandingPage.css`.
+  - Establecido `scroll-margin-top: 80px` para `#contacto` y resto de secciones ancladas para evitar que el encabezado tape el inicio del contenido.
+- **4. Preservación Estricta:**
+  - Sin alteraciones en diseño del header, textos, colores, botones adicionales, botón flotante de WhatsApp ni resto de secciones.
+
+---
+
+## [3.5.12] — 2026-09-25
+
+### Actualización de Precios y Cuadrícula Interactiva 2x2 en Modalidad Part Duo (#precios)
+- **1. Tarifas Oficiales de Modalidad Part Duo (2 Alumnos):**
+  - Implementada cuadrícula 2x2 homogénea a Clases Particulares Individuales con las 4 opciones solicitadas:
+    - **1 clase / semana:** `$2,000` MXN/mes (4 clases al mes).
+    - **2 clases / semana:** `$3,500` MXN/mes (8 clases al mes) — *Seleccionada por defecto*.
+    - **3 clases / semana:** `$5,240` MXN/mes (12 clases al mes).
+    - **5 clases / semana:** `$9,000` MXN/mes (20 clases al mes).
+- **2. Interactividad y Selección Unitaria Exclusiva:**
+  - Integrado hook de estado reactivo `selectedDuoRate` (valores `1`, `2`, `3`, `5`).
+  - Al seleccionar cualquier recuadro de tarifa:
+    - Se aplica borde dorado oficial (`#D59B28`), fondo dorado sutil con iluminación (`rgba(213, 155, 40, 0.1)`) y badge superior «Seleccionado».
+    - La opción previamente seleccionada retorna limpiamente a su estado neutro.
+    - Se activa automáticamente la tarjeta Part Duo (`lrd-duo-active`).
+- **3. Botón CTA Dinámico:**
+  - Actualización reactiva del texto del botón con base en la frecuencia activa:
+    - `COTIZAR PLAN PART DUO · 1 CLASE/SEM`
+    - `COTIZAR PLAN PART DUO · 2 CLASES/SEM`
+    - `COTIZAR PLAN PART DUO · 3 CLASES/SEM`
+    - `COTIZAR PLAN PART DUO · 5 CLASES/SEM`
+    - Con prefijo `✓` cuando la tarjeta se encuentra activa.
+  - Apertura del modal de lead con origen dinámico (`Modalidad Part Duo (X clases/sem)`).
+- **4. Armonía Geométrica y Estética Visual:**
+  - Rebalanceo del contenedor `.lrd-private-pricing-container` a columnas simétricas `repeat(2, 1fr)` en escritorio para perfecta nivelación de ambas tarjetas.
+  - Hover sutil en tono dorado para las cajas de tarifa de Part Duo.
+- **5. Preservación Estricta:**
+  - Intactos los precios de Particulares Individuales ($1,500, $2,500, $3,750, $6,500), Sabatino ($1,350), Regular ($1,490) e Intensivo ($2,550).
+  - Intactos el bloque compartido DELF/DALF/TCF, el banner de inscripción 100% gratuita, horarios, viñetas de beneficios y resto de secciones.
+
+---
+
+## [3.5.11] — 2026-09-25
+
+### Distintivo General de Inscripción 100% Gratuita en Precios (#precios)
+- **1. Distintivo General Superior (`.lrd-pricing-free-enrollment-banner`):**
+  - Incorporado distintivo horizontal unificado entre las pestañas de selección («Clases Grupales» / «Clases Particulares & Part Duo») y el inicio de las tarjetas de precios.
+  - Visible y aplicable de forma global para toda la sección de precios independientemente de la pestaña activa.
+  - Texto principal en tipografía Outfit y azul marino oficial: `INSCRIPCIÓN 100% GRATUITA` (`#001844` con `font-weight: 850`).
+  - Separador dot dorado (`#D59B28`) y texto secundario explicativo: `Sin cuota de inscripción al comenzar.` (`#001844` con `font-weight: 550`).
+  - Acabado estético premium: fondo blanco limpio (`#FFFFFF`), borde dorado sutil (`rgba(213, 155, 40, 0.45)`), sombra suave e ícono SVG profesional `BadgeCheck` en dorado realce (`#D59B28`).
+  - Adaptabilidad responsive: en dispositivos móviles se distribuye de manera centrada y limpia sin saltos forzados de línea.
+- **2. Barra Inferior de Confianza y Garantía (`.lrd-pricing-guarantee-bar`):**
+  - Actualizado el ítem de inscripción de *«Sin costos de inscripción ocultos»* a *«Inscripción 100% gratuita»* con `ShieldCheck` en dorado para eliminar duplicaciones y unificar el mensaje en toda la landing.
+- **3. Preservación Integral:**
+  - Sin alteraciones en precios, promociones multi-mes, horarios, modalidades, beneficios, botones ni estructura de las tarjetas.
+
+---
+
+## [3.5.10] — 2026-09-25
+
+### Especificación de Horarios en Modalidades Regular e Intensiva (Punto 12) (#precios)
+- **1. Modalidad Regular («Franja Horaria»):**
+  - Actualizadas las opciones de selección horaria al nuevo formato uniforme:
+    - **Matutino:** `08:00 – 12:00 h`
+    - **Vespertino:** `13:00 – 21:00 h` (reemplaza al anterior 16:00 – 21:00).
+- **2. Modalidad Intensivo («Elige Turno»):**
+  - Actualizadas las opciones de selección horaria con idéntico estándar visual:
+    - **Matutino:** `08:00 – 12:00 h`
+    - **Vespertino:** `13:00 – 21:00 h` (reemplaza al anterior 18:00 – 21:00).
+- **3. Consistencia Visual y Arquitectura de Píldoras (.lrd-opt-pill-stacked):**
+  - Implementada distribución apilada de alta legibilidad (`.lrd-opt-pill-stacked`, `.lrd-opt-pill-shift`, `.lrd-opt-pill-time`), mostrando el turno en negrita y la franja en tipografía clara y sin saltos incómodos de línea (`white-space: nowrap`).
+  - Mantenidos los acentos cromáticos por modalidad: dorado (`#D59B28`) en Regular y rojo carmesí (`#D92534`) en Intensivo.
+- **4. Preservación Estricta:**
+  - Sin alteraciones en precios ($1,490 / $2,550), días de clase, número de sesiones por semana, beneficios, botones CTA, Modalidad Sabatino ni Clases Particulares.
+
+---
+
+## [3.5.9] — 2026-09-25
+
+### Unificación Tipográfica a Azul Marino y Erradicación de Grises en Testimonios (#testimonios)
+- **1. Testimonios de Alumnos (.lrd-testi-quote-text):**
+  - Actualizado el color del texto de las citas de `#1E293B` (gris pizarra oscuro) a azul marino oficial `#001844`.
+  - Incrementado el peso de la fuente a `font-weight: 600` (SemiBold en estilo cursiva) para erradicar cualquier desvanecimiento o apariencia grisácea producida por el subpixel antialiasing en pantallas de alta y baja densidad.
+- **2. Subtítulos de Alumno y Nivel (.lrd-testi-level-sub):**
+  - Ajustado de `#64748B` a `#001844` con `font-weight: 650`.
+- **3. Barra Superior de Confianza y Calificación (.lrd-testi-trust-bar):**
+  - Párrafo descriptivo (`.lrd-testi-trust-text`) unificado en `#001844` con `font-weight: 600` y `800` en `strong`.
+  - Píldora de puntuación (`.lrd-testi-rating-label`) y borde sutil convertidos a `#001844` y `rgba(0, 24, 68, 0.14)`.
+  - Separador dot (`.lrd-testi-trust-dot`) ajustado a tinte marino suave.
+- **4. Indicadores de Carrusel y Elementos de Soporte (.lrd-dot-item, .lrd-pro-prefix-pill):**
+  - Puntos inactivos del slider actualizados de gris neutro `#CBD5E1` a `rgba(0, 24, 68, 0.22)`.
+  - Píldoras de prefijo y horarios residuales homologados al sistema `#001844`.
+- **5. Preservación Estricta:**
+  - Intactos los acentos dorados (`#D59B28`), rojos (`#D92534`), banderas por país (`flag_mx`, `flag_es`, `flag_ar`), sellos de agua decorativos y geometría responsive de tarjetas.
+
+---
+
+## [3.5.8] — 2026-09-25
+
+### Actualización del Badge en Bloque de Exámenes Oficiales (#precios)
+- **1. Ajuste de Texto en Badge Superior:**
+  - Sustituido el texto del badge `.lrd-pexam-bar-tag` de *«BENEFICIO COMPARTIDO · PARTICULARES & PART DUO»* a *«DISPONIBLE EN CLASES PART»*.
+  - Precisión de alcance comercial: aclara la disponibilidad del servicio dentro de la modalidad de Clases Particulares y Part Duo sin inducir a interpretaciones de inclusión automática no tarifada.
+- **2. Preservación Integral:**
+  - Mantenidos al 100% la posición compartida del bloque, título *«PREPARACIÓN PARA EXÁMENES OFICIALES»*, descripción, píldoras `DELF · DALF · TCF`, colores, padding, bordes y estilos responsive.
+
+---
+
+## [3.5.7] — 2026-09-25
+
+### Corrección Integral de Tipografía Gris en Callout de Prueba, Clases Particulares y Subtítulo de Precios
+- **1. Banner Callout «¿Aún tienes dudas sobre tu nivel o la metodología?» (Imagen 1):**
+  - Título (`.lrd-trial-title`) y párrafo descriptivo (`.lrd-trial-desc`) unificados a azul marino oficial `#001844`.
+  - Peso tipográfico incrementado a `font-weight: 550` (y `800` en `strong`) para erradicar cualquier efecto de antialiasing grisáceo o deslavado.
+- **2. Sección «Clases Particulares & Part Duo» (Imagen 2):**
+  - Textos descriptivos (`.lrd-private-desc`, `.lrd-duo-desc`, `.lrd-duo-banner-text`) consolidados en `#001844` con peso `550 / 650`.
+  - Rejilla de tarifas: frecuencia (`.lrd-rate-freq`), precio numérico (`.lrd-rate-price`), sufijos y detalles (`.lrd-rate-detail`) homogeneizados en `#001844` con pesos de `600` a `900`.
+  - Recuadros de tarifa inactivos (`.lrd-rate-box`): sustituido fondo y bordes grisáceos por fondo blanco limpio con borde marino sutil (`rgba(0, 24, 68, 0.16)`).
+  - Viñetas de beneficios (`.lrd-private-features-list li`): texto en `#001844` con peso `550` e íconos check en `#001844`.
+  - Bloque compartido de exámenes: título y descripción en `#001844` con peso `550 / 800`.
+- **3. Subtítulo Superior de Precios bajo Subrayado Rojo (Imagen 3):**
+  - Subtítulo *«Clases 100% en vivo por Zoom con profesores nativos de Francia...»* (`.lrd-pricing-subtitle`) y título (`.lrd-pricing-title`) actualizados a azul marino profundo `#001844` con `font-weight: 600`.
+- **4. Modalidades Grupales y Profesores:**
+  - Descripciones de ritmo (`.lrd-pcard-pace-clean`), sufijos de precio y beneficios de Sabatino, Regular e Intensivo alineados al azul marino nítido `#001844`.
+
+---
+
+## [3.5.6] — 2026-09-25
+
+### Unificación y Consistencia de Color Tipográfico a Azul Marino Imperial (#profesores & #precios)
+- **1. Sección de Modalidades / Planes (Sabatino, Regular, Intensivo):**
+  - Homologación tipográfica al sistema de azul marino oficial (`#001844` para jerarquía principal y `#001b50` para textos de lectura/viñetas), con peso y contraste tipográfico definidos (`font-weight: 500 / 600 / 750`).
+  - Eliminación de bordes, fondos y hovers en gris pizarra (`#E2E8F0`, `#CBD5E1`, `#F1F5F9`, `#F8FAFC`).
+  - Sustitución de cajas de selectores de turnos/horarios y botones inactivos por acabados limpios con tintes sutiles azul marino y bordes refinados (`rgba(0, 24, 68, 0.12)`).
+  - Íconos de verificación y reloj en Modalidad Sabatino actualizados al azul profundo `#001844`.
+- **2. Sección de Profesores (Jean-Luc, Sophie, Pierre):**
+  - Subtítulo humanizado ajustado al azul marino imperial (`#001b50` con `font-weight: 500`).
+  - Metadatos de procedencia y condición nativa alineados a `#001b50` y `#001844` (preservando el rojo `#D92534` en la condición nativa y dorado en especialidad).
+  - Cita/presentación personal en `#001844` con peso óptimo de lectura.
+  - Marco y fondo técnico de las fotografías de profesores actualizados de gris frío (`#F1F5F9` / `#E2E8F0`) a azul marino profundo `#001844`.
+- **3. Bloque Inferior de Beneficios debajo de Profesores:**
+  - Títulos principales («100% Nativos de Francia», «Máximo 8 Alumnos por Grupo», «Rotación Real de Acentos») consolidados en `#001844` con peso `800`.
+  - Subtítulos («Acentos reales de París, Lyon y Burdeos», «Atención cercana y corrección personalizada», «Entrena tu oído para la vida y los viajes») actualizados de `#002664` a `#001b50` con `font-weight: 600` para eliminar cualquier percepción de texto desvanecido o grisáceo.
+  - Contenedor de beneficios elevado a fondo blanco limpio con borde azul marino sutil (`rgba(0, 24, 68, 0.12)`), erradicando el fondo grisáceo `#F8FAFC`.
+- **4. Integridad del Diseño:**
+  - Preservación estricta de acentos dorados (`#D59B28`), rojos (`#D92534`), jerarquías visuales, dimensiones, espaciados y distribución.
+
+---
+
+## [3.5.5] — 2026-09-25
+
+### Reubicación de Exámenes Oficiales como Beneficio Compartido y Homologación de Botones (#precios)
+- **1. Reubicación del Bloque «Preparación para Exámenes Oficiales»:**
+  - Extraído de la tarjeta individual y colocado como **bloque compartido horizontal** directamente debajo de ambas tarjetas (*Clases Particulares Individuales* y *Modalidad Part Duo*).
+  - Incluye tag explicativo: *«BENEFICIO COMPARTIDO · PARTICULARES & PART DUO»*.
+  - Mantiene el título en Cinzel, descripción completa, icono vectorial `GraduationCap` en rojo oficial `#D92534` y badge pill dorado `DELF · DALF · TCF`.
+  - Exclusivo de la pestaña de Clases Particulares (no aparece en las modalidades grupales).
+  - Ambas tarjetas de Clases Particulares quedan perfectamente simétricas con 4 viñetas cada una.
+- **2. Homologación de Botones de Clases Particulares y Part Duo (Estilo Botón Regular):**
+  - Reemplazados los botones por la clase estándar `.lrd-btn-pcard-clean` (mismo tamaño, altura, border-radius, tipografía, transición y peso que el botón Regular).
+  - **Estado Normal (inactivo):** Fondo claro (`#F8FAFC`), borde sutil (`#CBD5E1`) y texto azul marino (`#001b50`).
+  - **Hover y Activo:**
+    - *Clases Particulares:* Rojo oficial `#D92534`, texto blanco con check y sombra suave.
+    - *Modalidad Part Duo:* Dorado oficial `#D59B28`, texto blanco con check y sombra suave.
+  - Selección mutuamente excluyente con sincronización inmediata.
+- **3. Integridad del Sistema:**
+  - Botones de Sabatino, Regular e Intensivo, precios, horarios y demás módulos 100% preservados.
+
+---
+
+## [3.5.4] — 2026-09-25
+
+### Unificación Cromática: Erradicación de Textos Grises por Azul Marino Imperial (#precios)
+- **1. Sustitución Completa de Tipografía Gris a Azul Marino Oficial (`#001b50`):**
+  - Subtítulo principal de la sección de precios: *«Clases 100% en vivo por Zoom con profesores nativos de Francia...»*.
+  - Encabezados de categoría neutrales (`CURSO SABATINO`) y descripciones de ritmo de las 3 tarjetas de modalidades (*Sabatino*, *Regular*, *Intensivo*).
+  - Sufijos de frecuencia monetaria (*«MXN / mes»*).
+  - Títulos de selectores de horarios y opciones inactivas de turnos y días de clase (*«08:00 - 10:50»*, *«Mié - Jue - Vie»*, etc.).
+  - Textos de viñetas de beneficios en todas las tarjetas grupales y particulares.
+  - Descripciones y tarifas de *Clases Particulares* y *Part Duo*.
+  - Subtítulos de testimonios, subtítulos del stepper de niveles y modal de confirmación.
+- **2. Paleta Institucional Pura:**
+  - Se consolida la tríada oficial: **Azul Marino Imperial (`#001b50`)**, **Dorado Royal (`#D59B28`)**, **Rojo Carmesí (`#D92534`)** y **Blanco (`#FFFFFF`)**, con 0% de textos grises residuales.
+
+---
+
+## [3.5.3] — 2026-09-25
+
+### Refinamiento de Redacción y Destacado Visual Sutil en Clases Particulares (#precios)
+- **1. Desduplicación de Redacción en Descripción Superior:**
+  - Retirada la mención de "preparación DELF/DALF" del párrafo superior para evitar redundancia con el nuevo beneficio:
+    *«1 alumno con profesor nativo exclusivo. El ritmo, objetivos (viajes, negocios) y horarios se adaptan 100% a tu disponibilidad.»*
+- **2. Destacado Visual Sutil del Bloque de Exámenes Oficiales:**
+  - Mayor respiración y espaciado vertical (`margin-top: 6px; margin-bottom: 2px; padding: 11px 13px;`).
+  - Contenedor con tinte ultra-sutil (`background: rgba(0, 27, 80, 0.022); border: 1px solid rgba(0, 27, 80, 0.07); border-radius: 12px;`), sin sombras exageradas ni pesadez visual.
+  - Preservados el icono `GraduationCap` en rojo oficial `#D92534` y la píldora dorada `DELF · DALF · TCF`.
+- **3. Integridad del Sistema:**
+  - Precios, planes, botones, Part Duo, horarios y demás secciones 100% inalterados.
+
+---
+
+## [3.5.2] — 2026-09-25
+
+### Integración de Preparación para Exámenes Oficiales en Clases Particulares (#precios)
+- **1. Nuevo Beneficio Académico en Clases Particulares Individuales:**
+  - Incorporado el beneficio enfocado a certificaciones internacionales:
+    *«Preparación para exámenes oficiales: Ejercicios prácticos y acompañamiento enfocados en DELF, DALF, TCF y otras certificaciones oficiales.»*
+  - Icono SVG profesional `GraduationCap` en rojo carmesí `#D92534`, armónico con el resto de viñetas de la tarjeta.
+- **2. Badge de Certificaciones Oficiales Disponibles:**
+  - Píldora sutil con fondo dorado translúcido (`background: rgba(213, 155, 40, 0.08); border: 1px solid rgba(213, 155, 40, 0.32);`) y separadores dorados:
+    `DELF · DALF · TCF`
+  - Tipografía limpia en mayúsculas, sin logos de terceros, preservando la sobriedad y elegancia del diseño.
+- **3. Integridad Total del Módulo:**
+  - Precios, selector de turnos/frecuencia, botones CTA, modalidad Part Duo y clases grupales 100% inalterados.
+
+---
+
+## [3.5.1] — 2026-09-25
+
+### Desvinculación de Referencia B1+ / B2-C1 y Limpieza Fina del Borde Inferior (#cursos)
+- **1. Reemplazo de Imagen en B2-C1 por Nueva Alumna Exclusiva:**
+  - Sustituida la imagen repetida en **B2-C1** por la nueva alumna provista por el cliente (`media_1790355074505.png`): joven sonriente de cabello castaño ondulado, collar dorado, saco beige, bolígrafo en mano derecha y mano izquierda gesticulando hacia su laptop en clase de perfeccionamiento.
+  - Se mantiene al 100% la imagen original de **B1+** (`profesora_remota_explicando_ante_su_portatil`), asegurando que cada uno de los 7 niveles cuente con una fotografía única y diferenciada.
+- **2. Erradicación de la Franja Rectangular de Mesa en B1+ y B2-C1:**
+  - En **B1+**, se eliminó quirúrgicamente la franja marrón inferior sobrante que flotaba bajo la sombra de contacto, manteniendo el chasis de la laptop y la libreta íntegros y descansando de forma natural sobre el fondo azul marino `#001b50`.
+  - En **B2-C1**, se removió el bloque rectangular de mesa de madera (80px de altura y 775px de ancho que cortaba plano a 930px), preservando la silueta completa del cuaderno, el teclado, el touchpad, la laptop y la sombra natural de contacto con anti-aliasing fino.
+  - Proporciones, tamaño y posición de las personas rigurosamente preservadas (escala estandarizada a ~970px de altura efectiva y encuadre en lienzo 1122x1402).
+- **3. Integridad del Sistema:**
+  - Textos, tarjetas, botones CTA, navegación y demás secciones conservados al 100% sin modificaciones.
+
+---
+
+## [3.5.0] — 2026-09-24
+
+### Actualización de Imágenes con Laptop Completa en Sección Niveles (#cursos) y Unificación de Acabado Inferior
+- **Sustitución de las 6 Fotografías de Alumnos por Nuevas Versiones Mejor Encuadradas:**
+  - **Nivel A1 (`niña de 12 años (2).png`):** Estudiante con audífonos, libreta, estuche y laptop completa sin recortes en la base.
+  - **Nivel A2:** Preservado el estudiante con mochila y celular (sin laptop).
+  - **Nivel A2+ (`muchacha joven.png`):** Joven en chaqueta verde celebrando con laptop completa, teclado, touchpad y libreta.
+  - **Nivel B1 (`chico adulto.png`):** Alumno con camisa azul, taza de café, libreta y laptop completa en plano natural.
+  - **Nivel B1+ (`señora.png`):** Alumna adulta en clase remota con laptop completa, libreta y recorte inferior limpio.
+  - **Nivel B2 (`hombre mayor.png`):** Hombre adulto con lentes, libros de texto, libreta y laptop completa con puertos y teclado visibles.
+  - **Nivel B2-C1 (`señora nivel c1.png`):** Alumna en perfeccionamiento con libreta, AirPod y laptop completa sin cortes en lateral ni fondo.
+- **Ajuste de Consistencia Visual en Recorte Inferior (B1+ y B2-C1):**
+  - Eliminada la franja/base rectangular sobrante de mesa de madera en la parte inferior de las imágenes de **B1+** y **B2-C1**.
+  - Objetos (alumna, libreta y laptop) 100% íntegros y visibles, con sus sombras de contacto naturales preservadas.
+  - El fondo transparente se extiende directamente hasta la base del cuaderno y laptop, logrando un acabado idéntico y homogéneo con los niveles A1, A2+, B1 y B2 sobre el fondo azul marino `#001b50`.
+- **Optimización y Estandarización de Formatos:**
+  - Todas las imágenes procesadas en **WebP** y **PNG** con compresión de alto rendimiento y transparencia alfa limpia.
+  - Altura máxima unificada a `385px` y proporciones armónicas idénticas en todas las tarjetas (`A1`, `A2+`, `B1`, `B1+`, `B2`, `B2-C1`), garantizando altura de tarjeta constante (~482px–501px / 544px) sin desbordes.
+- **Integridad Absoluta:**
+  - Sin alteraciones en textos, colores, botones CTA, tabs, badges ni estructura general de la landing page.
+
+---
+
+## [3.4.9] — 2026-09-24
+
+### Refinamiento Visual Final en Tarjeta B2-C1 (#cursos)
+- **1. Encabezado Superior Más Limpio y Despejado:**
+  - Título secundario acortado a: *«Perfeccionamiento • Conversación y certificación»*.
+  - *«4 meses»* reubicado como información secundaria en un badge discreto (`.lrd-level-duration-pill`) con fondo translúcido y borde sutil, colocado de forma armónica en la misma línea para que el encabezado respire y no compita con el título principal.
+- **2. Títulos de las 4 Competencias Pulidos (Sin Dos Puntos):**
+  - Retirados los dos puntos (`:`) al final de cada título de competencia, manteniendo la tipografía en mayúsculas negritas con su descripción debajo y el layout en 2 columnas:
+    - `CONVERSACIÓN AVANZADA` / *Debates y conversación sobre actualidad, cultura, estudios y trabajo.*
+    - `FLUIDEZ Y PRECISIÓN` / *Mejora pronunciación, vocabulario y naturalidad al expresarte.*
+    - `PREPARACIÓN PARA EXÁMENES` / *Ejercicios prácticos para DELF, DALF, TCF y certificaciones oficiales.*
+    - `PRÁCTICA ORAL Y ESCRITA` / *Comprensión, expresión oral, escritura y simulaciones de examen.*
+- **3. Microajuste de Encuadre en Fotografía (Resolución Completa de la Laptop) y Sticker:**
+  - Reducción del ~4.7% en la fotografía de la alumna (`max-height: 368px`, `max-width: 415px`), manteniendo 100% sus proporciones y nitidez.
+  - Desplazamiento de 14px adicionales a la izquierda (`transform: translate(-34px, -18px)`, dentro del rango 12px–18px) y margen inferior ajustado a `-12px`.
+  - El borde lateral y la base de la laptop quedan holgadamente visibles con abundante fondo azul marino a la derecha y abajo, luciendo natural e integrado sin rozar los límites del card.
+  - **Sticker «J'aime le français»:** Reubicado a `right: -20px`, eliminando el corte del contenedor lateral y mostrándose 100% nítido y completo.
+- **Integridad del Sistema:**
+  - Preservados al 100% el fondo azul marino, colores institucionales, badge circular, pestañas interactivas, CTA oficial y navegación del stepper.
+
+---
+
+## [3.4.8] — 2026-09-24
+
+### Séptimo Nivel de Perfeccionamiento B2-C1 & Unificación del Sistema de Diseño (Punto 11)
+- **Incorporación de B2-C1 en la Secuencia Oficial:**
+  - Secuencia completa: `A1 → A2 → A2+ → B1 → B1+ → B2 → B2-C1` sin reemplazar B2. B2-C1 actúa como la culminación y etapa final de perfeccionamiento.
+- **Navegación Stepper Superior Unificada:**
+  - Séptimo botón `B2-C1 / Perfeccionamiento` con redimensionamiento armónico (`width: 124px`, padding `15px 6px`) en desktop y scroll horizontal fluido en móvil/tablet.
+  - En estado inactivo, B2-C1 conserva exactamente el mismo estilo limpio que el resto de niveles (tarjeta blanca, borde sutil, textos en azul y gris slate), evitando estados mixtos o halos competidores.
+  - Al seleccionarse, pasa a estado activo rojo carmesí con la corona dorada flotante oficial y los demás niveles pasan a inactivo.
+- **Identidad Cromática y Proporciones Idénticas:**
+  - **Misma Altura y Proporciones:** Card compactada a ~514px (en línea con A1 501px y A2 521px), erradicando el desfase de altura anterior.
+  - **Badge Circular Oficial:** Fondo rojo `#D92534`, borde punteado blanco `border: 2px dashed #ffffff` y 3 estrellas doradas, idéntico al sistema visual general.
+  - **Encabezado Superior Rojo:** *«Perfeccionamiento · Conversación y certificación · 4 meses»* con la clase estándar `lrd-level-subtag-red`.
+  - **Título y Subtítulo:** *«Perfecciona tu francés.»* en serif blanco y *«Habla, argumenta y certifícate.»* en cursiva dorada a 1 línea.
+  - **4 Competencias Clave Compactas (en 2 columnas):**
+    1. *Conversación avanzada:* Debates y conversación sobre actualidad, cultura, estudios y trabajo.
+    2. *Fluidez y precisión:* Mejora pronunciación, vocabulario y naturalidad al expresarte.
+    3. *Preparación para exámenes:* Ejercicios prácticos para DELF, DALF, TCF y certificaciones oficiales.
+    4. *Práctica oral y escrita:* Comprensión, expresión oral, escritura y simulaciones de examen.
+  - **Enfoque del Nivel:** Texto conciso y equilibrado para alumnos con base sólida orientados a conversación avanzada y certificaciones oficiales.
+  - **CTA:** `QUIERO PERFECCIONAR MI FRANCÉS` con el botón rojo oficial.
+- **Visual Exclusivo B2-C1:**
+  - Utilizada únicamente la nueva imagen enviada por el cliente (`estudiante_conversacion_perfeccionamiento_b2_c1.webp`), recortada en transparencia natural, encuadrada proporcionalmente a 385px de altura sin distorsiones ni fondos artificiales.
+
+---
+
+## [3.4.7] — 2026-09-24
+
+### Valor Añadido & Beneficios Concretos del Portal del Alumno (Punto 10)
+- **Frase Introductoria de Valor Añadido:**
+  - Incorporada la frase de enlace antes del bloque de beneficios: *«Además de tus clases en vivo, tu portal te permite:»*, remarcando de forma directa y clara que la plataforma es una ventaja complementaria integral al servicio en directo.
+- **Redacción Concreta y Práctica de los 3 Beneficios:**
+  1. **TODO EN UN SOLO LUGAR:** *«Consulta tus clases, calendario y materiales desde un mismo portal.»*
+  2. **SIGUE TU PROGRESO:** *«Visualiza tu avance, estadísticas y desempeño de forma clara.»*
+  3. **RECURSOS SIEMPRE DISPONIBLES:** *«Accede a PDFs, videos y herramientas para seguir practicando.»*
+- **Armonía Visual y Coherencia:**
+  - Preservados los iconos vectoriales SVG profesionales Lucide en `#001b50` (`LayoutDashboard`, `TrendingUp`, `BookOpen`) sin emojis Unicode ni tarjetas sobrecargadas.
+  - Adaptación móvil balanceada con orden de lectura natural y legibilidad inmediata.
+
+---
+
+## [3.4.6] — 2026-09-24
+
+### Refinamiento Visual Premium en Portal del Alumno (#portal-alumno)
+- **Ampliación Visual de la Plataforma (+8% a 10%):**
+  - Contenedor de la sección extendido a `max-width: 1250px` y redistribución de columnas (`0.88fr` a `1.38fr`).
+  - Ancho máximo del marco de navegador ampliado de `780px` a `820px`, otorgándole el protagonismo absoluto a la interfaz real del portal sin distorsiones ni recortes.
+- **Párrafo Principal Conciso:**
+  - Sintetizado a: *«Como alumno tendrás acceso a tu Portal Académico para consultar clases, materiales, progreso y recursos desde un mismo lugar.»*, aligerando la carga de lectura.
+- **Despeje y Jerarquía en Barra de Navegador:**
+  - Retirada la etiqueta redundante superior (*PORTAL DEL ALUMNO*), centrando la barra de dirección segura `portal.lesroisdufrancais.com`.
+  - Priorizada la etiqueta flotante de alto valor `INCLUIDO CON TU EXPERIENCIA` con pulso verde en la esquina inferior del dashboard.
+- **Mayor Contraste y Presencia en Frase de Cierre:**
+  - La frase *«Tus clases, tu progreso y tus recursos, siempre contigo.»* ahora cuenta con mayor espacio superior (`margin-top: 18px`), barra lateral dorada reforzada de `3px solid #D59B28` y tipografía destacada (`font-weight: 700`, `font-size: 0.98rem`) en Azul Marino `#001b50`.
+- **Generoso Espaciado Inferior hacia Niveles:**
+  - Incrementado el padding inferior a `105px` (y `65px` en móvil) para que la sección respire de forma holgada y prestigiosa antes de *"Todos los niveles"*.
+
+---
+
+## [3.4.5] — 2026-09-24
+
+### Ajuste de Ritmo Visual & Continuidad en Portal del Alumno (#portal-alumno)
+- **Eliminación de Líneas Divisorias:**
+  - Retirado el borde divisorio superior (`border-top`) de `.lrd-portal-section`, permitiendo una transición limpia y continua sobre fondo blanco entre el cierre de *"Así se vive una clase en vivo"* y el nuevo bloque del portal.
+- **Optimización de Espaciado Vertical:**
+  - Reducido el padding inferior de `.lrd-live-class-section` de `70px` a `25px` (y en móvil a `20px`).
+  - Reducido el padding superior de `.lrd-portal-section` de `85px` a `15px` (y en móvil de `55px` a `18px`).
+- **Unificación Cromática Total al Azul Oficial (#001b50) & Erradicación de Tonos Grises:**
+  - Se eliminaron las opacidades (`opacity: 0.88` y `opacity: 0.92`) y colores atenuados que generaban un tono grisáceo (#526381) sobre fondo blanco.
+  - Párrafo descriptivo, títulos de beneficios, descripciones y frase de cierre ahora utilizan el **Azul Marino Oficial (`#001b50`)** sólido de la marca con 100% de opacidad y legibilidad impecable.
+  - Iconos vectoriales Lucide de cada beneficio sincronizados en `#001b50`.
+
+---
+
+## [3.4.4] — 2026-09-24
+
+### Nueva Sección: Portal del Alumno — "Tu Espacio Digital" (Paso 9)
+- **Ubicación Estratégica:** Insertada inmediatamente después de *"Así se vive una clase en vivo"* (`#clase-en-vivo`) y antes de *"Todos los niveles"* (`#cursos`), completando la narrativa del prospecto (*Quién enseña → Cómo se vive una clase → Qué herramientas digitales recibes → Qué nivel puedes estudiar*).
+- **Captura Real del Portal Académico (Rol Alumno):**
+  - Tomada directamente desde la interfaz del alumno en resolución retina (1540x920 @2x) con la cuenta demo de prueba `Andrea García` (`andrea@example.com`).
+  - Muestra la barra lateral completa con módulos oficiales, el banner de bienvenida con grupo asignado (*Niza · Grupo 1*), profesor (*Jean-Luc · Nativo*), nivel actual (*A1 · Básico 1*), calendario interactivo de clases y widgets de estadísticas académicas (horas, videos, PDFs y score general).
+  - Asistente virtual minimizado a un botón circular discreto para garantizar protagonismo total al dashboard limpio.
+  - Optimizada a formato WebP de alta fidelidad: de 1.06 MB en PNG a solo **190 KB** (`portal_alumno_dashboard.webp`).
+- **Diseño Editorial & Marco Estilo Navegador:**
+  - Marco realista tipo ventana de navegador con botones de control tricolor (`#FF5F56`, `#FFBD2E`, `#27C93F`), barra de dirección segura (`portal.lesroisdufrancais.com`), badge superior dorado `PORTAL DEL ALUMNO` y etiqueta flotante inferior con pulso verde `INCLUIDO CON TU EXPERIENCIA`.
+  - Columna izquierda con Eyebrow `TU ESPACIO DIGITAL`, titular de gran jerarquía con destaque en rojo Les Rois (`TODO EN UN SOLO LUGAR`), 3 beneficios ligeros con SVG de Lucide Icons (`LayoutDashboard`, `TrendingUp`, `BookOpen`) y frase de cierre sutil con acento dorado: *«Tus clases, tu progreso y tus recursos, siempre contigo.»*
+  - Composición 100% responsiva: en escritorio 2 columnas con 58% de peso visual al navegador; en móvil reordenado automáticamente en secuencia vertical óptima (*Eyebrow → Título → Texto → Captura de portal a ancho completo → 3 Beneficios → Frase final*).
+- **Corrección de Navegación del Alumno:**
+  - Resuelto el bug donde los enlaces del sidebar (`/clases`, `/perfil`, `/progreso`, etc.) expulsaban a la landing page debido a rutas huérfanas sin el prefijo `/dashboard`. Actualizado [Sidebar.tsx](file:///c:/Users/Mariana/OneDrive/Desktop/MOVIDATCI/portalrdf_temp/frontend/src/components/layout/Sidebar.tsx) con las rutas correctas `/dashboard/...` y blindado con alias de redirección en [App.tsx](file:///c:/Users/Mariana/OneDrive/Desktop/MOVIDATCI/portalrdf_temp/frontend/src/App.tsx).
+
+---
+
+## [3.4.3] — 2026-09-24
+
+
+### Reordenamiento de Rotación en el Hero & Unificación Cromática
+- **Nuevo Orden de Secuencia en Hero Slideshow:**
+  - **1ª Imagen (Carga Inicial Eager):** `hero_slide_3.webp` — Los dos jóvenes chocando el puño (comunica juventud, dinamismo y el concepto royal rebelde de la marca desde el primer segundo).
+  - **2ª Imagen:** `rey.webp` — El personaje royal provisto por el cliente (hombre con uniforme rojo, lentes oscuros y estilo de realeza).
+  - **3ª Imagen:** `hero_slide_1.webp` — La chica con corona y capa (reina).
+  - **4ª Imagen:** `hero_slide_2.webp` — El hombre con corona sorprendido mirando el celular (rey divertido/tecnológico).
+  - Secuencia visual cíclica: *Jóvenes → Personaje royal cliente → Reina → Rey divertido → Jóvenes*.
+  - Sincronización completa en código (`LandingPage.tsx`, `landingDefaults.ts`, `SettingsManager.tsx`) y base de datos Supabase (`AppSettings.heroSlides`).
+- **Unificación Cromática en 'Así Se Vive Una Clase en Vivo':**
+  - Removido gradiente oscuro a tono vino/guinda (`#B01825`) en `.lrd-text-red-gradient` en favor del color sólido cálido oficial `#D92534` (`--lrd-red-main`), logrando cohesión total con el badge `CLASES REALES · 100% EN VIVO` y el resto de la landing.
+
+---
+
+## [3.4.2] — 2026-09-24
+
+
+### Humanización y Autenticidad en Sección de Niveles (#cursos)
+- **6 Nuevas Fotografías de Estudiantes y Profesora (Progresión Etaria y Pedagógica Natural):**
+  - **A1 (Básico 1):** `estudiante_con_portatil_y_auriculares.webp` — Chica adolescente con audífonos blancos, laptop y cuaderno (inicio y descubrimiento).
+  - **A2 (Básico 2):** `estudiante_sonriente_con_mochila_y_cuadernos.webp` — Chico adolescente con sudadera azul, mochila, cuadernos y celular (mayor confianza y participación).
+  - **A2+ (Intermedio 1):** `estudiante_celebrando_frente_al_portatil.webp` — Joven con camisa verde, laptop y cuaderno (comienza a desenvolverse con soltura).
+  - **B1 (Intermedio 2):** `joven_conversando_con_portatil_y_cuaderno.webp` — Joven adulto con camisa azul, laptop y libreta conversando durante la clase (autonomía y fluidez).
+  - **B1+ (Avanzado 1):** `profesora_remota_explicando_ante_su_portatil.webp` — Mujer adulta con blazer beige, laptop y libreta en clase online (perfil profesional y dominio argumentativo).
+  - **B2 (Avanzado 2):** `hombre_estudiando_con_portatil_y_libros.webp` — Hombre adulto con lentes, laptop, libros y libreta (perfil maduro, perfeccionamiento y maestría). Reemplaza y erradica por completo la imagen anterior del chico con boina/camiseta a rayas en BD y archivos estáticos.
+- **Optimización WebP de Alta Fidelidad (-85% peso):** De archivos PNG de ~1 MB a WebP de 110–150 KB preservando el 100% de nitidez, canal alfa transparente y preloads síncronos a 0ms. Se conservaron los archivos PNG originales de alta resolución con nombres literales.
+- **Calibración Visual y Encuadre Natural en CSS:**
+  - Alineación al ras de la tarjeta azul (`margin-bottom: -32px`) para que los escritorios y bases de los personajes descansen de manera natural sobre el borde inferior.
+  - Sombra suave y realista (`filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.28))`), erradicando sombras negras duras o recortes artificiales.
+  - Eliminación de escalas y traslaciones forzadas heredadas de ilustraciones anteriores (`scale: 1.18`, etc.), manteniendo proporción limpia y fidedigna.
+- **Sincronización Total con Portal Administrador:** Actualizados `DEFAULT_LEVELS` en `LandingPage.tsx`, `landingDefaults.ts` y presets de `SettingsManager.tsx`.
+
+---
+
+## [3.4.1] — 2026-09-23
+
+### Limpieza y Enfoque en Sección Método MRAF®
+- **Eliminación de Figuras Decorativas Artificiales:** Retiradas las dos imágenes recortadas de stock (`prince_real_cutout.webp` y `girl_real_cutout.webp`) ubicadas en las esquinas inferiores del grid de tarjetas.
+- **Protagonismo a las 4 Tarjetas M · R · A · F:** Las tarjetas del método y su valor pedagógico quedan como el foco absoluto de atención.
+- **Preservación de Grabados Arquitectónicos Tenues:** Se mantienen los fondos tenues ilustrados del castillo francés y la reina para resguardar la identidad visual elegante y el estilo francés.
+- **Reequilibrio de Espaciado:** Reducción del margen inferior del grid a `40px` (desktop) y `15px` superior en el bloque de CTA, eliminando el hueco vacío y logrando una transición armónica hacia la sección de profesores y clases reales.
+
+### Refinamiento Visual en Sección “ASÍ SE VIVE UNA CLASE EN VIVO”
+- **Título Equilibrado:** Distribuido de manera natural en 2 líneas sin aislar palabras clave (`CLASE EN VIVO` con `white-space: nowrap` y tamaño tipográfico proporcional).
+- **Mayor Protagonismo al Video:** Contenedor de video ampliado a `390px` en escritorio, manteniendo proporción nativa vertical 9:16 sin distorsión.
+- **Simplificación de Badges:** Conservado únicamente `CLASE REAL` en la parte superior del reproductor y botón `Mira una clase real` inferior.
+- **Beneficios Más Ligeros:** Eliminadas cajas pesadas; ahora se presentan como bloques limpios con iconos vectoriales SVG Lucide en tonos Azul Marino (#001844 y #002664).
+- **Frase Final Elegante:** Centrada, con rombos dorados discretos (`◆`) en `#D59B28` sin emojis.
+
+### Unificación Cromática en Sección “CONOCE A NUESTROS PROFESORES”
+- **Eliminación Total de Textos Grises:** Se reemplazaron todos los textos grises (`#475569`, `#64748B`, `#334155`) por los azules marinos oficiales de la marca (`#001844` y `#002664`), aplicados en el subtítulo del encabezado, metadatos de ciudad/nativos, citas de presentación personal de cada profesor y descripciones de la barra de reaseguro.
+
+---
+
+## [3.4.0] — 2026-09-23
+
+### Nueva Sección: “ASÍ SE VIVE UNA CLASE EN VIVO” (Evidencia Real y Experiencia)
+- **Ubicación Estratégica:** Insertada inmediatamente después de la sección `CONOCE A NUESTROS PROFESORES`, respondiendo a la pregunta de cómo se vive la experiencia real en el aula online de Les Rois du Français.
+- **Video Real Vertical de Clase Integrado:**
+  - Archivo real de 25 segundos (`/videos/clase_real_prueba.mp4`, 360x640) montado en tarjeta con esquinas redondeadas (`28px`), borde fino azul marino/dorado y sombra flotante suave.
+  - Reproductor controlado por el usuario (sin autoplay intrusivo con audio).
+  - Overlay interactivo con badges: `CLASE REAL` (`BadgeCheck`), indicador pulsante `100% EN VIVO` (`Radio`) y botón central elegante `Mira una clase real` (`Play` en círculo limpio).
+- **Columna Editorial & 3 Beneficios Ligeros con Iconos SVG Lucide:**
+  - Eyebrow en rojo con línea horizontal: `CLASES REALES · 100% EN VIVO` con icono `Radio`.
+  - Título principal de gran jerarquía: `ASÍ SE VIVE UNA CLASE EN VIVO EN LES ROIS DU FRANÇAIS` (con `CLASE EN VIVO` destacado en degradado rojo oficial).
+  - Frase de concepto: *«No solo aprendes francés. Lo hablas.»*
+  - Párrafo descriptivo: *«Clases 100% online y en vivo donde la conversación, la interacción y la participación forman parte de cada sesión.»*
+  - 3 Beneficios con iconos vectoriales SVG de Lucide Icons en contenedor circular suave (`#F8FAFC`):
+    - 💬 `MessageCircle`: **CONVERSACIÓN REAL** — *«Practica francés desde el primer día.»*
+    - 📹 `Video`: **INTERACCIÓN EN VIVO** — *«Pregunta, participa y recibe correcciones de tu profesor.»*
+    - 👥 `UsersRound`: **GRUPOS REDUCIDOS** — *«Máximo 8 alumnos para una experiencia más cercana.»*
+- **Cierre Unificador con Separadores en Rombo Dorado:**
+  - Franja centrada con micro-insignia tricolor francesa y la frase:  
+    `Profesores reales  ◆  Alumnos reales  ◆  Francés en práctica.` (cero emojis).
+- **Adaptación Responsiva:**
+  - Escritorio: 2 columnas balanceadas (55% / 45%).
+  - Tableta: Escala armónica y proporciones balanceadas.
+  - Móvil: Reordenamiento vertical con `display: contents` (Eyebrow → Título → Subtítulo → **Video real protagonista** → 3 Beneficios → Cierre).
+
+---
+
+## [3.3.0] — 2026-09-22
+
+### Rediseño de Máximo Protagonismo y Humanización en Sección “NUESTROS MAESTROS REALES”
+- **Grid de 3 Profesores Simultáneos en Escritorio:** Eliminados tabs y carruseles. Los 3 profesores nativos se presentan de forma inmediata en una misma fila (`grid-template-columns: repeat(3, 1fr)`), permitiendo al visitante constatar la presencia del equipo humano detrás de Les Rois du Français.
+- **Fotografías Reales con 55%–60% del Alto de la Tarjeta:**
+  - Integradas y optimizadas a WebP las 3 fotografías reales proporcionadas:
+    - **Prof. Jean-Luc** (`teacher_royal_jean_luc.webp`): En su escritorio con pizarra de estudio (*"On y arrive!"*), libros de gramática y laptop.
+    - **Prof. Sophie** (`teacher_royal_sophie.webp`): Con suéter a rayas, libreta de notas, taza y bandera francesa de fondo.
+    - **Prof. Pierre** (`teacher_royal_pierre.webp`): Con taza (*"Un café, une bonne conversation :)"*) y libros de fonética.
+  - Altura del encuadre fotográfico calibrada a `380px` (`object-position: center 15%`), manteniendo rostros grandes, cercanos y nítidos.
+  - **Cero disfraces, coronas falsas o accesorios artificiales sobre las fotos**, preservando la autenticidad y elegancia profesional.
+- **Espacio Preparado para Video Real de Presentación:** Micro-píldora translúcida con efecto frosted glass en la esquina inferior de la foto (`▶ Ver presentación`), discreta y no interactiva (con tooltip *"Próximamente video de presentación"*), lista para conectar futuros clips grabados por los profesores reales. Se descartó la prueba con video de IA y se eliminó limpiamente todo el modal, reproductor y estilos asociados para mantener la máxima elegancia y autenticidad sin contenido simulado.
+- **Cabecera Simplificada y Humanizada:**
+  - Título: `CONOCE A NUESTROS PROFESORES` (con acento visual en degradado rojo oficial sobre `PROFESORES`).
+  - Subtítulo 1: *"Profesores nativos que harán que el francés cobre vida."*
+  - Subtítulo 2: *"Conoce a las personas que estarán contigo clase a clase."*
+  - Eliminados hashtags, párrafos adicionales y elementos ruidosos.
+- **Jerarquía de Tarjetas Simplificadas:**
+  - Foto (55-60%) → Nombre en *Playfair Display* → Condición nativa y procedencia confirmada (*Profesor/a nativo/a de francés • París / Lyon / Burdeos*) → Badge sutil dorado de especialidad confirmada (`CONVERSACIÓN Y FLUIDEZ`, `CULTURA Y VIDA COTIDIANA`, `ESTRUCTURA Y PRÁCTICA ORAL`) → Presentación breve de máx 2 líneas (tono conversacional, no currículum).
+- **Eliminación de Elementos Distractores:** Retiradas las insignias de *"Actitud Royal"*, *"Cero Aburrimiento"*, *"Savoir-Faire Royal"* y hashtags dentro de las tarjetas.
+- **Franja de Reaseguro y Confianza Vectorial:**
+  - 3 diferenciales oficiales del equipo con iconografía SVG nativa de alta fidelidad (cero emojis genéricos de sistema operativo):
+    - 🛡️ *100% Nativos de Francia* (Escudo tricolor oficial de Francia en SVG).
+    - 👥 *Máximo 8 Alumnos por Grupo* (Atención y corrección personalizada).
+    - 🔊 *Rotación Real de Acentos* (Entrenamiento auditivo para viajes y situaciones reales).
+- **Adaptación Responsiva Completa:**
+  - Escritorio: 3 profesores en 1 sola fila.
+  - Tableta (641px a 1024px): Disposición **2 + 1** con el 3er profesor elegantemente centrado en su propia fila.
+  - Móvil (≤ 640px): 1 profesor por fila con tarjetas centradas y fotos grandes.
+
+### Depuración y Limpieza de Emojis / Elementos Decorativos Solicitada Esta Semana
+- Retirados rayitos, estrellas y corazones blancos sobre stickers de beneficios y método.
+- Erradicación de emojis genéricos en la escala de niveles, dejando únicamente la corona dorada de identidad en el nivel seleccionado.
+- Corona removida del título de maestros para un acabado tipográfico más limpio y sofisticado.
+
+### Respaldos Locales Almacenados (Sin Push Remoto)
+- Carpeta `backups_landing/pre_semana_modificaciones/` con las versiones originales previas a los cambios de la semana.
+- Carpeta `backups_landing/version_actual_semana/` con el código actual completo.
+- Rama local de seguridad `backup/landing-pre-semana`.
+
+---
+
 ## [3.2.1] — 2026-09-08
 
 ### Persistencia Resiliente & Sincronización Supabase-First en Configuración de Landing Page

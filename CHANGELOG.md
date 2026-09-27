@@ -2,6 +2,73 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-09-25] - Landing Page v3.5.16: Inscripción Gratuita, Tarifas Part Duo, Contacto y Conclusión del Método MRAF
+
+### 🏷️ 1. Distintivo de Inscripción 100% Gratuita (#precios)
+- **Badge Superior Unificado:** Incorporada franja horizontal (`.lrd-pricing-free-enrollment-banner`) entre las pestañas y el inicio de las tarjetas de precios con icono SVG `BadgeCheck` dorado, texto principal `INSCRIPCIÓN 100% GRATUITA` y texto secundario `Sin cuota de inscripción al comenzar.`.
+- **Barra de Garantía:** Reemplazado *«Sin costos de inscripción ocultos»* por *«Inscripción 100% gratuita»* con `ShieldCheck` dorado, eliminando duplicidades y unificando el mensaje comercial.
+
+### 👥 2. Tarifas y Cuadrícula Interactiva 2x2 en Modalidad Part Duo (#precios)
+- **4 Tarifas Oficiales Configuradas:**
+  - 1 clase/semana: `$2,000` MXN/mes (4 clases al mes).
+  - 2 clases/semana: `$3,500` MXN/mes (8 clases al mes) — *Seleccionada por defecto*.
+  - 3 clases/semana: `$5,240` MXN/mes (12 clases al mes).
+  - 5 clases/semana: `$9,000` MXN/mes (20 clases al mes).
+- **Interactividad y CTA Dinámico:** Hook de estado reactivo `selectedDuoRate`, selección unitaria con borde dorado y badge «Seleccionado». Botón reactivo `COTIZAR PLAN PART DUO · X CLASES/SEM` con prefijo `✓` y apertura de modal con el plan exacto.
+- **Simetría 1:1:** Nivelación geométrica del contenedor a `grid-template-columns: repeat(2, 1fr)` en escritorio.
+
+### 📍 3. Funcionalidad de Desplazamiento Suave en Enlace «Contacto» (#contacto)
+- **Anchor ID de Destino:** Asignado `id="contacto"` al contenedor principal del pie de página (`<footer className="lrd-footer-dark-new" id="contacto">`), conectando directamente con la columna CONTÁCTANOS y redes sociales.
+- **Navegación Móvil y Desktop:** Controlador `handleNavAnchorClick` con auto-cierre del menú hamburguesa en móvil y desplazamiento suave nativo (`scrollIntoView({ behavior: 'smooth' })`).
+- **Offset Global:** `scroll-margin-top: 80px` en secciones ancladas para compensar la barra superior.
+
+### 🎯 4. Rango de Edad en el Método MRAF® (#metodo)
+- **Píldora Centrada y Elegante:** `DESDE LOS 12 AÑOS · SIN LÍMITE DE EDAD` (`#001844`, peso 850) con icono SVG `Users` en dorado.
+- **Respiro Visual:** Depuración de frases explicativas secundarias y aumento de margen vertical (`margin-top: 26px; margin-bottom: 42px;`), otorgando aire y evitando saturación entre el encabezado y las tarjetas.
+
+### 💡 5. Conclusión del Método MRAF® y 3 Principios Fundamentales (#metodo)
+- **Franja de Conclusión:** Bloque compacto `.lrd-mraf-conclusion-box` bajo las 4 tarjetas M/R/A/F con la introducción: *«Un método intuitivo donde aprendes francés usándolo: conversación, interacción y participación activa en cada clase.»*.
+- **3 Principios:** **Conversación Real** (`MessageSquare` rojo), **Interacción Constante** (`MessageCircle` dorado) y **Participación Activa** (`Sparkles` dorado).
+- **Responsivo:** 3 columnas horizontales en desktop y apiladas en móvil, preservando al 100% la imagen gráfica oficial del título de MRAF®.
+
+---
+
+## [2026-09-23] - Landing Page: Sección "Así Se Vive Una Clase en Vivo" (Video Real), Limpieza MRAF y Unificación Cromática
+
+### 🎬 Nueva Sección: “ASÍ SE VIVE UNA CLASE EN VIVO” (Punto 6)
+- **Ubicación Inmediata tras Profesores:** Conector visual y conceptual después de *«Conoce a nuestros profesores»*, ofreciendo evidencia tangible de la interacción profesor-alumno en el aula virtual.
+- **Video Real de Clase en Vivo (`clase_real_prueba.mp4`):** Video vertical nativo de 25 segundos (360x640) escalado a `390px` en escritorio, con proporción 9:16 intacta, sin recortes agresivos ni deformaciones.
+- **Overlay Interactivo Limpio:** Badge único superior **`CLASE REAL`** con `BadgeCheck`, botón inferior **`Mira una clase real`** con icono SVG `Play`, y reproducción con audio bajo demanda por el usuario.
+- **3 Bloques Informativos de Beneficios Ligeros:**
+  - `MessageCircle`: **CONVERSACIÓN REAL** — *«Practica francés desde el primer día.»*
+  - `Video`: **INTERACCIÓN EN VIVO** — *«Pregunta, participa y recibe correcciones de tu profesor.»*
+  - `UsersRound`: **GRUPOS REDUCIDOS** — *«Máximo 8 alumnos para una experiencia más cercana.»*
+- **Cierre Centrado:** Frase elegante con rombos dorados: `Profesores reales ◆ Alumnos reales ◆ Francés en práctica.` (cero emojis).
+
+### 🧹 Limpieza y Reequilibrio en Método MRAF®
+- **Eliminación de Figuras de Personas:** Retirados los stickers recortados del príncipe (`prince_real_cutout.webp`) y la chica francesa (`girl_real_cutout.webp`) en las esquinas del grid.
+- **Reequilibrio de Espaciado:** Reducción del margen inferior del grid de `75px` a `40px` y ajuste a `15px` en el CTA inferior para eliminar el hueco vacío.
+- **Protagonismo Total a las 4 Tarjetas $M \cdot R \cdot A \cdot F$:** Manteniendo intactos los grabados arquitectónicos tenues del castillo y la reina.
+
+### 🎨 Unificación Cromática y Nomenclatura en “CONOCE A NUESTROS PROFESORES” (Puntos 4 y 5)
+- **Ajuste de Título:** Actualizado a *"CONOCE A NUESTROS PROFESORES"* con *"PROFESORES"* destacado en degradado rojo oficial.
+- **Erradicación de Textos Grises:** Eliminados los tonos grises (`#475569`, `#64748B`, `#334155`), unificando subtítulo, procedencia, citas y barra de reaseguro en **Azul Marino Oficial (`#001844` y `#002664`)**.
+- **Punto 4 en Espera de Material:** Píldoras `▶ Ver presentación` preparadas en las 3 fotos para vincular los videos reales de presentación en cuanto los entregue el cliente.
+
+---
+
+## [2026-09-22] - Landing Page: Maestros Reales Protagonistas, Limpieza de Distractores y Respaldos Locales
+
+### 👑 Rediseño de Máximo Protagonismo y Humanización en Sección “NUESTROS MAESTROS REALES”
+- **Grid de 3 Profesores Simultáneos en Escritorio:** Eliminación de tabs y carruseles; los 3 profesores nativos se presentan de forma inmediata en una misma fila (`grid-template-columns: repeat(3, 1fr)`).
+- **Fotografías Reales de Alta Definición (55%–60% de la Tarjeta):** Integración y optimización a WebP de Jean-Luc, Sophie y Pierre en sus espacios de trabajo reales, con encuadre de plano medio cercano (`380px`, `center 15%`) y **cero disfraces ni coronas artificiales**.
+- **Espacio Preparado para Video Real (`▶ Ver presentación`):** Píldora frosted glass discreta y no interactiva para conectar futuros clips reales cuando los profesores los graben. Se retiró la prueba con video de IA y se eliminó limpiamente todo el modal, reproductor y estilos asociados.
+- **Cabecera Simplificada y Humanizada:** Título *"NUESTROS MAESTROS REALES"* con frases breves y sin párrafos redundantes ni hashtags.
+- **Jerarquía y Tarjetas Humanas:** Foto → Nombre en Playfair Display → Condición nativa y procedencia confirmada (París, Lyon, Burdeos) → Especialidad confirmada (`CONVERSACIÓN Y FLUIDEZ`, `CULTURA Y VIDA COTIDIANA`, `ESTRUCTURA Y PRÁCTICA ORAL`) → Presentación breve de máx 2 líneas.
+- **Franja de Confianza Vectorial:** 3 diferenciales confirmados con iconografía vectorial SVG nativa (100% Nativos de Francia con escudo tricolor, Máximo 8 alumnos por grupo y Rotación real de acentos con ondas acústicas).
+- **Depuración de Emojis y Stickers de la Semana:** Limpieza de stickers y emojis genéricos en la escala de niveles y gráficos secundarios de beneficios.
+- **Respaldos Locales Integrales:** Guardadas versiones en `backups_landing/pre_semana_modificaciones/` y `backups_landing/version_actual_semana/`, más rama git local `backup/landing-pre-semana` (sin push remoto).
+
 ---
 
 ## [2026-09-09] - Persistencia y Visualización Resiliente de Fecha de Inicio en Gestión de Grupos (Supabase-First)

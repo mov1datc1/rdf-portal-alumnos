@@ -99,6 +99,15 @@ function App() {
             <Route path="video" element={<VideoFrances />} />
             <Route path="perfil" element={<Perfil />} />
           </Route>
+          {/* Alias por si acceden con URL directa sin /dashboard */}
+          <Route path="/clases" element={<Navigate to="/dashboard/clases" replace />} />
+          <Route path="/progreso" element={<Navigate to="/dashboard/progreso" replace />} />
+          <Route path="/estadisticas" element={<Navigate to="/dashboard/estadisticas" replace />} />
+          <Route path="/recursos" element={<Navigate to="/dashboard/recursos" replace />} />
+          <Route path="/video" element={<Navigate to="/dashboard/video" replace />} />
+          <Route path="/perfil" element={<Navigate to="/dashboard/perfil" replace />} />
+          <Route path="/mis-clases" element={<Navigate to="/dashboard/clases" replace />} />
+          <Route path="/mi-perfil" element={<Navigate to="/dashboard/perfil" replace />} />
         </Route>
 
         {/* Rutas Protegidas para Administradores */}

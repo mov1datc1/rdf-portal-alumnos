@@ -10,7 +10,6 @@ import {
   Globe,
   User,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Menu,
   X,
@@ -26,7 +25,14 @@ import {
   Sparkles,
   Zap,
   BookOpen,
-  ExternalLink
+  ExternalLink,
+  Radio,
+  MessageCircle,
+  UsersRound,
+  BadgeCheck,
+  LayoutDashboard,
+  TrendingUp,
+  GraduationCap
 } from 'lucide-react';
 import './LandingPage.css';
 import { useAuthStore } from '../store/authStore';
@@ -62,9 +68,11 @@ interface LevelData {
   titleLine2: string;
   iconDoodle: string;
   desc: string;
-  bullets: Array<{ icon: string; text: string }>;
+  bullets: Array<{ icon: string; title?: string; text: string }>;
   characterImage: string;
   characterAlt: string;
+  ctaText?: string;
+  durationBadge?: string;
 }
 
 export const DEFAULT_LEVELS: Record<string, LevelData> = {
@@ -83,8 +91,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'book', text: '4 unidades (~1 mes c/u) con libro de actividades 100% gratis' },
       { icon: 'people', text: 'Examen escrito y oral al finalizar con certificación oficial' }
     ],
-    characterImage: '/imagenes-lp/level_char_a1.webp',
-    characterAlt: 'Alumna aprendiendo fundamentos de francés con libros y laptop - Nivel A1'
+    characterImage: '/imagenes-lp/estudiante_con_portatil_y_auriculares.webp',
+    characterAlt: 'Chica adolescente con audífonos blancos, laptop y cuaderno - Nivel A1'
   },
   A2: {
     code: 'A2',
@@ -101,8 +109,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'trophy', text: 'Rotación con profesores nativos de distintas regiones de Francia' },
       { icon: 'book', text: '4 unidades temáticas, evaluación oral y escrita con certificado' }
     ],
-    characterImage: '/imagenes-lp/level_char_a2.webp',
-    characterAlt: 'Alumno practicando rutina y comunicación en francés - Nivel A2'
+    characterImage: '/imagenes-lp/estudiante_sonriente_con_mochila_y_cuadernos.webp',
+    characterAlt: 'Chico adolescente con sudadera azul, mochila, cuadernos y celular - Nivel A2'
   },
   'A2+': {
     code: 'A2+',
@@ -119,8 +127,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'book', text: '4 unidades de estudio práctico con material pedagógico gratuito' },
       { icon: 'trophy', text: 'Acreditación oficial mediante examen oral y escrito final' }
     ],
-    characterImage: '/imagenes-lp/level_char_a2_plus.webp',
-    characterAlt: 'Alumna con corona ganando fluidez y soltura en francés - Nivel A2+'
+    characterImage: '/imagenes-lp/estudiante_celebrando_frente_al_portatil.webp',
+    characterAlt: 'Joven con camisa verde, laptop y cuaderno - Nivel A2+'
   },
   B1: {
     code: 'B1',
@@ -137,8 +145,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'people', text: 'Inmersión cultural con múltiples acentos regionales franceses' },
       { icon: 'book', text: 'Certificado de nivel intermedio y pase directo a nivel Avanzado' }
     ],
-    characterImage: '/imagenes-lp/level_char_b1.webp',
-    characterAlt: 'Alumno con corona debatiendo y consolidando su francés - Nivel B1'
+    characterImage: '/imagenes-lp/joven_conversando_con_portatil_y_cuaderno.webp',
+    characterAlt: 'Joven adulto con camisa azul, laptop y libreta conversando - Nivel B1'
   },
   'B1+': {
     code: 'B1+',
@@ -155,8 +163,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'book', text: '4 unidades avanzadas con dinámicas interactivas y roleplays' },
       { icon: 'trophy', text: 'Examen oral y escrito riguroso con certificado avalado' }
     ],
-    characterImage: '/imagenes-lp/level_char_b1_plus.webp',
-    characterAlt: 'Profesor entusiasta con bandana y guiño royal - Nivel B1+'
+    characterImage: '/imagenes-lp/profesora_remota_explicando_ante_su_portatil.webp',
+    characterAlt: 'Alumna adulta en clase online con laptop y libreta - Nivel B1+'
   },
   B2: {
     code: 'B2',
@@ -173,8 +181,44 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'people', text: 'Argumentación espontánea, negociación y expresión de alto nivel' },
       { icon: 'book', text: 'Maestría total de la lengua, modismos, cultura y humor francés' }
     ],
-    characterImage: '/imagenes-lp/french_guy_pointing.webp',
-    characterAlt: 'Profesor de francés en boina señalando la maestría total - Nivel B2'
+    characterImage: '/imagenes-lp/hombre_estudiando_con_portatil_y_libros.webp',
+    characterAlt: 'Hombre adulto con lentes, laptop, libros y libreta - Nivel B2'
+  },
+  'B2-C1': {
+    code: 'B2-C1',
+    sub: 'Perfeccionamiento',
+    subLabel: 'Perfeccionamiento',
+    levelTag: 'Perfeccionamiento • Conversación y certificación',
+    durationBadge: '4 meses',
+    titleLine1: 'Perfecciona tu francés.',
+    titleLine2: 'Habla, argumenta y certifícate.',
+    iconDoodle: '/imagenes-lp/diamond_doodle_c2.webp',
+    desc: 'Este nivel está dirigido a alumnos con una base sólida de francés que desean perfeccionar su comunicación mediante conversación avanzada y práctica orientada a exámenes oficiales.',
+    bullets: [
+      {
+        icon: 'chat',
+        title: 'CONVERSACIÓN AVANZADA',
+        text: 'Debates y conversación sobre actualidad, cultura, estudios y trabajo.'
+      },
+      {
+        icon: 'people',
+        title: 'FLUIDEZ Y PRECISIÓN',
+        text: 'Mejora pronunciación, vocabulario y naturalidad al expresarte.'
+      },
+      {
+        icon: 'trophy',
+        title: 'PREPARACIÓN PARA EXÁMENES',
+        text: 'Ejercicios prácticos para DELF, DALF, TCF y certificaciones oficiales.'
+      },
+      {
+        icon: 'book',
+        title: 'PRÁCTICA ORAL Y ESCRITA',
+        text: 'Comprensión, expresión oral, escritura y simulaciones de examen.'
+      }
+    ],
+    characterImage: '/imagenes-lp/estudiante_conversacion_perfeccionamiento_b2_c1.webp',
+    characterAlt: 'Alumna en clase de conversación y perfeccionamiento B2-C1',
+    ctaText: 'QUIERO PERFECCIONAR MI FRANCÉS'
   }
 };
 
@@ -184,47 +228,39 @@ const DEFAULT_TEACHERS = [
   {
     id: 'jean-luc',
     name: 'Jean-Luc',
-    role: 'Le Roi du Fun & Conversación',
-    city: 'París, Francia',
-    exp: '8 años de experiencia',
+    role: 'Profesor nativo de francés',
+    specialty: 'CONVERSACIÓN Y FLUIDEZ',
+    city: 'París',
     image: '/imagenes-lp/teacher_royal_jean_luc.webp',
-    badge: 'Actitud Royal',
-    hashtag: '#ReyDelFrancés',
-    quote: '¡Bonjour! Mi misión es que hables francés con total confianza, soltura y cero miedo a equivocarte.',
-    bullets: ['100% Hablante Nativo de París', 'Especialista en Metodología MRAF® y Fluidez', 'Clases interactivas en vivo con grupos máx. 8']
+    quote: 'Mi objetivo es que pierdas el miedo y empieces a expresarte en francés con naturalidad.'
   },
   {
     id: 'sophie',
     name: 'Sophie',
-    role: 'La Reine de la Culture & Estilo',
-    city: 'Lyon, Francia',
-    exp: '6 años de experiencia',
+    role: 'Profesora nativa de francés',
+    specialty: 'CULTURA Y VIDA COTIDIANA',
+    city: 'Lyon',
     image: '/imagenes-lp/teacher_royal_sophie.webp',
-    badge: 'Cero Aburrimiento',
-    hashtag: '#FrancésDivertido',
-    quote: '¡C\'est la vie! Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.',
-    bullets: ['Nativa de Lyon, Francia', 'Rotación de acentos y cultura francófona viva', 'Práctica comunicativa para viajes y vida diaria']
+    quote: 'Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.'
   },
   {
     id: 'pierre',
     name: 'Pierre',
-    role: 'El Gran Canciller del Francés',
-    city: 'Burdeos, Francia',
-    exp: '10 años de experiencia',
+    role: 'Profesor nativo de francés',
+    specialty: 'ESTRUCTURA Y PRÁCTICA ORAL',
+    city: 'Burdeos',
     image: '/imagenes-lp/teacher_royal_pierre.webp',
-    badge: 'Savoir-Faire Royal',
-    hashtag: '#AprendeComoRey',
-    quote: '¡Le français, c\'est cool! Olvídate de las clases tradicionales y aburridas. Tu coronación en francés empieza aquí.',
-    bullets: ['Evaluador de Exámenes Escritos y Orales', 'Dominio del idioma sin estrés ni tecnicismos', 'Puntualidad y atención 100% personalizada']
+    quote: 'Olvídate de las clases aburridas; practicaremos para que hables con soltura y seguridad desde el primer día.'
   }
 ];
 
 const DEFAULT_HERO_SLIDES = [
-  { src: '/imagenes-lp/rey.webp', alt: 'Rey Oficial Les Rois du Français' },
-  { src: '/imagenes-lp/hero_slide_1.webp', alt: 'Reina con Corona Les Rois du Français' },
-  { src: '/imagenes-lp/hero_slide_2.webp', alt: 'Estudiante con Celular Les Rois du Français' },
-  { src: '/imagenes-lp/hero_slide_3.webp', alt: 'Comunidad Les Rois du Français' }
+  { id: 'slide-1', src: '/imagenes-lp/hero_slide_3.webp', alt: 'Jóvenes Estudiantes Les Rois du Français' },
+  { id: 'slide-2', src: '/imagenes-lp/rey.webp', alt: 'Rey Oficial Les Rois du Français' },
+  { id: 'slide-3', src: '/imagenes-lp/hero_slide_1.webp', alt: 'Reina con Corona Les Rois du Français' },
+  { id: 'slide-4', src: '/imagenes-lp/hero_slide_2.webp', alt: 'Estudiante con Celular Les Rois du Français' }
 ];
+
 
 export function LandingPage() {
   const { user, isAdmin, isTeacher } = useAuthStore();
@@ -276,7 +312,14 @@ export function LandingPage() {
           setTeachers(cfg.teachers);
         }
         if (cfg.levelsData && typeof cfg.levelsData === 'object' && Object.keys(cfg.levelsData).length > 0) {
-          setLevelsData(prev => ({ ...prev, ...cfg.levelsData }));
+          const sanitized = { ...cfg.levelsData };
+          Object.keys(sanitized).forEach(k => {
+            if (sanitized[k]?.characterImage?.includes('french_guy_pointing')) {
+              sanitized[k].characterImage = DEFAULT_LEVELS[k]?.characterImage;
+              sanitized[k].characterAlt = DEFAULT_LEVELS[k]?.characterAlt;
+            }
+          });
+          setLevelsData(prev => ({ ...prev, ...sanitized }));
         }
       }
     };
@@ -303,9 +346,9 @@ export function LandingPage() {
     };
   }, []);
 
-  // Preload all 6 level character silhouettes immediately into browser memory for 0ms lag-free tabs
+  // Preload all 7 level character silhouettes immediately into browser memory for 0ms lag-free tabs
   useEffect(() => {
-    const levelKeys = ['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2'];
+    const levelKeys = ['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2', 'B2-C1'];
     levelKeys.forEach((lvlKey) => {
       const charImg = levelsData[lvlKey]?.characterImage || DEFAULT_LEVELS[lvlKey]?.characterImage;
       if (charImg) {
@@ -320,10 +363,24 @@ export function LandingPage() {
     if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setHeroSlideIndex(prev => (prev + 1) % heroSlides.length);
-    }, 5000);
+    }, 30000);
     return () => clearInterval(timer);
   }, [heroSlides.length]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPlayingClassVideo, setIsPlayingClassVideo] = useState(false);
+  const classVideoRef = React.useRef<HTMLVideoElement>(null);
+
+  const handlePlayClassVideo = () => {
+    if (classVideoRef.current) {
+      if (isPlayingClassVideo) {
+        classVideoRef.current.pause();
+        setIsPlayingClassVideo(false);
+      } else {
+        classVideoRef.current.play();
+        setIsPlayingClassVideo(true);
+      }
+    }
+  };
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadOrigin, setLeadOrigin] = useState('Clase de Prueba Gratis');
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -331,33 +388,15 @@ export function LandingPage() {
   const [selectedGroupPlan, setSelectedGroupPlan] = useState<'regular' | 'sabatino' | 'intensivo' | null>(null);
   const [selectedPrivateType, setSelectedPrivateType] = useState<'individual' | 'duo'>('individual');
   const [selectedPrivateRate, setSelectedPrivateRate] = useState<number>(3);
+  const [selectedDuoRate, setSelectedDuoRate] = useState<number>(2);
   const [selectedPromoMonths, setSelectedPromoMonths] = useState<3 | 6 | 9>(6);
   const [regularDays, setRegularDays] = useState<'LMV' | 'MJV'>('LMV');
   const [regularShift, setRegularShift] = useState<'matutino' | 'vespertino'>('matutino');
   const [sabatinoShift, setSabatinoShift] = useState<'08:00' | '11:00' | '14:00'>('11:00');
   const [intensivoShift, setIntensivoShift] = useState<'matutino' | 'vespertino'>('matutino');
 
-  // Teachers Section State
-  const [activeTeacherIndex, setActiveTeacherIndex] = useState<number>(0);
-  const [teacherScrollRatio, setTeacherScrollRatio] = useState<number>(0);
+  // MRAF Section State
   const [activeMrafIndex, setActiveMrafIndex] = useState<number>(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const sectionEl = document.getElementById('profesores');
-      if (!sectionEl) return;
-      const rect = sectionEl.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const totalDist = windowHeight + rect.height;
-      const currentDist = windowHeight - rect.top;
-      const progress = Math.max(0, Math.min(1, currentDist / totalDist));
-      setTeacherScrollRatio(progress);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -398,6 +437,16 @@ export function LandingPage() {
     setLeadModalOpen(true);
   };
 
+  const handleNavAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    setIsMobileMenuOpen(false);
+    const target = document.getElementById(targetId);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth' });
+      window.history.pushState(null, '', `#${targetId}`);
+    }
+  };
+
   const handleLeadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormSubmitted(true);
@@ -417,6 +466,7 @@ export function LandingPage() {
           alt="Château de Chambord al atardecer"
           className="lrd-hero-bg-chateau"
           decoding="async"
+          fetchPriority="high"
         />
         {/* Soft Dark Subtle Overlay for legibility without obscuring photo colors */}
         <div className="lrd-hero-overlay-subtle"></div>
@@ -431,6 +481,7 @@ export function LandingPage() {
                 alt="Les Rois du Français"
                 className="lrd-brand-logo-img"
                 decoding="async"
+                fetchPriority="high"
               />
             </Link>
 
@@ -466,7 +517,13 @@ export function LandingPage() {
                   <a href="#nosotros" className="lrd-nav-link-clean" onClick={() => setIsMobileMenuOpen(false)}>SOBRE NOSOTROS</a>
                 </li>
                 <li className="lrd-nav-item">
-                  <a href="#contacto" className="lrd-nav-link-clean" onClick={() => setIsMobileMenuOpen(false)}>CONTACTO</a>
+                  <a
+                    href="#contacto"
+                    className="lrd-nav-link-clean"
+                    onClick={(e) => handleNavAnchorClick(e, 'contacto')}
+                  >
+                    CONTACTO
+                  </a>
                 </li>
               </ul>
 
@@ -541,14 +598,26 @@ export function LandingPage() {
         <div className="lrd-container lrd-hero-container-clean">
           {/* Left Content Side */}
           <div className="lrd-hero-left-clean">
-            {/* Small Red Crown above title */}
-            <div className="lrd-crown-header-wrap">
+            {/* Corona Oficial e Insignia VIP de Alta Gama: Profesores Nativos + 100% Online */}
+            <div className="lrd-hero-crown-badge-row">
               <img
                 src="/imagenes-lp/hero_crown_red.webp"
                 alt="Corona Les Rois du Français"
                 className="lrd-crown-red-img"
                 decoding="async"
+                fetchPriority="high"
               />
+              <div className="lrd-hero-vip-badge">
+                <span className="lrd-vip-badge-text-main">
+                  Profesores nativos
+                </span>
+
+                <span className="lrd-vip-badge-star" aria-hidden="true">✦</span>
+
+                <span className="lrd-vip-badge-text-sub">
+                  100% online en vivo
+                </span>
+              </div>
             </div>
 
             {/* Main Title: Tu reinado del / francés (Red) / en línea */}
@@ -580,13 +649,13 @@ export function LandingPage() {
             {/* Bullet Highlights */}
             <div className="lrd-hero-bullets-row">
               <span className="lrd-bullet-item">
-                <ShieldCheck size={16} color="#FFFFFF" /> Sin compromiso
+                <Check size={16} color="#D59B28" strokeWidth={2.6} /> Sin compromiso
               </span>
               <span className="lrd-bullet-item">
-                <Globe size={16} color="#FFFFFF" /> 100% online
+                <Check size={16} color="#D59B28" strokeWidth={2.6} /> Grupos reducidos
               </span>
               <span className="lrd-bullet-item">
-                <User size={16} color="#FFFFFF" /> Profesores nativos
+                <Check size={16} color="#D59B28" strokeWidth={2.6} /> Clases en vivo
               </span>
             </div>
           </div>
@@ -600,6 +669,7 @@ export function LandingPage() {
                 alt={slide.alt}
                 className={`lrd-king-img-prominent lrd-hero-slide-item ${idx === heroSlideIndex ? 'active' : ''}`}
                 loading={idx === 0 ? 'eager' : 'lazy'}
+                fetchPriority={idx === 0 ? 'high' : 'low'}
                 decoding="async"
               />
             ))}
@@ -664,11 +734,11 @@ export function LandingPage() {
       {/* SECCIÓN 1: NUESTRO MÉTODO MRAF® - EDICIÓN REALEZA REBELDE (CRISP VECTOR CODE) */}
       <section className="lrd-section-mraf-new lrd-mraf-showcase-deluxe" id="metodo">
         {/* Ilus de Fondo: Castillo Francés Izquierda, Retrato Reina Derecha y Flor Floral Derecha Abajo */}
-        <img loading="lazy" decoding="async" src="/imagenes-lp/castle_sketch_hd.webp?v=2"
+        <img loading="lazy" decoding="async" src="/imagenes-lp/castle_sketch_hd.webp?v=5"
           alt="Castillo Francés Grabado"
           className="lrd-bg-sketch-castle"
         />
-        <img loading="lazy" decoding="async" src="/imagenes-lp/queen_frame_hd.webp?v=2"
+        <img loading="lazy" decoding="async" src="/imagenes-lp/queen_frame_hd.webp?v=3"
           alt="Retrato Reina Grabado"
           className="lrd-bg-sketch-queen"
         />
@@ -680,30 +750,23 @@ export function LandingPage() {
         <div className="lrd-container lrd-mraf-container-relative">
           {/* Header Ilustrado HD Oficial */}
           <div className="lrd-mraf-header-deluxe">
-            <img loading="lazy" decoding="async" src="/imagenes-lp/mraf_header_official_hd.webp?v=2"
+            <img loading="lazy" decoding="async" src="/imagenes-lp/mraf_header_official_hd.webp?v=8"
               alt="Método para hablar Francés sin sufrir MRAF®"
               className="lrd-mraf-official-header-img"
             />
+
+            {/* Distintivo de Edad: Desde los 12 años · Sin límite de edad */}
+            <div className="lrd-mraf-age-badge-wrap">
+              <div className="lrd-mraf-age-pill">
+                <Users size={16} color="#D59B28" strokeWidth={2.4} />
+                <span className="lrd-mraf-age-pill-main">DESDE LOS 12 AÑOS · SIN LÍMITE DE EDAD</span>
+              </div>
+            </div>
           </div>
 
           {/* Grid de 4 Tarjetas Interactivas M - R - A - F */}
           <div className="lrd-mraf-grid-deluxe">
 
-            {/* Sticker Flotante Príncipe Izquierda */}
-            <div className="lrd-floating-sticker-anchor lrd-sticker-prince-pos">
-              <img loading="lazy" decoding="async" src="/imagenes-lp/prince_real_cutout.webp?v=10"
-                alt="Príncipe Les Rois du Français"
-                className="lrd-sticker-img-cutout lrd-prince-tilted"
-              />
-            </div>
-
-            {/* Sticker Manuscrito: Aquí se habla de verdad */}
-            <div className="lrd-floating-handwriting-anchor lrd-sticker-habla-verdad-pos">
-              <img loading="lazy" decoding="async" src="/imagenes-lp/sticker_habla_de_verdad.webp?v=2"
-                alt="Aquí se habla de verdad"
-                className="lrd-handwriting-sticker-img"
-              />
-            </div>
 
             {/* Card 1: M - MÉTODO */}
             <div
@@ -751,10 +814,6 @@ export function LandingPage() {
               </div>
               <div className="lrd-letter-wrap-r">
                 <span className="lrd-giant-letter lrd-red-letter">R</span>
-                <img loading="lazy" decoding="async" src="/imagenes-lp/lightning_doodle_pure.webp?v=88888"
-                  alt="Rayo Rojo"
-                  className="lrd-lightning-doodle-img"
-                />
               </div>
               <h3 className="lrd-mraf-title-label">RÁPIDO</h3>
               <p className="lrd-mraf-desc-text">
@@ -769,17 +828,10 @@ export function LandingPage() {
               onClick={() => setActiveMrafIndex(2)}
               onMouseEnter={() => setActiveMrafIndex(2)}
             >
-              <div className="lrd-ribbon-tag-gold">
-                LA FAVORITA <Heart size={12} fill="#D92534" color="#D92534" style={{ display: 'inline', marginLeft: '3px', verticalAlign: 'middle' }} />
-              </div>
               <div className="lrd-card-top-icon">
                 <img loading="lazy" decoding="async" src="/imagenes-lp/crown_a.webp?v=999999" alt="Corona A" className="lrd-crown-icon-sm" />
               </div>
               <div className="lrd-letter-wrap-a">
-                <img loading="lazy" decoding="async" src="/imagenes-lp/heart_doodle.webp?v=20"
-                  alt="Corazón Blanco"
-                  className="lrd-heart-doodle-img"
-                />
                 <span className="lrd-giant-letter lrd-gold-letter">A</span>
               </div>
               <h3 className="lrd-mraf-title-label lrd-gold-title">APRENDIZAJE</h3>
@@ -821,29 +873,65 @@ export function LandingPage() {
               <span className="lrd-hashtag-badge lrd-red-badge">#100%Nativo</span>
             </div>
 
-            {/* Sticker Manuscrito: Cero francés aburrido */}
-            <div className="lrd-floating-handwriting-anchor lrd-sticker-cero-aburrido-pos">
-              <img loading="lazy" decoding="async" src="/imagenes-lp/sticker_cero_aburrido.webp?v=2"
-                alt="Cero francés aburrido"
-                className="lrd-handwriting-sticker-img"
-              />
-            </div>
 
-            {/* Sticker Flotante Chica Boina Derecha */}
-            <div className="lrd-floating-sticker-anchor lrd-sticker-girl-pos">
-              <img loading="lazy" decoding="async" src="/imagenes-lp/girl_real_cutout.webp?v=10"
-                alt="Chica Francesa Les Rois du Français"
-                className="lrd-sticker-img-cutout"
-              />
+          </div>
+
+          {/* Conclusión del Método: Enfoque Intuitivo y Práctico */}
+          <div className="lrd-mraf-conclusion-box">
+            <p className="lrd-mraf-conclusion-intro">
+              Un método intuitivo donde aprendes francés usándolo: conversación, interacción y participación activa en cada clase.
+            </p>
+
+            <div className="lrd-mraf-principles-row">
+              <div className="lrd-mraf-principle-item">
+                <div className="lrd-mraf-principle-icon lrd-principle-icon-red">
+                  <MessageSquare size={18} color="#D92534" strokeWidth={2.2} />
+                </div>
+                <div className="lrd-mraf-principle-text">
+                  <h4 className="lrd-mraf-principle-title">CONVERSACIÓN REAL</h4>
+                  <p className="lrd-mraf-principle-desc">Hablas francés desde el primer día.</p>
+                </div>
+              </div>
+
+              <div className="lrd-mraf-principle-item">
+                <div className="lrd-mraf-principle-icon lrd-principle-icon-gold">
+                  <MessageCircle size={18} color="#D59B28" strokeWidth={2.2} />
+                </div>
+                <div className="lrd-mraf-principle-text">
+                  <h4 className="lrd-mraf-principle-title">INTERACCIÓN CONSTANTE</h4>
+                  <p className="lrd-mraf-principle-desc">Preguntas, respondes y recibes correcciones.</p>
+                </div>
+              </div>
+
+              <div className="lrd-mraf-principle-item">
+                <div className="lrd-mraf-principle-icon lrd-principle-icon-sparkle">
+                  <Sparkles size={18} color="#D59B28" strokeWidth={2.2} />
+                </div>
+                <div className="lrd-mraf-principle-text">
+                  <h4 className="lrd-mraf-principle-title">PARTICIPACIÓN ACTIVA</h4>
+                  <p className="lrd-mraf-principle-desc">Practicas, opinas y te involucras en cada sesión.</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Subtítulo Inferior HD Oficial & Botón Rojo CTA Centrado */}
+          {/* Subtítulo Inferior Vectorial Elegante & Botón Rojo CTA Centrado */}
           <div className="lrd-mraf-bottom-cta-block">
-            <img loading="lazy" decoding="async" src="/imagenes-lp/mraf_bottom_cta_hd.webp?v=3"
-              alt="¿Y lo mejor? No necesitas ser un genio para aprender francés. Solo necesitas empezar."
-              className="lrd-mraf-official-bottom-cta-img"
-            />
+            <div className="lrd-mraf-cta-typography-clean">
+              <div className="lrd-mraf-cta-pre-row">
+                <span className="lrd-mraf-cta-question">¿Y LO MEJOR?</span>
+              </div>
+              <h3 className="lrd-mraf-cta-main-headline">
+                No necesitas ser un genio para aprender francés.
+              </h3>
+              <div className="lrd-mraf-cta-sub-wrap">
+                <span className="lrd-mraf-cta-sub-text">
+                  Solo necesitas <strong className="lrd-mraf-cta-accent-red">empezar.</strong>
+                </span>
+                <div className="lrd-mraf-cta-gold-brush-line"></div>
+              </div>
+            </div>
+
             <div className="lrd-cta-btn-arrow-row">
               <button
                 className="lrd-btn-red-main lrd-btn-cta-royal-mraf"
@@ -856,160 +944,410 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* SECCIÓN INTERACTIVA: CONOCE A NUESTROS MAESTROS REALES */}
+      {/* SECCIÓN INTERACTIVA: CONOCE A NUESTROS PROFESORES */}
+      {/* SECCIÓN: CONOCE A NUESTROS PROFESORES (GRID DE 3 PROFESORES CON MÁXIMO PROTAGONISMO) */}
       <section className="lrd-teachers-section-interactive" id="profesores">
         <div className="lrd-container">
-          {/* Encabezado Principal */}
+          {/* Encabezado Principal Humanizado & Royal */}
           <div className="lrd-teachers-header-center">
             <h2 className="lrd-teachers-main-title">
-              NUESTROS MAESTROS <span className="lrd-text-red-gradient">REALES</span>
-              <img loading="lazy" decoding="async" src="/imagenes-lp/crown_clean.webp" alt="Corona Marca" className="lrd-title-crown-brand" />
+              CONOCE A NUESTROS <span className="lrd-text-red-gradient">PROFESORES</span>
             </h2>
-            <div className="lrd-teachers-badge-row">
-              <span className="lrd-hashtag-pill">#ReyDelFrancés</span>
-              <span className="lrd-hashtag-pill lrd-pill-red">Actitud Royal, Cero Aburrimiento</span>
-            </div>
-            <p className="lrd-teachers-subtitle">
-              Profesores 100% nativos franceses de diversas regiones (París, Lyon, Burdeos). Disfruta de una auténtica rotación de acentos en grupos de máximo 8 alumnos.
+            <p className="lrd-teachers-concept-phrase">
+              Profesores nativos que harán que el francés cobre vida.
+            </p>
+            <p className="lrd-teachers-human-sub">
+              Conoce a las personas que estarán contigo clase a clase.
             </p>
           </div>
 
-          {/* Banner con los 3 Maestros Reales Juntos & Scroll Reveal Effect */}
-          <div className="lrd-scroll-reveal-wrapper">
-            <div
-              className="lrd-scroll-reveal-card lrd-card-team-together"
-              style={{
-                height: `${Math.max(160, Math.min(420, 420 - Math.max(0, (teacherScrollRatio - 0.2) * 450)))}px`,
-                transform: `scale(${1 - Math.max(0, (teacherScrollRatio - 0.25) * 0.15)})`,
-                opacity: Math.max(0.65, 1 - Math.max(0, (teacherScrollRatio - 0.5) * 0.8)),
-                borderRadius: '28px',
-                overflow: 'hidden'
-              }}
-            >
-              {/* Overlay de texto limpio */}
-              <div className="lrd-reveal-overlay-clean">
-                <h3 className="lrd-reveal-title-clean">"El aprendizaje de reyes no sigue reglas aburridas"</h3>
-              </div>
+          {/* GRID DE 3 PROFESORES VISIBLES AL MISMO TIEMPO (55-60% FOTO PROTAGONISTA) */}
+          <div className="lrd-teachers-royal-grid">
+            {teachers.map((teacher, index) => {
+              const isFemale = teacher.id === 'sophie' || teacher.name?.toLowerCase().includes('sophie');
+              const nativeCondition = isFemale ? 'Profesora nativa de francés' : 'Profesor nativo de francés';
+              const confirmedSpecialty = teacher.specialty || (
+                teacher.id === 'jean-luc'
+                  ? 'CONVERSACIÓN Y FLUIDEZ'
+                  : teacher.id === 'sophie'
+                  ? 'CULTURA Y VIDA COTIDIANA'
+                  : teacher.id === 'pierre'
+                  ? 'ESTRUCTURA Y PRÁCTICA ORAL'
+                  : (teacher.role ? teacher.role.toUpperCase() : 'CONVERSACIÓN Y FLUIDEZ')
+              );
+              const personalPresentation = (
+                teacher.id === 'jean-luc'
+                  ? 'Mi objetivo es que pierdas el miedo y empieces a expresarte en francés con naturalidad.'
+                  : teacher.id === 'sophie'
+                  ? 'Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.'
+                  : teacher.id === 'pierre'
+                  ? 'Olvídate de las clases aburridas; practicaremos para que hables con soltura y seguridad desde el primer día.'
+                  : (teacher.quote ? teacher.quote.replace(/^[“"']|[”"']$/g, '') : '')
+              );
 
-              {/* Mosaico de los 3 profesores juntos sin nombres superpuestos */}
-              <div className="lrd-team-collage-grid">
-                <div className="lrd-team-member-col">
-                  <img loading="lazy" decoding="async" src={teachers[0]?.image || "/imagenes-lp/teacher_royal_jean_luc.webp"} alt={`Prof. ${teachers[0]?.name || 'Jean-Luc'}`} className="lrd-team-member-img" />
-                </div>
-                <div className="lrd-team-member-col">
-                  <img loading="lazy" decoding="async" src={teachers[1]?.image || "/imagenes-lp/teacher_royal_sophie.webp"} alt={`Prof. ${teachers[1]?.name || 'Sophie'}`} className="lrd-team-member-img" />
-                </div>
-                <div className="lrd-team-member-col">
-                  <img loading="lazy" decoding="async" src={teachers[2]?.image || "/imagenes-lp/teacher_royal_pierre.webp"} alt={`Prof. ${teachers[2]?.name || 'Pierre'}`} className="lrd-team-member-img" />
-                </div>
+              const cleanCity = teacher.city ? teacher.city.replace(', Francia', '').trim() : '';
+              const teacherImg = (teacher.image && !teacher.image.includes('rey') && !teacher.image.includes('queen') && !teacher.image.includes('student'))
+                ? teacher.image
+                : (teacher.id === 'jean-luc'
+                    ? '/imagenes-lp/teacher_royal_jean_luc.webp'
+                    : teacher.id === 'sophie'
+                    ? '/imagenes-lp/teacher_royal_sophie.webp'
+                    : '/imagenes-lp/teacher_royal_pierre.webp');
+
+              return (
+                <article key={teacher.id || index} className="lrd-teacher-royal-card">
+                  {/* Fotografía Principal (55-60% de protagonismo visual) */}
+                  <div className="lrd-teacher-card-photo-wrap">
+                    <img
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                      src={teacherImg}
+                      alt={`Prof. ${teacher.name} - ${nativeCondition}`}
+                      className="lrd-teacher-card-img"
+                    />
+
+                    {/* Espacio sutil preparado para futuro video real */}
+                    <div className="lrd-teacher-video-teaser" title="Próximamente video de presentación">
+                      <Play size={11} fill="#FFFFFF" color="#FFFFFF" />
+                      <span>Ver presentación</span>
+                    </div>
+                  </div>
+
+                  {/* Cuerpo Informativo Limpio, Humano y Jerárquico */}
+                  <div className="lrd-teacher-card-body">
+                    {/* Nombre del Profesor */}
+                    <h3 className="lrd-teacher-card-name">
+                      Prof. {teacher.name}
+                    </h3>
+
+                    {/* Procedencia y Condición Nativa */}
+                    <p className="lrd-teacher-card-meta">
+                      <span className="lrd-meta-native-text">{nativeCondition}</span>
+                      {cleanCity && (
+                        <span className="lrd-meta-city-text"> • {cleanCity}</span>
+                      )}
+                    </p>
+
+                    {/* Especialidad Confirmada */}
+                    {confirmedSpecialty && (
+                      <div className="lrd-teacher-specialty-badge">
+                        <span>{confirmedSpecialty}</span>
+                      </div>
+                    )}
+
+                    {/* Presentación Personal Breve (Máximo 2 líneas) */}
+                    {personalPresentation && (
+                      <p className="lrd-teacher-card-quote-text">
+                        “{personalPresentation}”
+                      </p>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {/* Barra de Reaseguro y Diferenciales del Staff */}
+          <div className="lrd-teachers-trust-footer">
+            <div className="lrd-trust-badge-item">
+              <div className="lrd-trust-icon-box lrd-trust-box-french" title="100% Nativos de Francia">
+                {/* Escudo Oficial Frances Tricolor Vectorial */}
+                <svg width="22" height="24" viewBox="0 0 24 26" fill="none">
+                  <path d="M12 2L4 5.2v6.5c0 5.8 3.4 11.2 8 12.8 4.6-1.6 8-7 8-12.8V5.2L12 2z" fill="#FFFFFF" />
+                  <path d="M4 6.8v4.9c0 5.5 3.2 10.6 8 12.3V2.4L4 6.8z" fill="#002664" />
+                  <path d="M12 24c4.8-1.7 8-6.8 8-12.3V6.8l-8-4.4V24z" fill="#ED2939" />
+                  <path d="M9 3.8h6v19.4H9V3.8z" fill="#FFFFFF" />
+                  <path d="M12 2L4 5.2v6.5c0 5.8 3.4 11.2 8 12.8 4.6-1.6 8-7 8-12.8V5.2L12 2z" stroke="#001844" strokeWidth="1.6" fill="none" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="lrd-trust-text-col">
+                <strong>100% Nativos de Francia</strong>
+                <span>Acentos reales de París, Lyon y Burdeos</span>
+              </div>
+            </div>
+
+            <div className="lrd-trust-badge-item">
+              <div className="lrd-trust-icon-box lrd-trust-box-red" title="Máximo 8 Alumnos por Grupo">
+                {/* Icono Vectorial Grupos Reducidos / Atención VIP */}
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D92534" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" fill="#D92534" fillOpacity="0.12" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <div className="lrd-trust-text-col">
+                <strong>Máximo 8 Alumnos por Grupo</strong>
+                <span>Atención cercana y corrección personalizada</span>
+              </div>
+            </div>
+
+            <div className="lrd-trust-badge-item">
+              <div className="lrd-trust-icon-box lrd-trust-box-gold" title="Rotación Real de Acentos">
+                {/* Icono Vectorial Acústico de Rotación de Acentos */}
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D59B28" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" fill="#D59B28" fillOpacity="0.18" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+              </div>
+              <div className="lrd-trust-text-col">
+                <strong>Rotación Real de Acentos</strong>
+                <span>Entrena tu oído para la vida y los viajes</span>
               </div>
             </div>
           </div>
 
-          {/* Selector de Profesores (Tabs / Avatares) */}
-          <div className="lrd-teachers-carousel-container">
-            <div className="lrd-teacher-tabs-bar">
-              {teachers.map((teacher, index) => (
-                <button
-                  key={teacher.id || index}
-                  className={`lrd-teacher-tab-item ${activeTeacherIndex === index ? 'lrd-tab-active' : ''}`}
-                  onClick={() => setActiveTeacherIndex(index)}
-                >
-                  <div className="lrd-tab-avatar-frame">
-                    <img loading="lazy" decoding="async" src={teacher.image} alt={teacher.name} className="lrd-tab-avatar-img" />
+        </div>
+      </section>
+
+      {/* SECCIÓN: ASÍ SE VIVE UNA CLASE EN VIVO (EVIDENCIA REAL Y EXPERIENCIA) */}
+      <section className="lrd-live-class-section" id="clase-en-vivo">
+        <div className="lrd-container">
+          <div className="lrd-live-class-grid">
+            {/* Columna Izquierda: Contenido Editorial y Beneficios */}
+            <div className="lrd-live-class-text-col">
+              <div className="lrd-live-class-header-block">
+                {/* Eyebrow con indicador de transmisión en vivo */}
+                <div className="lrd-live-class-eyebrow-wrap">
+                  <span className="lrd-live-class-eyebrow">
+                    <Radio size={15} color="#D92534" strokeWidth={2.2} className="lrd-eyebrow-live-icon" />
+                    CLASES REALES · 100% EN VIVO
+                  </span>
+                </div>
+
+                {/* Título Principal de Gran Jerarquía */}
+                <h2 className="lrd-live-class-main-title">
+                  ASÍ SE VIVE UNA <span className="lrd-text-red-gradient lrd-nowrap">CLASE EN VIVO</span>
+                  <br />
+                  EN LES ROIS DU FRANÇAIS
+                </h2>
+
+                {/* Frase Concepto y Subtítulo */}
+                <p className="lrd-live-class-concept-phrase">
+                  No solo aprendes francés. Lo hablas.
+                </p>
+                <p className="lrd-live-class-desc">
+                  Clases 100% online y en vivo donde la conversación, la interacción y la participación forman parte de cada sesión.
+                </p>
+              </div>
+
+              {/* 3 Beneficios Ligeros con Iconos SVG Minimalistas */}
+              <div className="lrd-live-class-benefits-list">
+                {/* 1. Conversación Real */}
+                <div className="lrd-live-benefit-item">
+                  <div className="lrd-live-benefit-icon-box">
+                    <MessageCircle size={21} color="#001844" strokeWidth={1.9} />
                   </div>
-                  <div className="lrd-tab-text-wrap">
-                    <span className="lrd-tab-teacher-name">{teacher.name}</span>
-                    <span className="lrd-tab-teacher-city">{teacher.city}</span>
-                  </div>
-                  <span className="lrd-tab-status-badge">{teacher.badge}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Ficha Principal de Profesor Activo */}
-            {(() => {
-              const currentTeacher = teachers[activeTeacherIndex] || teachers[0] || DEFAULT_TEACHERS[0];
-              return (
-                <div className="lrd-active-teacher-showcase">
-                  <div className="lrd-showcase-photo-col">
-                    <div className="lrd-showcase-image-wrap">
-                      <img loading="lazy" decoding="async" src={currentTeacher.image}
-                        alt={currentTeacher.name}
-                        className="lrd-showcase-main-img"
-                      />
-                      <div className="lrd-floating-sticker lrd-sticker-tr">
-                        {currentTeacher.badge}
-                      </div>
-                      <div className="lrd-floating-sticker lrd-sticker-bl">
-                        {currentTeacher.hashtag}
-                      </div>
-                    </div>
-
-                    {/* Flechas de Navegación del Carrusel */}
-                    <div className="lrd-carousel-arrows-row">
-                      <button
-                        className="lrd-carousel-arrow-btn"
-                        onClick={() => setActiveTeacherIndex((prev) => (prev === 0 ? teachers.length - 1 : prev - 1))}
-                        aria-label="Profesor Anterior"
-                      >
-                        <ChevronLeft size={20} color="#001b50" />
-                      </button>
-                      <span className="lrd-carousel-index-text">
-                        {activeTeacherIndex + 1} / {teachers.length}
-                      </span>
-                      <button
-                        className="lrd-carousel-arrow-btn"
-                        onClick={() => setActiveTeacherIndex((prev) => (prev === teachers.length - 1 ? 0 : prev + 1))}
-                        aria-label="Siguiente Profesor"
-                      >
-                        <ChevronRight size={20} color="#001b50" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="lrd-showcase-info-col">
-                    <div className="lrd-showcase-pills-top">
-                      <span className="lrd-pill-item-blue">
-                        {currentTeacher.city}
-                      </span>
-                      <span className="lrd-pill-item-red">
-                        {currentTeacher.exp}
-                      </span>
-                    </div>
-
-                    <h3 className="lrd-showcase-fullname">
-                      Prof. {currentTeacher.name}
-                    </h3>
-                    <p className="lrd-showcase-role">{currentTeacher.role}</p>
-
-                    <div className="lrd-showcase-quote-card">
-                      <span className="lrd-quote-icon-mark">“</span>
-                      <p className="lrd-quote-text">{currentTeacher.quote}</p>
-                    </div>
-
-                    <div className="lrd-showcase-bullets-block">
-                      <h4 className="lrd-bullets-heading">Beneficios de estudiar con {currentTeacher.name}:</h4>
-                      <ul className="lrd-bullets-list">
-                        {(currentTeacher.bullets || []).map((bullet: string, idx: number) => (
-                          <li key={idx}>
-                            <Check size={16} color="#D92534" strokeWidth={3} style={{ flexShrink: 0, marginTop: '2px' }} />
-                            <span>{bullet}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <button
-                      className="lrd-btn-red-main lrd-showcase-cta-btn"
-                      onClick={() => openLeadModal(`Clase con Prof. ${currentTeacher.name}`)}
-                    >
-                      ¡QUIERO APRENDER CON {currentTeacher.name?.toUpperCase()}!
-                    </button>
+                  <div className="lrd-live-benefit-content">
+                    <h3 className="lrd-live-benefit-title">CONVERSACIÓN REAL</h3>
+                    <p className="lrd-live-benefit-desc">Practica francés desde el primer día.</p>
                   </div>
                 </div>
-              );
-            })()}
+
+                {/* 2. Interacción en Vivo */}
+                <div className="lrd-live-benefit-item">
+                  <div className="lrd-live-benefit-icon-box">
+                    <Video size={21} color="#001844" strokeWidth={1.9} />
+                  </div>
+                  <div className="lrd-live-benefit-content">
+                    <h3 className="lrd-live-benefit-title">INTERACCIÓN EN VIVO</h3>
+                    <p className="lrd-live-benefit-desc">Pregunta, participa y recibe correcciones de tu profesor.</p>
+                  </div>
+                </div>
+
+                {/* 3. Grupos Reducidos */}
+                <div className="lrd-live-benefit-item">
+                  <div className="lrd-live-benefit-icon-box">
+                    <UsersRound size={21} color="#001844" strokeWidth={1.9} />
+                  </div>
+                  <div className="lrd-live-benefit-content">
+                    <h3 className="lrd-live-benefit-title">GRUPOS REDUCIDOS</h3>
+                    <p className="lrd-live-benefit-desc">Máximo 8 alumnos para una experiencia más cercana.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna Derecha: Video Real Vertical con Mayor Protagonismo */}
+            <div className="lrd-live-class-video-col">
+              <div className={`lrd-live-class-video-card ${isPlayingClassVideo ? 'is-playing' : ''}`}>
+                <video
+                  ref={classVideoRef}
+                  src="/videos/clase_real_prueba.mp4"
+                  className="lrd-live-class-video-element"
+                  playsInline
+                  controls={isPlayingClassVideo}
+                  onPlay={() => setIsPlayingClassVideo(true)}
+                  onPause={() => setIsPlayingClassVideo(false)}
+                  onEnded={() => setIsPlayingClassVideo(false)}
+                  preload="metadata"
+                />
+
+                {/* Overlay Interactivo con badge único CLASE REAL y botón de reproducción */}
+                {!isPlayingClassVideo && (
+                  <div className="lrd-live-video-overlay" onClick={handlePlayClassVideo}>
+                    <div className="lrd-live-video-top-badges">
+                      <span className="lrd-live-badge-pill">
+                        <BadgeCheck size={14} color="#D59B28" strokeWidth={2} />
+                        CLASE REAL
+                      </span>
+                    </div>
+
+                    <div className="lrd-live-play-cta-wrapper">
+                      <button
+                        type="button"
+                        className="lrd-live-play-btn"
+                        aria-label="Reproducir video de clase real"
+                      >
+                        <span className="lrd-play-icon-circle">
+                          <Play size={20} fill="#001844" color="#001844" strokeWidth={2} style={{ marginLeft: '2px' }} />
+                        </span>
+                        <span className="lrd-play-btn-text">Mira una clase real</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Frase Final de Cierre Centrada y Elegante */}
+          <div className="lrd-live-class-footer-row">
+            <p className="lrd-live-closing-phrase">
+              <span>Profesores reales</span>
+              <span className="lrd-gold-diamond">◆</span>
+              <span>Alumnos reales</span>
+              <span className="lrd-gold-diamond">◆</span>
+              <span>Francés en práctica.</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN: PORTAL DEL ALUMNO (TU ESPACIO DIGITAL) */}
+      <section className="lrd-portal-section" id="portal-alumno">
+        <div className="lrd-container">
+          <div className="lrd-portal-grid">
+            
+            {/* Columna Izquierda: Contenido Editorial y Beneficios */}
+            <div className="lrd-portal-text-col">
+              <div className="lrd-portal-header-block">
+                {/* Eyebrow tecnológico en rojo Les Rois */}
+                <div className="lrd-portal-eyebrow-wrap">
+                  <span className="lrd-portal-eyebrow">
+                    <LayoutDashboard size={14} color="#D92534" strokeWidth={2.2} />
+                    TU ESPACIO DIGITAL
+                  </span>
+                </div>
+
+                {/* Título Principal de Gran Jerarquía */}
+                <h2 className="lrd-portal-main-title">
+                  TU FRANCÉS,
+                  <br />
+                  <span className="lrd-portal-title-highlight">TODO EN UN SOLO LUGAR</span>
+                </h2>
+
+                {/* Frase Concepto y Subtítulo */}
+                <p className="lrd-portal-concept-phrase">
+                  Tu experiencia continúa más allá de las clases en vivo.
+                </p>
+                <p className="lrd-portal-desc">
+                  Como alumno tendrás acceso a tu Portal Académico para consultar clases, materiales, progreso y recursos desde un mismo lugar.
+                </p>
+              </div>
+
+              {/* Frase introductoria a los 3 beneficios como valor añadido */}
+              <p className="lrd-portal-benefits-intro">
+                Además de tus clases en vivo, tu portal te permite:
+              </p>
+
+              {/* 3 Beneficios Ligeros con Iconos SVG Minimalistas */}
+              <div className="lrd-portal-benefits-list">
+                {/* Beneficio 1 */}
+                <div className="lrd-portal-benefit-item">
+                  <div className="lrd-portal-benefit-icon-box">
+                    <LayoutDashboard size={20} color="#001b50" strokeWidth={2} />
+                  </div>
+                  <div className="lrd-portal-benefit-content">
+                    <h3 className="lrd-portal-benefit-title">TODO EN UN SOLO LUGAR</h3>
+                    <p className="lrd-portal-benefit-desc">
+                      Consulta tus clases, calendario y materiales desde un mismo portal.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Beneficio 2 */}
+                <div className="lrd-portal-benefit-item">
+                  <div className="lrd-portal-benefit-icon-box">
+                    <TrendingUp size={20} color="#001b50" strokeWidth={2} />
+                  </div>
+                  <div className="lrd-portal-benefit-content">
+                    <h3 className="lrd-portal-benefit-title">SIGUE TU PROGRESO</h3>
+                    <p className="lrd-portal-benefit-desc">
+                      Visualiza tu avance, estadísticas y desempeño de forma clara.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Beneficio 3 */}
+                <div className="lrd-portal-benefit-item">
+                  <div className="lrd-portal-benefit-icon-box">
+                    <BookOpen size={20} color="#001b50" strokeWidth={2} />
+                  </div>
+                  <div className="lrd-portal-benefit-content">
+                    <h3 className="lrd-portal-benefit-title">RECURSOS SIEMPRE DISPONIBLES</h3>
+                    <p className="lrd-portal-benefit-desc">
+                      Accede a PDFs, videos y herramientas para seguir practicando.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Frase de Cierre Sutil */}
+              <div className="lrd-portal-closing-wrap">
+                <p className="lrd-portal-closing-phrase">
+                  Tus clases, tu progreso y tus recursos, siempre contigo.
+                </p>
+              </div>
+            </div>
+
+            {/* Columna Derecha: Captura REAL del Portal en Marco Estilo Navegador */}
+            <div className="lrd-portal-preview-col">
+              <div className="lrd-portal-browser-frame">
+                {/* Barra Superior Estilo Navegador */}
+                <div className="lrd-portal-browser-header">
+                  <div className="lrd-browser-dots">
+                    <span className="lrd-browser-dot lrd-dot-red"></span>
+                    <span className="lrd-browser-dot lrd-dot-yellow"></span>
+                    <span className="lrd-browser-dot lrd-dot-green"></span>
+                  </div>
+                  <div className="lrd-browser-address-bar">
+                    <span className="lrd-browser-lock-icon">🔒</span>
+                    <span className="lrd-browser-url-text">portal.lesroisdufrancais.com</span>
+                  </div>
+                </div>
+
+                {/* Cuerpo del Navegador con Captura Real del Dashboard */}
+                <div className="lrd-portal-browser-body">
+                  <img
+                    src="/imagenes-lp/portal_alumno_dashboard.webp"
+                    alt="Captura real del Portal Académico del Alumno en Les Rois du Français"
+                    className="lrd-portal-screenshot-img"
+                    loading="eager"
+                    decoding="async"
+                  />
+                  
+                  {/* Badge Discreto de Experiencia */}
+                  <div className="lrd-portal-floating-tag">
+                    <span className="lrd-tag-live-dot"></span>
+                    <span>INCLUIDO CON TU EXPERIENCIA</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -1034,7 +1372,6 @@ export function LandingPage() {
             <div className="lrd-levels-headline-wrap">
               {/* Badge "TODOS LOS NIVELES" arriba del título a la izquierda */}
               <div className="lrd-levels-tag-badge">
-                <img loading="lazy" decoding="async" src="/imagenes-lp/gold_crown_icon.webp" alt="Corona" className="lrd-tag-crown-mini" />
                 <span className="lrd-tag-text-red">TODOS LOS NIVELES</span>
               </div>
 
@@ -1043,32 +1380,11 @@ export function LandingPage() {
                 al <span className="lrd-title-red-highlight">“je parle français”</span>.
               </h2>
 
-              {/* Speech bubble flotante "parle, parle, parle !" */}
-              <div className="lrd-speech-bubble-float-pos">
-                <img loading="lazy" decoding="async" src="/imagenes-lp/parle_parle_speech_bubble.webp?v=999"
-                  alt="parle, parle, parle !"
-                  className="lrd-parle-bubble-img"
-                />
-              </div>
 
-              {/* Doodle croissant flotante a la derecha del título */}
-              <div className="lrd-croissant-doodle-pos">
-                <img loading="lazy" decoding="async" src="/imagenes-lp/croissant_doodle.webp"
-                  alt="Croissant"
-                  className="lrd-croissant-img"
-                />
-              </div>
-
-              {/* Doodle corazón flotante */}
-              <div className="lrd-heart-sketch-pos">
-                <svg width="24" height="22" viewBox="0 0 24 24" fill="none" stroke="#001b50" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-              </div>
             </div>
 
             <p className="lrd-levels-subtitle">
-              Encuentra tu nivel y empieza a subir de rango. <span className="lrd-fleur-de-lis">⚜️</span>
+              Encuentra tu nivel y empieza a subir de rango.
             </p>
           </div>
 
@@ -1077,9 +1393,10 @@ export function LandingPage() {
             <div className="lrd-stepper-connecting-line"></div>
 
             <div className="lrd-stepper-items-row">
-              {['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2'].map((lvlKey) => {
+              {['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2', 'B2-C1'].map((lvlKey) => {
                 const lvlData = levelsData[lvlKey] || DEFAULT_LEVELS[lvlKey];
                 const isActive = activeLevel === lvlKey;
+                const isB2C1 = lvlKey === 'B2-C1';
 
                 return (
                   <div
@@ -1089,46 +1406,19 @@ export function LandingPage() {
                   >
                     {/* Tarjeta del Nivel con Doodle superpuesto en su esquina correspondiente */}
                     <div className={`lrd-stepper-card-box ${isActive ? 'lrd-box-active-red' : ''}`}>
-                      {/* Doodle en la esquina correspondiente */}
-                      {lvlKey === 'A1' && (
-                        <img loading="lazy" decoding="async" src="/imagenes-lp/beret_doodle_a1.webp"
-                          alt="Boina Básico 1"
-                          className="lrd-corner-doodle lrd-doodle-a1-left"
-                        />
-                      )}
-                      {lvlKey === 'A2' && (
-                        <img loading="lazy" decoding="async" src="/imagenes-lp/coffee_cup_doodle.webp"
-                          alt="Taza Básico 2"
-                          className="lrd-corner-doodle lrd-doodle-a2-right"
-                        />
-                      )}
-                      {lvlKey === 'A2+' && (
-                        <img loading="lazy" decoding="async" src="/imagenes-lp/chat_bubble_doodle_b1.webp"
-                          alt="Bubble Intermedio 1"
-                          className="lrd-corner-doodle lrd-doodle-b1-right"
-                        />
-                      )}
-                      {lvlKey === 'B1' && (
-                        <img loading="lazy" decoding="async" src="/imagenes-lp/gold_crown_icon.webp"
-                          alt="Corona Intermedio 2"
-                          className="lrd-corner-doodle lrd-doodle-b2-crown"
-                        />
-                      )}
-                      {lvlKey === 'B1+' && (
-                        <img loading="lazy" decoding="async" src="/imagenes-lp/star_doodle_c1.webp"
-                          alt="Estrella Avanzado 1"
-                          className="lrd-corner-doodle lrd-doodle-c1-right"
-                        />
-                      )}
-                      {lvlKey === 'B2' && (
-                        <img loading="lazy" decoding="async" src="/imagenes-lp/diamond_doodle_c2.webp"
-                          alt="Diamante Avanzado 2"
-                          className="lrd-corner-doodle lrd-doodle-c2-right"
+                      {/* Pura Corona Dorada Oficial: se coloca exclusivamente sobre el nivel seleccionado sin fondo ni recuadro azul */}
+                      {isActive && (
+                        <img
+                          loading="lazy"
+                          decoding="async"
+                          src="/imagenes-lp/gold_crown_icon.webp"
+                          alt="Corona Dorada Real"
+                          className="lrd-selected-level-crown-img"
                         />
                       )}
 
-                      <span className="lrd-stepper-code-text">{lvlData.code}</span>
-                      <span className="lrd-stepper-sub-text">{lvlData.subLabel || lvlData.sub}</span>
+                      <span className={`lrd-stepper-code-text ${isB2C1 ? 'lrd-stepper-code-b2c1' : ''}`}>{lvlData.code}</span>
+                      <span className={`lrd-stepper-sub-text ${isB2C1 ? 'lrd-stepper-sub-b2c1' : ''}`}>{lvlData.subLabel || lvlData.sub}</span>
                     </div>
                   </div>
                 );
@@ -1146,13 +1436,18 @@ export function LandingPage() {
                   {/* Sello Circular Rojo del Nivel */}
                   <div className="lrd-level-red-stamp">
                     <span className="lrd-stamp-nivel-label">NIVEL</span>
-                    <span className="lrd-stamp-code">{activeLvl.code}</span>
+                    <span className={`lrd-stamp-code ${activeLevel === 'B2-C1' ? 'lrd-stamp-code-b2c1' : ''}`}>{activeLvl.code}</span>
                     <span className="lrd-stamp-stars">★★★</span>
                   </div>
 
                   {/* Encabezado del Nivel */}
                   <div className="lrd-card-dark-header">
-                    <span className="lrd-level-subtag-red">{activeLvl.levelTag}</span>
+                    <div className="lrd-level-subtag-row">
+                      <span className="lrd-level-subtag-red">{activeLvl.levelTag}</span>
+                      {activeLvl.durationBadge && (
+                        <span className="lrd-level-duration-pill">{activeLvl.durationBadge}</span>
+                      )}
+                    </div>
                     <h3 className="lrd-level-card-main-title">
                       {activeLvl.titleLine1} <br />
                       <span className="lrd-text-gold-handwriting">{activeLvl.titleLine2}</span>
@@ -1199,7 +1494,16 @@ export function LandingPage() {
                                 <img loading="lazy" decoding="async" src="/imagenes-lp/gold_open_book_icon.webp?v=555" alt="Book" className="lrd-gold-bullet-icon" />
                               )}
                             </div>
-                            <span className="lrd-bullet-text-dark">{b.text}</span>
+                            <span className="lrd-bullet-text-dark">
+                              {b.title ? (
+                                <>
+                                  <strong className="lrd-bullet-title-clean">{b.title}</strong>
+                                  <span className="lrd-bullet-desc-clean">{b.text}</span>
+                                </>
+                              ) : (
+                                b.text
+                              )}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -1218,7 +1522,7 @@ export function LandingPage() {
                       className="lrd-btn-red-main lrd-btn-level-cta"
                       onClick={() => openLeadModal(`Inscripción ${activeLvl.subLabel || activeLvl.sub}`)}
                     >
-                      QUIERO SUBIR DE NIVEL <ChevronRight size={18} style={{ marginLeft: '4px' }} />
+                      {activeLvl.ctaText || 'QUIERO SUBIR DE NIVEL'} <ChevronRight size={18} style={{ marginLeft: '4px' }} />
                     </button>
 
                     <div className="lrd-petit-stamp-wrap">
@@ -1238,8 +1542,11 @@ export function LandingPage() {
                       fetchPriority="high"
                       decoding="async"
                       key={activeLevel}
-                      src={activeLvl.characterImage || '/imagenes-lp/french_guy_pointing.webp'}
-                      alt={activeLvl.characterAlt || 'Personaje de Nivel Les Rois du Français'}
+                      src={(() => {
+                        const baseSrc = activeLvl.characterImage || DEFAULT_LEVELS[activeLevel]?.characterImage || '/imagenes-lp/estudiante_sonriente_con_mochila_y_cuadernos.webp';
+                        return baseSrc.includes('?') ? baseSrc : `${baseSrc}?v=20260926_polished`;
+                      })()}
+                      alt={activeLvl.characterAlt || 'Estudiante de Nivel Les Rois du Français'}
                       className={`lrd-french-guy-img lrd-character-fade-in lrd-char-img-${activeLevel.toLowerCase().replace('+', '-plus')}`}
                     />
                   </div>
@@ -1307,6 +1614,16 @@ export function LandingPage() {
             </button>
           </div>
 
+          {/* Distintivo General: Inscripción 100% Gratuita */}
+          <div className="lrd-pricing-free-enrollment-banner">
+            <div className="lrd-free-enrollment-badge">
+              <BadgeCheck size={18} color="#D59B28" strokeWidth={2.4} />
+              <span className="lrd-free-enrollment-main">INSCRIPCIÓN 100% GRATUITA</span>
+              <span className="lrd-free-enrollment-divider">·</span>
+              <span className="lrd-free-enrollment-sub">Sin cuota de inscripción al comenzar.</span>
+            </div>
+          </div>
+
           {/* TAB 1: MODALIDADES GRUPALES CON TARJETA CENTRAL DESTACADA EN RELIEVE 3D */}
           {pricingTab === 'grupales' && (
             <div className="lrd-pricing-cards-grid lrd-grid-royal-3d">
@@ -1341,7 +1658,7 @@ export function LandingPage() {
                 {/* Selector Interactivo de Horario Sabatino */}
                 <div className="lrd-schedule-selector-box">
                   <span className="lrd-schedule-selector-title">
-                    <Clock size={13} color="#001b50" /> Selecciona tu turno en sábado:
+                    <Clock size={13} color="#001844" /> Selecciona tu turno en sábado:
                   </span>
                   <div className="lrd-schedule-options-row">
                     <button
@@ -1370,23 +1687,23 @@ export function LandingPage() {
 
                 <ul className="lrd-pcard-benefits-clean">
                   <li>
-                    <Check size={15} color="#001b50" strokeWidth={3} />
+                    <Check size={15} color="#001844" strokeWidth={3} />
                     <span><strong>1 sesión intensiva</strong> semanal de 2h 50 min</span>
                   </li>
                   <li>
-                    <Check size={15} color="#001b50" strokeWidth={3} />
+                    <Check size={15} color="#001844" strokeWidth={3} />
                     <span>Grupos reducidos de <strong>máx. 8 alumnos</strong></span>
                   </li>
                   <li>
-                    <Check size={15} color="#001b50" strokeWidth={3} />
+                    <Check size={15} color="#001844" strokeWidth={3} />
                     <span>Profesor 100% nativo con dinámicas orales</span>
                   </li>
                   <li>
-                    <Check size={15} color="#001b50" strokeWidth={3} />
+                    <Check size={15} color="#001844" strokeWidth={3} />
                     <span>Libro de actividades y material <strong>GRATIS</strong></span>
                   </li>
                   <li>
-                    <Check size={15} color="#001b50" strokeWidth={3} />
+                    <Check size={15} color="#001844" strokeWidth={3} />
                     <span>Evaluación dual y diploma oficial de nivel</span>
                   </li>
                 </ul>
@@ -1465,17 +1782,19 @@ export function LandingPage() {
                     <div className="lrd-schedule-options-row">
                       <button
                         type="button"
-                        className={`lrd-opt-pill lrd-opt-gold ${regularShift === 'matutino' ? 'selected' : ''}`}
+                        className={`lrd-opt-pill lrd-opt-gold lrd-opt-pill-stacked ${regularShift === 'matutino' ? 'selected' : ''}`}
                         onClick={(e) => { e.stopPropagation(); setRegularShift('matutino'); setSelectedGroupPlan('regular'); }}
                       >
-                        Matutino (08:00 - 12:00)
+                        <span className="lrd-opt-pill-shift">Matutino</span>
+                        <span className="lrd-opt-pill-time">08:00 – 12:00 h</span>
                       </button>
                       <button
                         type="button"
-                        className={`lrd-opt-pill lrd-opt-gold ${regularShift === 'vespertino' ? 'selected' : ''}`}
+                        className={`lrd-opt-pill lrd-opt-gold lrd-opt-pill-stacked ${regularShift === 'vespertino' ? 'selected' : ''}`}
                         onClick={(e) => { e.stopPropagation(); setRegularShift('vespertino'); setSelectedGroupPlan('regular'); }}
                       >
-                        Vespertino (16:00 - 21:00)
+                        <span className="lrd-opt-pill-shift">Vespertino</span>
+                        <span className="lrd-opt-pill-time">13:00 – 21:00 h</span>
                       </button>
                     </div>
                   </div>
@@ -1557,17 +1876,19 @@ export function LandingPage() {
                   <div className="lrd-schedule-options-row">
                     <button
                       type="button"
-                      className={`lrd-opt-pill lrd-opt-red ${intensivoShift === 'matutino' ? 'selected' : ''}`}
+                      className={`lrd-opt-pill lrd-opt-red lrd-opt-pill-stacked ${intensivoShift === 'matutino' ? 'selected' : ''}`}
                       onClick={(e) => { e.stopPropagation(); setIntensivoShift('matutino'); setSelectedGroupPlan('intensivo'); }}
                     >
-                      Matutino (08:00 - 12:00)
+                      <span className="lrd-opt-pill-shift">Matutino</span>
+                      <span className="lrd-opt-pill-time">08:00 – 12:00 h</span>
                     </button>
                     <button
                       type="button"
-                      className={`lrd-opt-pill lrd-opt-red ${intensivoShift === 'vespertino' ? 'selected' : ''}`}
+                      className={`lrd-opt-pill lrd-opt-red lrd-opt-pill-stacked ${intensivoShift === 'vespertino' ? 'selected' : ''}`}
                       onClick={(e) => { e.stopPropagation(); setIntensivoShift('vespertino'); setSelectedGroupPlan('intensivo'); }}
                     >
-                      Vespertino (18:00 - 21:00)
+                      <span className="lrd-opt-pill-shift">Vespertino</span>
+                      <span className="lrd-opt-pill-time">13:00 – 21:00 h</span>
                     </button>
                   </div>
                 </div>
@@ -1612,7 +1933,8 @@ export function LandingPage() {
 
           {/* TAB 2: MODALIDADES PARTICULARES Y PART DUO */}
           {pricingTab === 'particulares' && (
-            <div className="lrd-private-pricing-container">
+            <>
+              <div className="lrd-private-pricing-container">
               {/* Tarjeta 1: Clases Particulares Individuales */}
               <div
                 className={`lrd-private-card ${selectedPrivateType === 'individual' ? 'lrd-private-active' : ''}`}
@@ -1622,7 +1944,7 @@ export function LandingPage() {
                   <div className="lrd-private-tag">1 A 1 PERSONALIZADO</div>
                   <h3 className="lrd-private-title">Clases Particulares Individuales</h3>
                   <p className="lrd-private-desc">
-                    1 alumno con profesor nativo exclusivo. El ritmo, objetivos (viajes, negocios, preparación DELF/DALF) y horarios se adaptan 100% a tu disponibilidad.
+                    1 alumno con profesor nativo exclusivo. El ritmo, objetivos (viajes, negocios) y horarios se adaptan 100% a tu disponibilidad.
                   </p>
                 </div>
 
@@ -1673,14 +1995,14 @@ export function LandingPage() {
                 </ul>
 
                 <button
-                  className={`${selectedPrivateType === 'individual' ? 'lrd-btn-red-main' : 'lrd-btn-navy-pcard'} lrd-btn-pcard-action`}
+                  className={`lrd-btn-pcard-clean lrd-btn-red-subtle ${selectedPrivateType === 'individual' ? 'lrd-btn-active' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedPrivateType('individual');
                     openLeadModal(`Clases Particulares (${selectedPrivateRate} clase${selectedPrivateRate > 1 ? 's' : ''}/sem)`);
                   }}
                 >
-                  {selectedPrivateType === 'individual' ? `✓ COTIZAR PLAN ${selectedPrivateRate} CLASE${selectedPrivateRate > 1 ? 'S' : ''}/SEM` : 'COTIZAR CLASES PARTICULARES'}
+                  {selectedPrivateType === 'individual' ? `✓ COTIZAR PLAN ${selectedPrivateRate} CLASE${selectedPrivateRate > 1 ? 'S' : ''}/SEM` : `COTIZAR PLAN ${selectedPrivateRate} CLASE${selectedPrivateRate > 1 ? 'S' : ''}/SEM`}
                 </button>
               </div>
 
@@ -1705,32 +2027,102 @@ export function LandingPage() {
                   </p>
                 </div>
 
+                <div className="lrd-private-rates-grid lrd-duo-rates-grid">
+                  <div
+                    className={`lrd-rate-box ${selectedDuoRate === 1 ? 'lrd-rate-selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(1); setSelectedPrivateType('duo'); }}
+                  >
+                    {selectedDuoRate === 1 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
+                    <span className="lrd-rate-freq">1 clase / semana</span>
+                    <span className="lrd-rate-price">$2,000 <small>MXN/mes</small></span>
+                    <span className="lrd-rate-detail">4 clases al mes</span>
+                  </div>
+                  <div
+                    className={`lrd-rate-box ${selectedDuoRate === 2 ? 'lrd-rate-selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(2); setSelectedPrivateType('duo'); }}
+                  >
+                    {selectedDuoRate === 2 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
+                    <span className="lrd-rate-freq">2 clases / semana</span>
+                    <span className="lrd-rate-price">$3,500 <small>MXN/mes</small></span>
+                    <span className="lrd-rate-detail">8 clases al mes</span>
+                  </div>
+                  <div
+                    className={`lrd-rate-box ${selectedDuoRate === 3 ? 'lrd-rate-selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(3); setSelectedPrivateType('duo'); }}
+                  >
+                    {selectedDuoRate === 3 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
+                    <span className="lrd-rate-freq">3 clases / semana</span>
+                    <span className="lrd-rate-price">$5,240 <small>MXN/mes</small></span>
+                    <span className="lrd-rate-detail">12 clases al mes</span>
+                  </div>
+                  <div
+                    className={`lrd-rate-box ${selectedDuoRate === 5 ? 'lrd-rate-selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(5); setSelectedPrivateType('duo'); }}
+                  >
+                    {selectedDuoRate === 5 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
+                    <span className="lrd-rate-freq">5 clases / semana</span>
+                    <span className="lrd-rate-price">$9,000 <small>MXN/mes</small></span>
+                    <span className="lrd-rate-detail">20 clases al mes</span>
+                  </div>
+                </div>
+
                 <ul className="lrd-private-features-list">
-                  <li><Check size={16} color="#001b50" /> <span>Mismo horario y profesor asignado para ambos</span></li>
-                  <li><Check size={16} color="#001b50" /> <span>Práctica conversacional activa y roleplays en pareja</span></li>
-                  <li><Check size={16} color="#001b50" /> <span>Libros de actividades individuales gratuitos para cada alumno</span></li>
-                  <li><Check size={16} color="#001b50" /> <span>Certificado oficial individual para cada estudiante al finalizar</span></li>
+                  <li><Check size={16} color="#001844" /> <span>Mismo horario y profesor asignado para ambos</span></li>
+                  <li><Check size={16} color="#001844" /> <span>Práctica conversacional activa y roleplays en pareja</span></li>
+                  <li><Check size={16} color="#001844" /> <span>Libros de actividades individuales gratuitos para cada alumno</span></li>
+                  <li><Check size={16} color="#001844" /> <span>Certificado oficial individual para cada estudiante al finalizar</span></li>
                 </ul>
 
                 <button
-                  className={`${selectedPrivateType === 'duo' ? 'lrd-btn-red-main' : 'lrd-btn-navy-pcard'} lrd-btn-pcard-action`}
+                  className={`lrd-btn-pcard-clean lrd-btn-gold-subtle ${selectedPrivateType === 'duo' ? 'lrd-btn-active' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedPrivateType('duo');
-                    openLeadModal('Modalidad Part Duo (2 Alumnos)');
+                    openLeadModal(`Modalidad Part Duo (${selectedDuoRate} clase${selectedDuoRate > 1 ? 's' : ''}/sem)`);
                   }}
                 >
-                  {selectedPrivateType === 'duo' ? '✓ COTIZAR PLAN PART DUO' : 'COTIZAR PLAN PART DUO'}
+                  {selectedPrivateType === 'duo'
+                    ? `✓ COTIZAR PLAN PART DUO · ${selectedDuoRate} CLASE${selectedDuoRate > 1 ? 'S' : ''}/SEM`
+                    : `COTIZAR PLAN PART DUO · ${selectedDuoRate} CLASE${selectedDuoRate > 1 ? 'S' : ''}/SEM`}
                 </button>
               </div>
             </div>
+
+            {/* Bloque Compartido: Preparación para Exámenes Oficiales */}
+            <div className="lrd-private-shared-exam-bar">
+              <div className="lrd-pexam-bar-left">
+                <div className="lrd-pexam-icon-circle">
+                  <GraduationCap size={24} color="#D92534" strokeWidth={2.2} />
+                </div>
+                <div className="lrd-pexam-bar-text-group">
+                  <div className="lrd-pexam-bar-header">
+                    <span className="lrd-pexam-bar-tag">DISPONIBLE EN CLASES PART</span>
+                    <h4 className="lrd-pexam-bar-title">PREPARACIÓN PARA EXÁMENES OFICIALES</h4>
+                  </div>
+                  <p className="lrd-pexam-bar-desc">
+                    Ejercicios prácticos y acompañamiento enfocados en DELF, DALF, TCF y otras certificaciones oficiales.
+                  </p>
+                </div>
+              </div>
+
+              <div className="lrd-pexam-bar-right">
+                <div className="lrd-private-exam-pills">
+                  <span>DELF</span>
+                  <span className="lrd-private-exam-sep">·</span>
+                  <span>DALF</span>
+                  <span className="lrd-private-exam-sep">·</span>
+                  <span>TCF</span>
+                </div>
+              </div>
+            </div>
+          </>
           )}
 
           {/* BANNER DE PROMOCIONES MULTI-MES (#promos) */}
           <div className="lrd-promos-banner-container" id="promos">
             <div className="lrd-promos-content">
               <div className="lrd-promos-text-col">
-                <span className="lrd-promos-pill">🏷️ AHORRO REAL DE LA REALEZA</span>
+                <span className="lrd-promos-pill">AHORRO REAL DE LA REALEZA</span>
                 <h3 className="lrd-promos-title">¿Prefieres asegurar tu nivel o pagar por adelantado?</h3>
                 <p className="lrd-promos-sub">
                   Aprovecha nuestros descuentos especiales en pagos multi-mes válidos para cualquier modalidad y horario.
@@ -1791,7 +2183,7 @@ export function LandingPage() {
             <div className="lrd-guarantee-top-row">
               <div className="lrd-guarantee-col">
                 <ShieldCheck size={20} color="#D59B28" />
-                <span>Sin costos de inscripción ocultos</span>
+                <span>Inscripción 100% gratuita</span>
               </div>
               <div className="lrd-guarantee-col">
                 <Check size={20} color="#D59B28" />
@@ -1840,58 +2232,20 @@ export function LandingPage() {
         <div className="lrd-container lrd-why-container-rel">
           {/* Composición Gráfica del Título Principal + Stickers y Doodles Exactos a la Referencia */}
           <div className="lrd-why-header-composition">
-            {/* Sticker 3D Salut flotante con sus estrellas doradas */}
-            <div className="lrd-why-floating-salut">
-              <img loading="lazy" decoding="async" src="/imagenes-lp/salut_3d_bubble.webp"
-                alt="Salut!"
-                className="lrd-why-salut-bubble"
-              />
-              <div className="lrd-why-salut-stars">
-                <svg width="60" height="60" viewBox="0 0 50 50" fill="none">
-                  <path d="M 22 4 Q 22 22 40 22 Q 22 22 22 40 Q 22 22 4 22 Q 22 22 22 4 Z" stroke="#D59B28" strokeWidth="3.2" strokeLinejoin="round" />
-                  <path d="M 38 32 Q 38 40 46 40 Q 38 40 38 48 Q 38 40 30 40 Q 38 40 38 32 Z" stroke="#D59B28" strokeWidth="2.5" strokeLinejoin="round" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Sticker Avión de Papel con estela punteada a la derecha */}
-            <img loading="lazy" decoding="async" src="/imagenes-lp/paper_plane_loop_trail.webp"
-              alt="Avión de papel"
-              className="lrd-why-paper-plane-trail"
-            />
-
-            {/* Sticker Burbuja Roja 3D "Ça va?" */}
-            <img loading="lazy" decoding="async" src="/imagenes-lp/ca_va_bubble_red.webp"
-              alt="Ça va?"
-              className="lrd-why-ca-va-bubble"
-            />
-
             {/* Título Principal Nítido en HTML/CSS Vectorial */}
             <div className="lrd-why-header-text-block">
               <h2 className="lrd-why-heading-title">
                 <span className="lrd-why-title-left-group">
-                  <img loading="lazy" decoding="async" src="/imagenes-lp/red_burst_diagonal.webp"
-                    alt="Destellos"
-                    className="lrd-why-burst-above-b"
-                  />
                   BENEFICIOS DE LA
                 </span>{' '}
                 <span className="lrd-why-title-red-group">
                   REALEZA
-                  <img loading="lazy" decoding="async" src="/imagenes-lp/crown_doodle_yellow.webp"
-                    alt="Corona"
-                    className="lrd-why-crown-above-a"
-                  />
                 </span>
               </h2>
               <p className="lrd-why-heading-sub">
                 ¿Por qué miles de alumnos eligen estudiar con Les Rois du Français?
               </p>
               <div className="lrd-why-heading-results-wrap">
-                <img loading="lazy" decoding="async" src="/imagenes-lp/red_burst_vertical.webp"
-                  alt="Destellos"
-                  className="lrd-why-results-burst-left"
-                />
                 <div className="lrd-why-handwritten-block">
                   <span className="lrd-why-results-handwritten">¡Resultados Reales!</span>
                   <img loading="lazy" decoding="async" src="/imagenes-lp/sketch_red_underline.svg"
@@ -1899,10 +2253,6 @@ export function LandingPage() {
                     className="lrd-why-handwritten-underline"
                   />
                 </div>
-                <img loading="lazy" decoding="async" src="/imagenes-lp/red_burst_vertical.webp"
-                  alt="Destellos"
-                  className="lrd-why-results-burst-right"
-                />
               </div>
             </div>
           </div>
@@ -1964,11 +2314,6 @@ export function LandingPage() {
 
                 {/* Card 2: Enfoque 100% Práctico */}
                 <div className="lrd-bcard-v2 lrd-bcard-accent-red">
-                  {/* Estrella roja flotante encima a la derecha */}
-                  <img loading="lazy" decoding="async" src="/imagenes-lp/red_star_target_doodle.webp"
-                    alt="Star Doodle"
-                    className="lrd-bcard-doodle-star-red"
-                  />
                   <div className="lrd-bcard-icon-badge lrd-bbadge-red">
                     <MessageSquare size={26} color="#FFFFFF" strokeWidth={2.4} />
                   </div>
@@ -1999,11 +2344,6 @@ export function LandingPage() {
                 {/* Card 3: Resultados Acelerados */}
                 <div className="lrd-bcard-wrapper-card3">
                   <div className="lrd-bcard-v2 lrd-bcard-accent-navy">
-                    {/* Rayo amarillo 3D flotante encima a la derecha */}
-                    <img loading="lazy" decoding="async" src="/imagenes-lp/yellow_lightning_doodle.webp"
-                      alt="Lightning Doodle"
-                      className="lrd-bcard-doodle-lightning-yellow"
-                    />
                   <div className="lrd-bcard-icon-badge lrd-bbadge-navy">
                     {/* Rocket / Speed energy icon */}
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -2042,11 +2382,6 @@ export function LandingPage() {
                     Conecta con compañeros motivados de todo el mundo y practica francés en un ambiente cercano y divertido.
                   </p>
                   <div className="lrd-bcard-footer-community">
-                    {/* Doodle doble corazón en azul marino */}
-                    <svg className="lrd-hearts-doodle" width="48" height="34" viewBox="0 0 48 34" fill="none" stroke="#001b50" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 28 C8 24, 2 17, 2 11 C2 5, 7 2, 12 7 C17 2, 22 5, 22 11 C22 17, 16 24, 12 28 Z" transform="rotate(-15 12 15)" />
-                      <path d="M32 26 C29 23, 24 17, 24 12 C24 7, 28 4, 32 8 C36 4, 40 7, 40 12 C40 17, 35 23, 32 26 Z" transform="rotate(10 32 15) scale(0.85)" />
-                    </svg>
                   </div>
                 </div>
 
@@ -2071,7 +2406,9 @@ export function LandingPage() {
                       </div>
 
                       <div className="lrd-vip-text-content">
-                        <h4 className="lrd-vip-title">Trato VIP & Realeza ✨</h4>
+                        <h4 className="lrd-vip-title">
+                          Trato VIP & Realeza <Sparkles size={18} color="#D59B28" style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px' }} />
+                        </h4>
                         <p className="lrd-vip-desc">
                           Profesores nativos franceses con actitud royal, cero aburrimiento y atención personalizada digna de un verdadero rey.
                         </p>
@@ -2285,7 +2622,7 @@ export function LandingPage() {
       </section>
 
       {/* SECCIÓN 5: FOOTER AZUL MARINO PROFUNDO */}
-      <footer className="lrd-footer-dark-new">
+      <footer className="lrd-footer-dark-new" id="contacto">
         <div className="lrd-container lrd-footer-flex-container">
           {/* Columna 1: Marca */}
           <div className="lrd-footer-col-brand">
