@@ -5,6 +5,21 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.5.21] — 2026-09-28
+
+### Navegación Especializada del Menú Desplegable «CURSOS»
+- **1. Desacoplamiento de Destinos en Dropdown de Cursos:**
+  - Corregido el problema donde las 3 opciones del menú redirigían exclusivamente a la sección de niveles (`#cursos`).
+  - *«6 Niveles Oficiales (Básico a Avanzado)»*: desplazamiento suave a la sección de niveles académicos A1 a B2-C1 (`#cursos`).
+  - *«Clases Grupales (Regular, Sabatino, Intensivo)»*: desplazamiento suave a `#precios` con activación y preselección automática de la pestaña *«Clases Grupales (Máx. 8 Alumnos)»*.
+  - *«Clases Particulares & Part Duo»*: desplazamiento suave a `#precios` con activación y preselección automática de la pestaña *«Clases Particulares & Part Duo»*.
+- **2. Handler Reactivo Unificado (`handleCourseNavClick`):**
+  - Cierre automático del menú drawer en móviles y tabletas (`setIsMobileMenuOpen(false)`).
+  - Sincronización precisa de estado de pestaña de tarifas (`setPricingTab`) y cálculo dinámico de posición de scroll mediante micro-retardo suave.
+  - Cero alteraciones en estilos, diseño ni textos del menú.
+
+---
+
 ## [3.5.20] — 2026-09-26
 
 ### Optimización Final de Carga, Rendimiento de Imágenes y Recursos Críticos
