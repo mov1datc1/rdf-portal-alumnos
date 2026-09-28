@@ -447,6 +447,25 @@ export function LandingPage() {
     }
   };
 
+  const handleCourseNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    targetId: 'cursos' | 'precios',
+    tab?: 'grupales' | 'particulares'
+  ) => {
+    setIsMobileMenuOpen(false);
+    if (tab) {
+      setPricingTab(tab);
+    }
+    const target = document.getElementById(targetId);
+    if (target) {
+      e.preventDefault();
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+      window.history.pushState(null, '', `#${targetId}`);
+    }
+  };
+
   const handleLeadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormSubmitted(true);
@@ -495,13 +514,13 @@ export function LandingPage() {
             <nav className={`lrd-nav-menu ${isMobileMenuOpen ? 'active' : ''}`}>
               <ul className="lrd-nav-list-clean">
                 <li className="lrd-nav-item">
-                  <a href="#cursos" className="lrd-nav-link-clean" onClick={() => setIsMobileMenuOpen(false)}>
+                  <a href="#cursos" className="lrd-nav-link-clean" onClick={(e) => handleCourseNavClick(e, 'cursos')}>
                     CURSOS <ChevronDown size={12} color="#FFFFFF" />
                   </a>
                   <ul className="lrd-dropdown-menu">
-                    <li><a href="#cursos" onClick={() => setIsMobileMenuOpen(false)}>6 Niveles Oficiales (Básico a Avanzado)</a></li>
-                    <li><a href="#cursos" onClick={() => setIsMobileMenuOpen(false)}>Clases Grupales (Regular, Sabatino, Intensivo)</a></li>
-                    <li><a href="#cursos" onClick={() => setIsMobileMenuOpen(false)}>Clases Particulares & Part Duo</a></li>
+                    <li><a href="#cursos" onClick={(e) => handleCourseNavClick(e, 'cursos')}>6 Niveles Oficiales (Básico a Avanzado)</a></li>
+                    <li><a href="#precios" onClick={(e) => handleCourseNavClick(e, 'precios', 'grupales')}>Clases Grupales (Regular, Sabatino, Intensivo)</a></li>
+                    <li><a href="#precios" onClick={(e) => handleCourseNavClick(e, 'precios', 'particulares')}>Clases Particulares & Part Duo</a></li>
                   </ul>
                 </li>
                 <li className="lrd-nav-item">

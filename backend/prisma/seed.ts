@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -12,14 +13,71 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter } as any);
 
 async function main() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  let authUserId: string | null = null;
+
+  if (supabaseUrl && supabaseServiceKey) {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const { data: usersData, error: listError } = await supabase.auth.admin.listUsers();
+  if (listError) {
+    console.error('Error al listar usuarios de Supabase auth:', listError);
+  }
+
+  const existingAuthUser = usersData?.users?.find((u) => u.email === 'andrea@example.com');
+
+  if (existingAuthUser) {
+    authUserId = existingAuthUser.id;
+    const { error: updateError } = await supabase.auth.admin.updateUserById(authUserId, {
+      password: 'LesRoisStudent2026!',
+      email_confirm: true,
+      user_metadata: {
+        firstName: 'Andrea',
+        lastName: 'García',
+        role: 'STUDENT',
+      },
+    });
+    if (updateError) {
+      console.error('Error actualizando contraseña de Andrea en Supabase Auth:', updateError);
+    } else {
+      console.log('✅ Supabase Auth: Contraseña sincronizada para andrea@example.com (LesRoisStudent2026!)');
+    }
+  } else {
+    const { data: createdAuth, error: createError } = await supabase.auth.admin.createUser({
+      email: 'andrea@example.com',
+      password: 'LesRoisStudent2026!',
+      email_confirm: true,
+      user_metadata: {
+        firstName: 'Andrea',
+        lastName: 'García',
+        role: 'STUDENT',
+      },
+    });
+    if (createError) {
+      console.error('Error creando a Andrea en Supabase Auth:', createError);
+    } else if (createdAuth?.user) {
+      authUserId = createdAuth.user.id;
+      console.log('✅ Supabase Auth: Usuario creado para andrea@example.com (LesRoisStudent2026!)');
+    }
+  }
+}
+
   const user = await prisma.user.upsert({
     where: { email: 'andrea@example.com' },
-    update: {},
+    update: {
+      firstName: 'Andrea',
+      lastName: 'García',
+      role: 'STUDENT',
+      isActive: true,
+    },
     create: {
+      ...(authUserId ? { id: authUserId } : {}),
       email: 'andrea@example.com',
       firstName: 'Andrea',
       lastName: 'García',
       role: 'STUDENT',
+      isActive: true,
     },
   });
 

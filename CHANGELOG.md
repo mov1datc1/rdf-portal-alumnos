@@ -2,6 +2,22 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-09-28] - Fix: Navegación Menú Cursos, Persistencia y Sincronización Supabase de Alumno Demo
+
+### 🧭 1. Navegación Especializada del Menú Desplegable «CURSOS» (Landing Page)
+- **Desacoplamiento de Destinos:** Corregido el enlace de las 3 opciones del menú desplegable:
+  - *«6 Niveles Oficiales (Básico a Avanzado)»*: desplazamiento suave a la sección de niveles académicos (`#cursos`).
+  - *«Clases Grupales (Regular, Sabatino, Intensivo)»*: desplazamiento suave a `#precios` con activación automática de la pestaña *«Clases Grupales»*.
+  - *«Clases Particulares & Part Duo»*: desplazamiento suave a `#precios` con activación automática de la pestaña *«Clases Particulares & Part Duo»*.
+- **Handler Unificado `handleCourseNavClick`:** Implementado control de scroll con sincronización de estado (`pricingTab`) y auto-cierre del menú drawer en móviles y tabletas.
+
+### 🔐 2. Sincronización Real de Autenticación de Alumno Demo (`andrea@example.com`)
+- **Supabase Auth & Hash Real:** Sincronizada la contraseña oficial documentada (`LesRoisStudent2026!`) para `andrea@example.com` en Supabase Auth (`auth.users`) sin bypasses ni hardcoding.
+- **Blindaje del Seed Backend (`seed.ts`):** Integrado cliente de Supabase Auth para verificar y sincronizar automáticamente la cuenta en `auth.users` con rol `STUDENT` y email confirmado al poblar la base de datos con Prisma, protegiendo las credenciales mediante variables de entorno (`process.env.SUPABASE_URL` y `process.env.SUPABASE_SERVICE_ROLE_KEY`).
+- **Verificación de RBAC:** Validado acceso íntegro de roles: Admin (`/admin`), Profesor (`/teacher`) y Alumno (`/dashboard`).
+
+---
+
 ## [2026-09-25] - Landing Page v3.5.16: Inscripción Gratuita, Tarifas Part Duo, Contacto y Conclusión del Método MRAF
 
 ### 🏷️ 1. Distintivo de Inscripción 100% Gratuita (#precios)
