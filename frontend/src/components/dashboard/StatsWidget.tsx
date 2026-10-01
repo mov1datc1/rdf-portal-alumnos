@@ -1,4 +1,4 @@
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, ArrowUpRight } from 'lucide-react';
 
 export function StatsWidget() {
   return (
@@ -16,22 +16,30 @@ export function StatsWidget() {
           <div className="flex flex-col border-r border-gray-100 pr-4">
             <p className="text-xs text-slate-500 mb-2 h-8">Horas de estudio</p>
             <p className="text-3xl font-bold text-[#1D3A8A] mb-2">24 h</p>
-            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">↑ +18% este mes</p>
+            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+              <ArrowUpRight className="w-3 h-3 text-emerald-500 inline shrink-0" /> +18% este mes
+            </p>
           </div>
           <div className="flex flex-col border-r border-gray-100 px-4">
             <p className="text-xs text-slate-500 mb-2 h-8">Videos completados</p>
             <p className="text-3xl font-bold text-[#1D3A8A] mb-2">16</p>
-            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">↑ +5 nuevos</p>
+            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+              <ArrowUpRight className="w-3 h-3 text-emerald-500 inline shrink-0" /> +5 nuevos
+            </p>
           </div>
           <div className="flex flex-col border-r border-gray-100 px-4">
             <p className="text-xs text-slate-500 mb-2 h-8">Material PDF revisado</p>
             <p className="text-3xl font-bold text-[#1D3A8A] mb-2">72%</p>
-            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">↑ constancia saludable</p>
+            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+              <ArrowUpRight className="w-3 h-3 text-emerald-500 inline shrink-0" /> constancia saludable
+            </p>
           </div>
           <div className="flex flex-col pl-4">
             <p className="text-xs text-slate-500 mb-2 h-8">Score general</p>
             <p className="text-3xl font-bold text-[#1D3A8A] mb-2">88%</p>
-            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">↑ desempeño sólido</p>
+            <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+              <ArrowUpRight className="w-3 h-3 text-emerald-500 inline shrink-0" /> desempeño sólido
+            </p>
           </div>
         </div>
 

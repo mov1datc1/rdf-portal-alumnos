@@ -1,5 +1,5 @@
 import { useAuthStore } from '../../store/authStore';
-import { Users, UserCircle } from 'lucide-react';
+import { Users, UserCircle, Globe } from 'lucide-react';
 
 export function HeroBanner({ dashboardData }: { dashboardData?: any }) {
   const user = useAuthStore(state => state.user);
@@ -11,10 +11,10 @@ export function HeroBanner({ dashboardData }: { dashboardData?: any }) {
       <div className="relative z-10 flex justify-between items-center">
         <div className="max-w-xl">
           <p className="text-xs font-bold tracking-widest flex items-center gap-2 mb-4 text-blue-100">
-            🇲🇽 MÉXICO - PORTAL ACADÉMICO PREMIUM
+            <Globe className="w-3.5 h-3.5 text-blue-200" /> MÉXICO · PORTAL ACADÉMICO PREMIUM
           </p>
           <h2 className="text-4xl font-extrabold mb-4 leading-tight">
-            Bonjour, {firstName} 👋<br />
+            Bonjour, {firstName}<br />
             Tu aprendizaje del francés<br />
             ahora vive en un solo lugar.
           </h2>

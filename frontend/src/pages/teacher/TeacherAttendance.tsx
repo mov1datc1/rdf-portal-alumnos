@@ -455,11 +455,13 @@ export function TeacherAttendance() {
                   Total: <span className="font-bold text-slate-800">{auditData.audit.length}</span> clases
                 </div>
                 <div className="flex gap-4">
-                  <span className="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
-                    {auditData.audit.filter((a:any) => a.attended === true).length} ✓
+                  <span className="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg flex items-center gap-1">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{auditData.audit.filter((a:any) => a.attended === true).length}</span>
                   </span>
-                  <span className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-lg">
-                    {auditData.audit.filter((a:any) => a.attended === false).length} ✗
+                  <span className="text-sm font-medium text-red-600 bg-red-50 px-3 py-1 rounded-lg flex items-center gap-1">
+                    <X className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                    <span>{auditData.audit.filter((a:any) => a.attended === false).length}</span>
                   </span>
                 </div>
               </div>

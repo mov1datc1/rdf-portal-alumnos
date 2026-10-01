@@ -25,7 +25,7 @@ export function TeacherDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-800">Bienvenido, Profesor 🎓</h1>
+        <h1 className="text-3xl font-bold text-slate-800">Bienvenido, Profesor</h1>
         <p className="text-slate-500 text-sm">Aquí tienes un resumen de tus grupos, alumnos y próximas clases.</p>
       </div>
 

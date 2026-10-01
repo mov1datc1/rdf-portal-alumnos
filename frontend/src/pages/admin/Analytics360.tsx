@@ -174,7 +174,9 @@ export function Analytics360() {
 
       {/* ── Occupancy / Capacity ── */}
       <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <h3 className="text-sm font-bold text-slate-800 mb-4">📊 Ocupación de Grupos</h3>
+        <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-[#1D3A8A]" /> Ocupación de Grupos
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {occupancy?.map((g: any) => (
             <div key={g.id} className="border border-slate-100 rounded-xl p-3">
@@ -197,7 +199,9 @@ export function Analytics360() {
       {/* ── Recent Activity ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-800 mb-4">💰 Últimos Pagos</h3>
+          <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-emerald-600" /> Últimos Pagos
+          </h3>
           {recent.payments?.length === 0 ? (
             <p className="text-xs text-slate-400 text-center py-4">Sin pagos registrados.</p>
           ) : (
@@ -216,7 +220,9 @@ export function Analytics360() {
         </div>
 
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <h3 className="text-sm font-bold text-slate-800 mb-4">🆕 Últimos Leads</h3>
+          <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <UserPlus className="w-4 h-4 text-purple-600" /> Últimos Leads
+          </h3>
           {recent.leads?.length === 0 ? (
             <p className="text-xs text-slate-400 text-center py-4">Sin leads recientes.</p>
           ) : (

@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, Plus, X, Phone, Mail, MessageSquare, TrendingUp, Search, Edit2, Trash2, ShieldCheck, AlertTriangle, Table, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Plus, X, Phone, Mail, MessageSquare, TrendingUp, Search, Edit2, Trash2, ShieldCheck, AlertTriangle, Table, Filter, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
 
 const SOURCES = [
-  { value: 'GOOGLE_ADS', label: 'Google Ads', color: '#4285F4', icon: '🔵' },
-  { value: 'META_ADS', label: 'Meta Ads', color: '#0668E1', icon: '🟣' },
-  { value: 'INSTAGRAM', label: 'Instagram', color: '#E1306C', icon: '📸' },
-  { value: 'FACEBOOK', label: 'Facebook', color: '#1877F2', icon: '📘' },
-  { value: 'WHATSAPP_ORGANIC', label: 'WhatsApp', color: '#25D366', icon: '💬' },
-  { value: 'REFERRAL', label: 'Referido', color: '#FF9800', icon: '🤝' },
-  { value: 'WEBSITE', label: 'Website', color: '#607D8B', icon: '🌐' },
+  { value: 'GOOGLE_ADS', label: 'Google Ads', color: '#4285F4' },
+  { value: 'META_ADS', label: 'Meta Ads', color: '#0668E1' },
+  { value: 'INSTAGRAM', label: 'Instagram', color: '#E1306C' },
+  { value: 'FACEBOOK', label: 'Facebook', color: '#1877F2' },
+  { value: 'WHATSAPP_ORGANIC', label: 'WhatsApp', color: '#25D366' },
+  { value: 'REFERRAL', label: 'Referido', color: '#FF9800' },
+  { value: 'WEBSITE', label: 'Website', color: '#607D8B' },
 ];
 
 const renderSourceIcon = (sourceValue: string, className = "w-4 h-4 inline-block align-middle") => {
@@ -69,7 +69,7 @@ const renderSourceIcon = (sourceValue: string, className = "w-4 h-4 inline-block
         </svg>
       );
     default:
-      return <span className={className}>🌐</span>;
+      return <Globe className={className} />;
   }
 };
 
@@ -77,7 +77,7 @@ const STATUSES = [
   { value: 'NEW', label: 'Nuevo', color: '#3B82F6', bg: 'bg-blue-50', border: 'border-blue-200' },
   { value: 'CONTACTED', label: 'Contactado', color: '#F59E0B', bg: 'bg-amber-50', border: 'border-amber-200' },
   { value: 'TRIAL_CLASS', label: 'Clase Prueba', color: '#8B5CF6', bg: 'bg-purple-50', border: 'border-purple-200' },
-  { value: 'ENROLLED', label: 'Inscrito ✅', color: '#10B981', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+  { value: 'ENROLLED', label: 'Inscrito', color: '#10B981', bg: 'bg-emerald-50', border: 'border-emerald-200' },
   { value: 'LOST', label: 'No Inscrito', color: '#EF4444', bg: 'bg-red-50', border: 'border-red-200' },
 ];
 

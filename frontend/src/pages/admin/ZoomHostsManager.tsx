@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Video, Loader2, Plus, Edit2, Trash2, Link, Check, X, ChevronUp, ChevronDown, Users, Wifi, WifiOff } from 'lucide-react';
+import { Video, Loader2, Plus, Edit2, Trash2, Link, Check, X, ChevronUp, ChevronDown, Users, Wifi, WifiOff, Key } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { showSuccess, showError, confirmDelete } from '../../utils/alerts';
 
@@ -228,8 +228,9 @@ export function ZoomHostsManager() {
             <div className="border-t border-dashed border-slate-200 pt-3">
               <button type="button" onClick={() => setShowS2S(!showS2S)}
                 className="flex items-center justify-between w-full text-left">
-                <p className="text-xs text-slate-500 flex items-center gap-1 font-semibold">
-                  🔑 Credenciales Server-to-Server OAuth
+                <p className="text-xs text-slate-500 flex items-center gap-1.5 font-semibold">
+                  <Key className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  Credenciales Server-to-Server OAuth
                   <span className="text-slate-400 font-normal">(opcional)</span>
                 </p>
                 {showS2S ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -329,8 +330,9 @@ export function ZoomHostsManager() {
 
                       {/* Test result */}
                       {testResults[host.id] && (
-                        <span className={`text-xs px-2 py-1 rounded-lg ${testResults[host.id].success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
-                          {testResults[host.id].success ? '✓ OK' : '✗ Error'}
+                        <span className={`text-xs px-2 py-1 rounded-lg flex items-center gap-1 ${testResults[host.id].success ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
+                          {testResults[host.id].success ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-red-600 shrink-0" />}
+                          <span>{testResults[host.id].success ? 'OK' : 'Error'}</span>
                         </span>
                       )}
 
@@ -377,8 +379,9 @@ export function ZoomHostsManager() {
                   {host.permanentLink && (
                     <div className="mt-2 pl-13">
                       <a href={host.permanentLink} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-[#2D8CFF] hover:underline font-mono truncate block max-w-md">
-                        🔗 {host.permanentLink}
+                        className="text-xs text-[#2D8CFF] hover:underline font-mono truncate block max-w-md flex items-center gap-1.5">
+                        <Link className="w-3.5 h-3.5 text-[#2D8CFF] shrink-0" />
+                        <span>{host.permanentLink}</span>
                       </a>
                     </div>
                   )}

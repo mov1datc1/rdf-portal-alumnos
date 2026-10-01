@@ -24,7 +24,11 @@ import {
   Check,
   Mail,
   Phone,
-  Trash2
+  Trash2,
+  User,
+  Info,
+  ArrowDown,
+  Lock
 } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
 import { showSuccess, showError } from '../../../utils/alerts';
@@ -734,19 +738,14 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
     setTimeout(() => setCopiedZoom(false), 2500);
   };
 
-  const getWhatsAppMessage = (studentFirstName?: string, includeEmojis: boolean = true) => {
+  const getWhatsAppMessage = (studentFirstName?: string, _includeEmojis: boolean = false) => {
     if (!editingClass) return '';
     const sName = studentFirstName || 'estimado alumno';
     const cTitle = editingClass.title || 'Clase de Francés';
     const cTime = editingClass.scheduledAt ? new Date(editingClass.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
     const zoomUrl = editingClass.url || 'https://zoom.us/j/9876543210';
 
-    if (includeEmojis) {
-      return `¡Bonjour ${sName}! 🥐\n\nTe comparto el acceso a nuestra clase de francés "${cTitle}" de hoy${cTime ? ` a las ${cTime} hrs` : ''}:\n\n👉 Enlace de Zoom: ${zoomUrl}\n\n¡Te esperamos! 🇫🇷✨`;
-    }
-
-    // Versión limpia para URL de WhatsApp (evita que el servidor de Meta convierta emojis en ??)
-    return `¡Bonjour ${sName}!\n\nTe comparto el acceso a nuestra clase de francés *"${cTitle}"* de hoy${cTime ? ` a las *${cTime} hrs*` : ''}:\n\n* Enlace de Zoom: ${zoomUrl}\n\n¡Te esperamos en clase!`;
+    return `¡Bonjour ${sName}!\n\nTe comparto el acceso a nuestra clase de francés "${cTitle}" de hoy${cTime ? ` a las ${cTime} hrs` : ''}:\n\nEnlace de Zoom: ${zoomUrl}\n\n¡Te esperamos en clase!`;
   };
 
   const handleCopyMessage = (text: string) => {
@@ -1025,7 +1024,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
               title="Activar o desactivar simulación de 37 clases para verificar alta densidad sin solapamientos"
             >
               <Zap className={`w-4 h-4 ${isStressTestActive ? 'text-amber-300 fill-amber-300' : 'text-amber-300'}`} />
-              <span>{isStressTestActive ? 'Quitar Estrés' : '🧪 Simular 37 Clases'}</span>
+              <span>{isStressTestActive ? 'Quitar Estrés' : 'Simular 37 Clases'}</span>
             </button>
 
             {/* Selector de Densidad */}
@@ -1092,7 +1091,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
               onChange={e => setSelectedTeacherFilter(e.target.value)}
               className="w-full bg-white/10 hover:bg-white/15 border border-white/20 rounded-xl py-2 px-3 text-xs text-white outline-none focus:ring-2 focus:ring-[#D59B28] transition-all font-semibold backdrop-blur-md [&>option]:text-slate-800"
             >
-              <option value="ALL">👨‍🏫 Todos los Profesores ({displayTeachers.length})</option>
+              <option value="ALL">Todos los Profesores ({displayTeachers.length})</option>
               {displayTeachers.map(t => (
                 <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
               ))}
@@ -1106,7 +1105,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
               onChange={e => setSelectedGroupFilter(e.target.value)}
               className="w-full bg-white/10 hover:bg-white/15 border border-white/20 rounded-xl py-2 px-3 text-xs text-white outline-none focus:ring-2 focus:ring-[#D59B28] transition-all font-semibold backdrop-blur-md [&>option]:text-slate-800"
             >
-              <option value="ALL">🏛️ Todos los Grupos / Niveles ({availableGroups.length})</option>
+              <option value="ALL">Todos los Grupos / Niveles ({availableGroups.length})</option>
               {availableGroups.map(g => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
@@ -1196,7 +1195,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                📅 Horario Semanal (Horas × Días)
+                <CalendarIcon className="w-3.5 h-3.5 inline mr-1 text-[#1D3A8A]" /> Horario Semanal (Horas × Días)
               </button>
               <button
                 type="button"
@@ -1207,12 +1206,12 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                👨‍🏫 Por Profesor
+                <User className="w-3.5 h-3.5 inline mr-1 text-[#1D3A8A]" /> Por Profesor
               </button>
             </div>
           ) : (
-            <span className="text-[11px] text-slate-400 font-semibold hidden md:inline">
-              💡 Tip: Haz clic en cualquier hora de la izquierda para resaltar toda esa fila en Dorado Real.
+            <span className="text-[11px] text-slate-400 font-semibold hidden md:inline flex items-center gap-1">
+              <Info className="w-3.5 h-3.5 inline text-slate-400 shrink-0" /> Tip: Haz clic en cualquier hora de la izquierda para resaltar toda esa fila en Dorado Real.
             </span>
           )}
         </div>
@@ -1350,7 +1349,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                           >
                             {dragOverCell === cellKey && (
                               <div className="p-2 border-2 border-dashed border-[#D59B28] bg-white/90 rounded-xl text-center text-[10px] font-black text-[#855807] shadow-sm animate-pulse flex items-center justify-center gap-1">
-                                <span>📥 Soltar a las {hourStr} con {teacher.firstName}</span>
+                                <span><ArrowDown className="w-3 h-3 inline mr-1 text-[#855807]" /> Soltar a las {hourStr} con {teacher.firstName}</span>
                               </div>
                             )}
 
@@ -1614,7 +1613,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                           >
                             {isDragOver && (
                               <div className="p-1.5 border-2 border-dashed border-[#D59B28] bg-white/95 rounded-lg text-center text-[9px] font-black text-[#855807] shadow-sm animate-pulse flex items-center justify-center gap-1">
-                                <span>📥 Soltar a las {hourStr}</span>
+                                <span><ArrowDown className="w-3 h-3 inline mr-1 text-[#855807]" /> Soltar a las {hourStr}</span>
                               </div>
                             )}
 
@@ -1801,8 +1800,8 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                             onDrop={e => handleDrop(e, teacher.id, undefined, day.toISOString())}
                           >
                             {dragOverCell === cellKey && (
-                              <div className="p-1.5 border-2 border-dashed border-[#D59B28] bg-white/90 rounded-lg text-center text-[9px] font-black text-[#855807] shadow-xs animate-pulse">
-                                📥 Soltar aquí
+                              <div className="p-1.5 border-2 border-dashed border-[#D59B28] bg-white/90 rounded-lg text-center text-[9px] font-black text-[#855807] shadow-xs animate-pulse flex items-center justify-center gap-1">
+                                <ArrowDown className="w-3 h-3 text-[#855807]" /> Soltar aquí
                               </div>
                             )}
 
@@ -2107,18 +2106,18 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                           className="w-full border border-slate-200 rounded-xl py-2.5 px-3 focus:ring-2 focus:ring-[#1D3A8A] outline-none font-bold text-slate-700 bg-white text-xs shadow-xs"
                         >
                           <option value="">Seleccionar Maestro</option>
-                          <optgroup label="🟢 PROFESORES DISPONIBLES A ESTA HORA">
+                          <optgroup label="PROFESORES DISPONIBLES A ESTA HORA">
                             {teacherAvailability.filter(t => t.isAvailable).map(({ teacher }) => (
                               <option key={teacher.id} value={teacher.id}>
-                                🟢 {teacher.firstName} {teacher.lastName} (Disponible)
+                                • {teacher.firstName} {teacher.lastName} (Disponible)
                               </option>
                             ))}
                           </optgroup>
                           {teacherAvailability.some(t => !t.isAvailable) && (
-                            <optgroup label="🔴 PROFESORES OCUPADOS A ESTA HORA">
+                            <optgroup label="PROFESORES OCUPADOS A ESTA HORA">
                               {teacherAvailability.filter(t => !t.isAvailable).map(({ teacher, conflictingClassTitle }) => (
                                 <option key={teacher.id} value={teacher.id}>
-                                  🔴 {teacher.firstName} {teacher.lastName} (Ocupado con {conflictingClassTitle})
+                                  • {teacher.firstName} {teacher.lastName} (Ocupado con {conflictingClassTitle})
                                 </option>
                               ))}
                             </optgroup>
@@ -2136,7 +2135,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                           <div className="p-3 bg-amber-50 border border-amber-300 rounded-2xl flex items-start gap-2.5 shadow-xs">
                             <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                             <div className="text-xs text-amber-950 leading-relaxed">
-                              <strong className="block font-black text-amber-900">⚠️ Solapamiento Detectado</strong>
+                              <strong className="block font-black text-amber-900">Solapamiento Detectado</strong>
                               Este maestro ya tiene asignada la clase <em>"{currentAvail.conflictingClassTitle}"</em> a esta misma hora.
                             </div>
                           </div>
@@ -2194,8 +2193,9 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                         placeholder="Escribe aquí los temas vistos, vocabulario francés trabajado, tareas para la próxima sesión u observaciones generales del grupo..."
                         className="w-full border border-slate-200 rounded-2xl p-3.5 text-xs text-slate-800 font-medium placeholder-slate-400 focus:ring-2 focus:ring-[#1D3A8A] outline-none bg-slate-50/50 resize-none transition-all shadow-xs leading-relaxed"
                       />
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        💡 Las notas de la bitácora quedan vinculadas a esta clase para consulta de profesores y administradores.
+                      <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                        <Info className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span>Las notas de la bitácora quedan vinculadas a esta clase para consulta de profesores y administradores.</span>
                       </p>
                     </div>
 
@@ -2451,7 +2451,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                   </div>
                 </div>
                 <span className="px-2 py-0.5 bg-slate-200/80 text-slate-600 rounded-md text-[10px] font-black flex items-center gap-1 shrink-0 select-none">
-                  🔒 Fijado
+                  <Lock className="w-3 h-3 text-slate-500" /> Fijado
                 </span>
               </div>
 
@@ -2471,7 +2471,7 @@ export function ScheduleCalendar({ classes, teachers, levels = [], zoomHosts: _z
                   </div>
                 </div>
                 <span className="px-2 py-0.5 bg-slate-200/80 text-slate-600 rounded-md text-[10px] font-black flex items-center gap-1 shrink-0 select-none">
-                  🔒 Fijado
+                  <Lock className="w-3 h-3 text-slate-500" /> Fijado
                 </span>
               </div>
 

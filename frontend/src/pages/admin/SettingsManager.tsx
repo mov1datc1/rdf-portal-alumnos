@@ -14,7 +14,13 @@ import {
   Crown,
   MapPin,
   UploadCloud,
-  RotateCcw
+  RotateCcw,
+  AlertTriangle,
+  DollarSign,
+  ShieldCheck,
+  Sparkles,
+  BookOpen,
+  Star
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { supabase } from '../../lib/supabase';
@@ -75,10 +81,10 @@ const LEVEL_CHAR_PRESETS = [
 ];
 
 const BULLET_ICON_OPTIONS = [
-  { label: '💬 Chat / Conversación', value: 'chat' },
-  { label: '🏆 Trofeo / Logro', value: 'trophy' },
-  { label: '📖 Libro / Estudio', value: 'book' },
-  { label: '👥 Personas / Inmersión', value: 'people' },
+  { label: 'Chat / Conversación', value: 'chat' },
+  { label: 'Trofeo / Logro', value: 'trophy' },
+  { label: 'Libro / Estudio', value: 'book' },
+  { label: 'Personas / Inmersión', value: 'people' },
 ];
 
 export function SettingsManager() {
@@ -850,8 +856,9 @@ export function SettingsManager() {
               Control Center
             </span>
             {hasUnsavedChanges && (
-              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1 border border-amber-300">
-                ⚠️ Cambios sin guardar
+              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-amber-300">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
+                <span>Cambios sin guardar</span>
               </span>
             )}
           </div>
@@ -973,7 +980,7 @@ export function SettingsManager() {
 
           <div className="border-t border-slate-100 pt-5">
             <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2">
-              💰 Presupuestos Publicitarios Mensuales (MXN)
+              <DollarSign className="w-5 h-5 text-emerald-600" /> Presupuestos Publicitarios Mensuales (MXN)
             </h3>
             <p className="text-xs text-slate-500 mb-4">
               Estos presupuestos se dividen automáticamente entre los prospectos captados para mostrar el Costo por Lead (CPL) en el CRM.
@@ -1031,8 +1038,9 @@ export function SettingsManager() {
                 La Landing Page rota estas 4 imágenes automáticamente cada 5 segundos con un efecto suave de fundido cruzado (*cross-fade*). Puedes cambiar la imagen, la descripción SEO (*alt text*) o desactivar temporalmente alguna diapositiva.
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-3 py-1.5 rounded-lg border border-amber-300">
-                  🛡️ <b>Prueba con tranquilidad:</b> Sube cualquier imagen y dale Guardar para verla en la Landing. Siempre puedes pulsar <b>"Restaurar fotos de fábrica"</b> o <b>Ctrl+Z</b> para regresar a como estaba.
+                <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-3 py-1.5 rounded-lg border border-amber-300 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-800 shrink-0" />
+                  <span><b>Prueba con tranquilidad:</b> Sube cualquier imagen y dale Guardar para verla en la Landing. Siempre puedes pulsar <b>"Restaurar fotos de fábrica"</b> o <b>Ctrl+Z</b> para regresar a como estaba.</span>
                 </span>
                 {heroSlides.some((s, i) => s.src !== DEFAULT_HERO_SLIDE_IMAGES[i]) && (
                   <button
@@ -1105,7 +1113,7 @@ export function SettingsManager() {
                         {preset.label}
                       </option>
                     ))}
-                    <option value="upload">📁 Subir desde tu PC (Abrir archivos)...</option>
+                    <option value="upload">Subir desde tu PC (Abrir archivos)...</option>
                     <option value="custom">-- Ruta o URL personalizada --</option>
                   </select>
 
@@ -1116,7 +1124,7 @@ export function SettingsManager() {
                     className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-dashed border-[#1D3A8A] bg-blue-50/70 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs mt-2"
                   >
                     <UploadCloud className="w-4 h-4" />
-                    {uploadingTarget === `Diapositiva #${idx + 1}` ? 'Subiendo imagen...' : '📁 Subir imagen desde tu PC'}
+                    {uploadingTarget === `Diapositiva #${idx + 1}` ? 'Subiendo imagen...' : 'Subir imagen desde tu PC'}
                   </button>
 
                   {/* Action buttons for Undo previous / Restore factory default / Return to custom */}
@@ -1128,7 +1136,7 @@ export function SettingsManager() {
                         className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                         title="Restaurar a la imagen oficial por defecto"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar oficial #{idx + 1}
+                        <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> Restaurar oficial #{idx + 1}
                       </button>
                     )}
                     {slide.src === DEFAULT_HERO_SLIDE_IMAGES[idx] && customHeroImages[idx] && (
@@ -1138,7 +1146,7 @@ export function SettingsManager() {
                         className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                         title="Volver a poner tu imagen personalizada"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> ↩️ Volver a foto personalizada
+                        <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> Volver a foto personalizada
                       </button>
                     )}
                     {previousHeroImages[idx] &&
@@ -1151,7 +1159,7 @@ export function SettingsManager() {
                         className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
                         title="Volver a la foto que tenías antes de este cambio"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Deshacer cambio
+                        <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> Deshacer cambio
                       </button>
                     )}
                     {slide.src === DEFAULT_HERO_SLIDE_IMAGES[idx] && !customHeroImages[idx] && (
@@ -1210,8 +1218,9 @@ export function SettingsManager() {
                 Personaliza la foto de perfil, ciudad de origen, cita célebre y lista de beneficios de cada profesor para la Landing Page pública.
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-3 py-1.5 rounded-lg border border-amber-300">
-                  🛡️ <b>Prueba con tranquilidad:</b> Sube cualquier foto y dale Guardar para verla en la Landing. Siempre puedes pulsar <b>"Restaurar fotos de fábrica"</b> o <b>Ctrl+Z</b> para regresar a como estaba.
+                <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-3 py-1.5 rounded-lg border border-amber-300 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-800 shrink-0" />
+                  <span><b>Prueba con tranquilidad:</b> Sube cualquier foto y dale Guardar para verla en la Landing. Siempre puedes pulsar <b>"Restaurar fotos de fábrica"</b> o <b>Ctrl+Z</b> para regresar a como estaba.</span>
                 </span>
                 {teachers.some(t => t.image !== DEFAULT_TEACHER_IMAGES[t.id]) && (
                   <button
@@ -1358,7 +1367,7 @@ export function SettingsManager() {
                         {preset.label}
                       </option>
                     ))}
-                    <option value="upload">📁 Subir foto desde tu PC (Abrir archivos)...</option>
+                    <option value="upload">Subir foto desde tu PC (Abrir archivos)...</option>
                     <option value="custom">-- URL personalizada --</option>
                   </select>
                   <input
@@ -1377,7 +1386,7 @@ export function SettingsManager() {
                   className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-dashed border-rose-400 bg-rose-50/70 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all shadow-xs"
                 >
                   <UploadCloud className="w-4 h-4" />
-                  {uploadingTarget === `Prof. ${currentTeacher?.name}` ? 'Subiendo foto...' : `📁 Subir foto de ${currentTeacher?.name} desde tu PC`}
+                  {uploadingTarget === `Prof. ${currentTeacher?.name}` ? 'Subiendo foto...' : `Subir foto de ${currentTeacher?.name} desde tu PC`}
                 </button>
 
                 {/* Botones de acción: Deshacer cambio / Restaurar oficial / Volver a personalizada */}
@@ -1390,7 +1399,7 @@ export function SettingsManager() {
                       className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Restaurar a la foto oficial original de fábrica"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar foto oficial ({currentTeacher?.name})
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> Restaurar foto oficial ({currentTeacher?.name})
                     </button>
                   )}
 
@@ -1402,7 +1411,7 @@ export function SettingsManager() {
                       className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Volver a poner tu foto personalizada subida"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> ↩️ Volver a tu foto personalizada
+                      <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> Volver a tu foto personalizada
                     </button>
                   )}
 
@@ -1417,7 +1426,7 @@ export function SettingsManager() {
                       className="flex-1 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Volver a la foto que tenías antes de este cambio"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Deshacer cambio
+                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> Deshacer cambio
                     </button>
                   )}
 
@@ -1578,8 +1587,9 @@ export function SettingsManager() {
                 Ajusta las competencias académicas, títulos y el personaje que viste la tarjeta Royal en la Landing Page.
               </p>
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-3 py-1.5 rounded-lg border border-amber-300">
-                  🛡️ <b>Prueba con tranquilidad:</b> Sube cualquier silueta y dale Guardar para verla en la Landing. Siempre puedes pulsar <b>"Restaurar personajes de fábrica"</b> o <b>Ctrl+Z</b> para regresar a como estaba.
+                <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-3 py-1.5 rounded-lg border border-amber-300 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-800 shrink-0" />
+                  <span><b>Prueba con tranquilidad:</b> Sube cualquier silueta y dale Guardar para verla en la Landing. Siempre puedes pulsar <b>"Restaurar personajes de fábrica"</b> o <b>Ctrl+Z</b> para regresar a como estaba.</span>
                 </span>
                 {Object.entries(DEFAULT_LEVEL_CHAR_IMAGES).some(([k, v]) => levelsData[k]?.characterImage !== v) && (
                   <button
@@ -1707,7 +1717,7 @@ export function SettingsManager() {
                         {preset.label}
                       </option>
                     ))}
-                    <option value="upload">📁 Subir personaje desde tu PC (Abrir archivos)...</option>
+                    <option value="upload">Subir personaje desde tu PC (Abrir archivos)...</option>
                     <option value="custom">-- Ruta o URL personalizada --</option>
                   </select>
                   <input
@@ -1726,7 +1736,7 @@ export function SettingsManager() {
                   className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-dashed border-[#1D3A8A] bg-blue-50/70 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs"
                 >
                   <UploadCloud className="w-4 h-4" />
-                  {uploadingTarget === `Personaje Nivel ${selectedLevelKey}` ? 'Subiendo personaje...' : `📁 Subir personaje de Nivel ${selectedLevelKey} desde tu PC`}
+                  {uploadingTarget === `Personaje Nivel ${selectedLevelKey}` ? 'Subiendo personaje...' : `Subir personaje de Nivel ${selectedLevelKey} desde tu PC`}
                 </button>
 
                 {/* Botones de acción: Deshacer cambio / Restaurar oficial / Volver a personalizada */}
@@ -1739,7 +1749,7 @@ export function SettingsManager() {
                       className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Restaurar a la silueta oficial original de fábrica"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> 🔄 Restaurar personaje oficial ({selectedLevelKey})
+                      <RotateCcw className="w-3.5 h-3.5 text-amber-700" /> Restaurar personaje oficial ({selectedLevelKey})
                     </button>
                   )}
 
@@ -1751,7 +1761,7 @@ export function SettingsManager() {
                       className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-purple-300 bg-purple-50 hover:bg-purple-100 text-purple-900 text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Volver a poner tu personaje personalizado"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> ↩️ Volver a personaje personalizado
+                      <RotateCcw className="w-3.5 h-3.5 text-purple-700" /> Volver a personaje personalizado
                     </button>
                   )}
 
@@ -1766,7 +1776,7 @@ export function SettingsManager() {
                       className="flex-1 w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#1D3A8A] text-xs font-bold transition-all shadow-xs cursor-pointer"
                       title="Volver al personaje que tenías antes de este cambio"
                     >
-                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> ↩️ Deshacer cambio
+                      <RotateCcw className="w-3.5 h-3.5 text-[#1D3A8A]" /> Deshacer cambio
                     </button>
                   )}
 
@@ -1875,24 +1885,26 @@ export function SettingsManager() {
                   <button
                     type="button"
                     onClick={() => setPreviewLevelTab('competencias')}
-                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-all ${
+                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
                       previewLevelTab === 'competencias'
                         ? 'bg-white/20 text-white font-black'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    ✨ 4 Competencias
+                    <Sparkles className="w-3 h-3 text-amber-300" />
+                    <span>4 Competencias</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setPreviewLevelTab('enfoque')}
-                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-all ${
+                    className={`text-xs font-bold px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
                       previewLevelTab === 'enfoque'
                         ? 'bg-white/20 text-white font-black'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    📖 Enfoque
+                    <BookOpen className="w-3 h-3 text-blue-300" />
+                    <span>Enfoque</span>
                   </button>
                 </div>
 
@@ -1902,7 +1914,7 @@ export function SettingsManager() {
                     <div className="space-y-2">
                       {(currentLevel?.bullets || []).map((b: any, idx: number) => (
                         <div key={idx} className="flex items-start gap-2 text-slate-200">
-                          <span className="text-amber-400 font-bold">★</span>
+                          <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0 mt-0.5" />
                           <span className="text-[11px] leading-relaxed">{b.text}</span>
                         </div>
                       ))}

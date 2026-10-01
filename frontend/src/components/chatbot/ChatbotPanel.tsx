@@ -19,7 +19,7 @@ export function ChatbotPanel() {
     {
       id: 'welcome',
       sender: 'bot',
-      text: `Bonjour ${firstName} 👋 Puedo ayudarte a encontrar tu próxima clase, abrir un PDF o revisar tu avance.`
+      text: `Bonjour ${firstName}. Puedo ayudarte a encontrar tu próxima clase, abrir un PDF o revisar tu avance.`
     }
   ]);
   const [inputValue, setInputValue] = useState('');

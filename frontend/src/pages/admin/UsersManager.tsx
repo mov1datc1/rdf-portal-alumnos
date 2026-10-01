@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { UserPlus, Loader2, X, Check, Power, PowerOff, KeyRound, Filter } from 'lucide-react';
+import { UserPlus, Loader2, X, Check, Power, PowerOff, KeyRound, Filter, GraduationCap, UserCheck, Shield } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 const ROLES = [
-  { value: 'STUDENT', label: 'Alumno', icon: '🎓', color: 'bg-blue-50 text-blue-700' },
-  { value: 'TEACHER', label: 'Profesor', icon: '👩‍🏫', color: 'bg-purple-50 text-purple-700' },
-  { value: 'ADMIN', label: 'Administrador', icon: '⚙️', color: 'bg-amber-50 text-amber-700' },
+  { value: 'STUDENT', label: 'Alumno', icon: GraduationCap, color: 'bg-blue-50 text-blue-700' },
+  { value: 'TEACHER', label: 'Profesor', icon: UserCheck, color: 'bg-purple-50 text-purple-700' },
+  { value: 'ADMIN', label: 'Administrador', icon: Shield, color: 'bg-amber-50 text-amber-700' },
 ];
 
 export function UsersManager() {
@@ -197,8 +197,9 @@ export function UsersManager() {
             const count = users.filter(u => u.role === r.value).length;
             return (
               <button key={r.value} onClick={() => setRoleFilter(r.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${roleFilter === r.value ? 'bg-[#1D3A8A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                {r.icon} {r.label} ({count})
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${roleFilter === r.value ? 'bg-[#1D3A8A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                <r.icon className="w-3.5 h-3.5 shrink-0" />
+                <span>{r.label} ({count})</span>
               </button>
             );
           })}
@@ -236,8 +237,9 @@ export function UsersManager() {
                       {u.phone && <p className="text-xs text-slate-400">{u.phone}</p>}
                     </td>
                     <td className="p-4">
-                      <span className={`${roleInfo?.color || 'bg-slate-100 text-slate-600'} px-2 py-1 rounded text-xs font-bold`}>
-                        {roleInfo?.icon} {roleInfo?.label || u.role}
+                      <span className={`${roleInfo?.color || 'bg-slate-100 text-slate-600'} px-2.5 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1.5`}>
+                        {roleInfo && <roleInfo.icon className="w-3.5 h-3.5 shrink-0" />}
+                        <span>{roleInfo?.label || u.role}</span>
                       </span>
                     </td>
                     <td className="p-4">
@@ -317,7 +319,7 @@ export function UsersManager() {
                           ? 'border-[#1D3A8A] bg-[#1D3A8A]/5 text-[#1D3A8A] font-bold'
                           : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                       }`}>
-                      <span className="text-lg">{r.icon}</span>
+                      <r.icon className="w-5 h-5 mx-auto mb-1 text-current" />
                       <p className="text-xs font-semibold">{r.label}</p>
                     </button>
                   ))}

@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar, Loader2, Plus, Clock, Link as LinkIcon, BookOpen, Search, 
   Trash2, Edit2, X, Check, Video, AlertTriangle, AlertCircle, Users,
-  Repeat, Sparkles, CheckCircle2, CalendarDays, Layers, Zap, Eye, EyeOff, CheckSquare
+  Repeat, Sparkles, CheckCircle2, CalendarDays, Layers, Zap, Eye, EyeOff, CheckSquare,
+  User, Settings, ArrowLeft, ArrowRight
 } from 'lucide-react';
 import { ScheduleCalendar } from './components/ScheduleCalendar';
 import { useAuthStore } from '../../store/authStore';
@@ -723,7 +724,7 @@ export function ScheduleManager() {
       const dates = conflictingSessions.map(s => `• ${s.dayName} ${s.formattedDate} (${s.conflictMessage})`).join('\n');
       setCustomAlert({
         show: true,
-        message: `No se pueden programar las clases porque hay ${conflictingSessions.length} fecha(s) que chocan con otra clase:\n\n${dates}\n\n💡 Tip: En la lista de fechas de abajo, haz clic en el botón "Excluir" en esa fecha para saltarla y crear las demás, o cambia el horario/Zoom.`,
+        message: `No se pueden programar las clases porque hay ${conflictingSessions.length} fecha(s) que chocan con otra clase:\n\n${dates}\n\nSugerencia: En la lista de fechas de abajo, haz clic en el botón "Excluir" en esa fecha para saltarla y crear las demás, o cambia el horario/Zoom.`,
         type: 'error'
       });
       return;
@@ -1002,7 +1003,8 @@ export function ScheduleManager() {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <span>📌 Clase Única</span>
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Clase Única</span>
               </button>
             </div>
           )}
@@ -1131,7 +1133,8 @@ export function ScheduleManager() {
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
-                    <span>⚙️ Días Personalizados (Selección libre)</span>
+                    <Settings className="w-3.5 h-3.5" />
+                    <span>Días Personalizados (Selección libre)</span>
                   </button>
 
                   {recurringPreset === 'CUSTOM' && (
@@ -1343,7 +1346,7 @@ export function ScheduleManager() {
                         onClick={() => setIsManualTime(!isManualTime)}
                         className="text-[10px] text-blue-600 hover:underline font-bold"
                       >
-                        {isManualTime ? 'Horarios Sugeridos' : '⚙️ Ingreso manual'}
+                        {isManualTime ? 'Horarios Sugeridos' : 'Ingreso manual'}
                       </button>
                     </div>
 
@@ -1380,7 +1383,7 @@ export function ScheduleManager() {
                             })}
                           </optgroup>
                         )}
-                        <option value="manual">⚙️ Otro horario (Ingresar manualmente)...</option>
+                        <option value="manual">Otro horario (Ingresar manualmente)...</option>
                       </select>
                     ) : (
                       <div className="flex gap-1.5 items-center">
@@ -1511,7 +1514,7 @@ export function ScheduleManager() {
                                 value={h.id} 
                                 className={isFree ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-medium'}
                               >
-                                {h.displayName} {isFree ? '✓ (100% Libre - 0 cruces)' : `⚠️ (Ocupado en ${conflicts} clase${conflicts > 1 ? 's' : ''})`}
+                                {h.displayName} {isFree ? '(100% Libre - 0 cruces)' : `(Ocupado en ${conflicts} clase${conflicts > 1 ? 's' : ''})`}
                               </option>
                             );
                           });
@@ -1539,7 +1542,7 @@ export function ScheduleManager() {
                                 value={t.id} 
                                 className={isFree ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-medium'}
                               >
-                                {t.firstName} {t.lastName} {isFree ? '✓ (100% Libre - 0 cruces)' : `⚠️ (Ocupado en ${conflicts} clase${conflicts > 1 ? 's' : ''})`}
+                                {t.firstName} {t.lastName} {isFree ? '(100% Libre - 0 cruces)' : `(Ocupado en ${conflicts} clase${conflicts > 1 ? 's' : ''})`}
                               </option>
                             );
                           });
@@ -1560,30 +1563,32 @@ export function ScheduleManager() {
                         hasAnyConflict ? 'bg-amber-50/70 border-amber-200 text-amber-900' : 'bg-slate-50 border-slate-100 text-slate-600'
                       } flex flex-col sm:flex-row sm:items-center justify-between gap-2`}>
                         <div className="flex flex-wrap items-center gap-3">
-                          <span className="flex items-center gap-1">
-                            👨‍🏫 <strong>{selectedLevel?.teacher ? `${selectedLevel.teacher.firstName} ${selectedLevel.teacher.lastName}` : 'Sin profesor asignado'}</strong>
+                          <span className="flex items-center gap-1.5">
+                            <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                            <strong>{selectedLevel?.teacher ? `${selectedLevel.teacher.firstName} ${selectedLevel.teacher.lastName}` : 'Sin profesor asignado'}</strong>
                             {defaultTeacherId && (
                               teacherConflicts > 0 ? (
-                                <span className="text-[10px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded-full">
-                                  ⚠️ {teacherConflicts} cruce{teacherConflicts > 1 ? 's' : ''}
+                                <span className="text-[10px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3 text-red-600 inline shrink-0" /> {teacherConflicts} cruce{teacherConflicts > 1 ? 's' : ''}
                                 </span>
                               ) : (
-                                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">
-                                  ✓ 100% Libre
+                                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <Check className="w-3 h-3 text-emerald-600 inline shrink-0" /> 100% Libre
                                 </span>
                               )
                             )}
                           </span>
-                          <span className="flex items-center gap-1">
-                            🎥 <strong>{selectedLevel?.zoomHostGroup?.displayName || zoomHosts.find((h: any) => h.id === selectedLevel?.zoomHostId)?.displayName || 'Zoom del grupo'}</strong>
+                          <span className="flex items-center gap-1.5">
+                            <Video className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                            <strong>{selectedLevel?.zoomHostGroup?.displayName || zoomHosts.find((h: any) => h.id === selectedLevel?.zoomHostId)?.displayName || 'Zoom del grupo'}</strong>
                             {defaultZoomId && (
                               zoomConflicts > 0 ? (
-                                <span className="text-[10px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded-full">
-                                  ⚠️ {zoomConflicts} cruce{zoomConflicts > 1 ? 's' : ''}
+                                <span className="text-[10px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3 text-red-600 inline shrink-0" /> {zoomConflicts} cruce{zoomConflicts > 1 ? 's' : ''}
                                 </span>
                               ) : (
-                                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full">
-                                  ✓ 100% Libre
+                                <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                  <Check className="w-3 h-3 text-emerald-600 inline shrink-0" /> 100% Libre
                                 </span>
                               )
                             )}
@@ -1597,9 +1602,10 @@ export function ScheduleManager() {
                               setIsZoomOverridden(true);
                               setIsTeacherOverridden(true);
                             }}
-                            className="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-white border border-blue-200 px-2 py-0.5 rounded-lg shadow-2xs self-start sm:self-auto cursor-pointer"
+                            className="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-white border border-blue-200 px-2.5 py-1 rounded-lg shadow-2xs self-start sm:self-auto cursor-pointer flex items-center gap-1"
                           >
-                            Elegir Zoom o Profesor disponible →
+                            <span>Elegir Zoom o Profesor disponible</span>
+                            <ArrowRight className="w-3 h-3" />
                           </button>
                         )}
                       </div>
@@ -1625,7 +1631,8 @@ export function ScheduleManager() {
                       <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                         isEndDateBeforeLastClass ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-[#1D3A8A]'
                       }`}>
-                        <span>⏳ Límite: {new Date(recurringEndDate + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</span>
+                        <Clock className="w-3 h-3 shrink-0" />
+                        <span>Límite: {new Date(recurringEndDate + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</span>
                       </span>
                     )}
                   </div>
@@ -1902,9 +1909,9 @@ export function ScheduleManager() {
                         <button
                           type="button"
                           onClick={() => { setIsZoomOverridden(false); setFormData({...formData, zoomHostId: '', url: ''}); }}
-                          className="text-xs text-blue-600 hover:text-blue-800 mb-2 underline"
+                          className="text-xs text-blue-600 hover:text-blue-800 mb-2 underline flex items-center gap-1"
                         >
-                          ← Volver al enlace del grupo
+                          <ArrowLeft className="w-3 h-3" /> Volver al enlace del grupo
                         </button>
                       )}
                       <select
@@ -1924,8 +1931,8 @@ export function ScheduleManager() {
                       </select>
 
                       {isZoomMode && (
-                        <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1">
-                          ✓ El link de Zoom se generará automáticamente al crear la clase.
+                        <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> El link de Zoom se generará automáticamente al crear la clase.
                         </p>
                       )}
                     </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyRound, Loader2, User, Mail, Shield, AlertCircle } from 'lucide-react';
+import { KeyRound, Loader2, User, Mail, Shield, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 export function Perfil() {
@@ -38,7 +38,7 @@ export function Perfil() {
       });
 
       if (res.ok) {
-        setMessage({ type: 'success', text: '✅ Contraseña actualizada exitosamente.' });
+        setMessage({ type: 'success', text: 'Contraseña actualizada exitosamente.' });
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
@@ -97,7 +97,7 @@ export function Perfil() {
           <div className={`mb-4 p-3 rounded-xl text-sm font-medium flex items-center gap-2 ${
             message.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'
           }`}>
-            {message.type === 'error' && <AlertCircle className="w-4 h-4" />}
+            {message.type === 'error' ? <AlertCircle className="w-4 h-4 shrink-0" /> : <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />}
             {message.text}
           </div>
         )}
