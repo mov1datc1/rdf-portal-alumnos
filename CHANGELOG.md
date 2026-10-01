@@ -2,6 +2,36 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-10-01] - Estandarización de Iconografía Vectorial (Lucide React) y Erradicación de Emojis Genéricos en Portales
+
+### 💎 1. Limpieza y Modernización Estética en Portales Privados (Alumno, Profesor y Administrador)
+- **Erradicación Sistemática de Emojis Genéricos:** Sustituidos todos los emojis de texto informales (como `👋`, `🎓`, `👥`, `👤`, `💰`, `📊`, `🆕`, `🟢`, `🔴`, `❌`, `✅`, `🗓️`, `💬`, `🔑`, `📌`, `⚙️`, `👨‍🏫`) por iconos vectoriales profesionales de **Lucide React** o tipografía institucional limpia en 14 archivos clave.
+- **Portal de Alumnos & Compartidos:**
+  - `HeroBanner.tsx`: Reemplazada bandera y saludo informal por `<Globe className="w-3.5 h-3.5 text-blue-200" /> MÉXICO · PORTAL ACADÉMICO PREMIUM` y `Bonjour, {firstName}`.
+  - `StatsWidget.tsx`: Sustituidas flechas de texto por `<TrendingUp className="w-3 h-3 text-emerald-500" />`.
+  - `ChatbotPanel.tsx`: Bienvenida inicial sin emoji de mano `👋`.
+  - `Perfil.tsx`: Mensaje de confirmación de cambio de contraseña con `<CheckCircle2 />` en vez de `✅`.
+- **Portal del Profesor:**
+  - `TeacherDashboard.tsx`: Encabezado limpio `Bienvenido, Profesor` sin birrete `🎓`.
+  - `TeacherAttendance.tsx`: Contadores de asistencia con `<Check />` y `<X />` en vez de caracteres `✓` y `✗`.
+- **Portal del Administrador:**
+  - `UsersManager.tsx`: Roles de usuario con iconos Lucide (`GraduationCap`, `UserCheck`, `Shield`) en filtros, tabla y modales.
+  - `GroupsManager.tsx`: Modalidades con `Users` y `User`, fecha de inscripción con `Calendar`, WhatsApp con `MessageSquare`, estatus activos/inactivos en texto limpio, y ficha de alumno con `GraduationCap` y `ChevronRight`.
+  - `CRMManager.tsx`: Estados de leads e iconos de canales con iconos vectoriales limpios sin círculos de colores ni emojis.
+  - `Analytics360.tsx`: Encabezados de métricas con `DollarSign`, `UserPlus` y `BarChart3`.
+  - `ZoomHostsManager.tsx`: Credenciales con `Key`, enlaces con `Link` y estatus de test con `Check`/`X`.
+  - `ScheduleManager.tsx` & `ScheduleCalendar.tsx`: Semáforos con viñetas limpias (`•`), botón drag & drop con `ArrowDown`, clases fijadas con `Lock` y tips con `Info`.
+  - `SettingsManager.tsx`: Botones de restaurar y deshacer con `RotateCcw` limpio, avisos con `ShieldCheck`, competencias con `Sparkles` y `Star`, y enfoque con `BookOpen`.
+
+### 🛡️ 2. Preservación Total e Intacta de la Landing Page
+- **Zero Regresiones:** El archivo `LandingPage.tsx` y sus estilos se mantuvieron 100% inalterados, preservando los copys comerciales hacia WhatsApp con sus emojis de conversión y badges decorativos.
+
+### 🚀 3. Verificación y Despliegue
+- **Compilación de Producción:** Validada con `tsc -b && vite build` completada en 7.7s sin errores (Exit Code 0).
+- **Despliegue Git Sincronizado:** Confirmado en ramas `origin/dev` y `origin/main` en commit `1d96962`.
+
+---
+
 ## [2026-09-28] - Fix: Navegación Menú Cursos, Persistencia y Sincronización Supabase de Alumno Demo
 
 ### 🧭 1. Navegación Especializada del Menú Desplegable «CURSOS» (Landing Page)
