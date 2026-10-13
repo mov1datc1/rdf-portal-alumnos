@@ -1262,7 +1262,7 @@ export function LandingPage() {
                   No solo aprendes francés. Lo hablas.
                 </p>
                 <p className="lrd-live-class-desc">
-                  Clases 100% online y en vivo donde la conversación, la interacción y la participación forman parte de cada sesión.
+                  Clases en vivo donde hablas, participas y practicas francés desde el primer día.
                 </p>
               </div>
 
@@ -1275,7 +1275,7 @@ export function LandingPage() {
                   </div>
                   <div className="lrd-live-benefit-content">
                     <h3 className="lrd-live-benefit-title">CONVERSACIÓN REAL</h3>
-                    <p className="lrd-live-benefit-desc">Practica francés desde el primer día.</p>
+                    <p className="lrd-live-benefit-desc">Habla francés desde tu primera clase.</p>
                   </div>
                 </div>
 
@@ -1286,7 +1286,7 @@ export function LandingPage() {
                   </div>
                   <div className="lrd-live-benefit-content">
                     <h3 className="lrd-live-benefit-title">INTERACCIÓN EN VIVO</h3>
-                    <p className="lrd-live-benefit-desc">Pregunta, participa y recibe correcciones de tu profesor.</p>
+                    <p className="lrd-live-benefit-desc">Participa y recibe correcciones al momento.</p>
                   </div>
                 </div>
 
@@ -1297,7 +1297,7 @@ export function LandingPage() {
                   </div>
                   <div className="lrd-live-benefit-content">
                     <h3 className="lrd-live-benefit-title">GRUPOS REDUCIDOS</h3>
-                    <p className="lrd-live-benefit-desc">Máximo 8 alumnos para una experiencia más cercana.</p>
+                    <p className="lrd-live-benefit-desc">Máximo 8 alumnos por grupo.</p>
                   </div>
                 </div>
               </div>
@@ -1387,13 +1387,13 @@ export function LandingPage() {
                   Tu experiencia continúa más allá de las clases en vivo.
                 </p>
                 <p className="lrd-portal-desc">
-                  Como alumno tendrás acceso a tu Portal Académico para consultar clases, materiales, progreso y recursos desde un mismo lugar.
+                  Accede a tus clases, materiales y progreso desde un mismo portal.
                 </p>
               </div>
 
               {/* Frase introductoria a los 3 beneficios como valor añadido */}
               <p className="lrd-portal-benefits-intro">
-                Además de tus clases en vivo, tu portal te permite:
+                Tu portal te permite:
               </p>
 
               {/* 3 Beneficios Ligeros con Iconos SVG Minimalistas */}
@@ -1406,7 +1406,7 @@ export function LandingPage() {
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">TODO EN UN SOLO LUGAR</h3>
                     <p className="lrd-portal-benefit-desc">
-                      Consulta tus clases, calendario y materiales desde un mismo portal.
+                      Consulta clases, calendario y materiales en un solo espacio.
                     </p>
                   </div>
                 </div>
@@ -1419,7 +1419,7 @@ export function LandingPage() {
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">SIGUE TU PROGRESO</h3>
                     <p className="lrd-portal-benefit-desc">
-                      Visualiza tu avance, estadísticas y desempeño de forma clara.
+                      Visualiza tu avance de forma clara.
                     </p>
                   </div>
                 </div>
@@ -1430,9 +1430,9 @@ export function LandingPage() {
                     <BookOpen size={20} color="#001b50" strokeWidth={2} />
                   </div>
                   <div className="lrd-portal-benefit-content">
-                    <h3 className="lrd-portal-benefit-title">RECURSOS SIEMPRE DISPONIBLES</h3>
+                    <h3 className="lrd-portal-benefit-title">RECURSOS DISPONIBLES</h3>
                     <p className="lrd-portal-benefit-desc">
-                      Accede a PDFs, videos y herramientas para seguir practicando.
+                      Accede a materiales y herramientas cuando los necesites.
                     </p>
                   </div>
                 </div>
@@ -1441,7 +1441,7 @@ export function LandingPage() {
               {/* Frase de Cierre Sutil */}
               <div className="lrd-portal-closing-wrap">
                 <p className="lrd-portal-closing-phrase">
-                  Tus clases, tu progreso y tus recursos, siempre contigo.
+                  Tus clases y recursos, siempre contigo.
                 </p>
               </div>
             </div>
