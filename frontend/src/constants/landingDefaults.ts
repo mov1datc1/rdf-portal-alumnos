@@ -31,7 +31,7 @@ export const DEFAULT_TEACHERS = [
     city: 'Toulouse',
     image: '/imagenes-lp/teacher_fanny.webp',
     video: '/videos/teacher_fanny.mp4',
-    quote: "Mon objectif c'est que tu apprennes le vrai français et que tu n'ais pas peur de t'exprimer. Dans mes classes la bienveillance sera toujours présente!"
+    quote: "Mi objetivo es que aprendas el francés de verdad y que no tengas miedo de expresarte. En mis clases siempre habrá un ambiente de confianza."
   },
   {
     id: 'jeremy',
@@ -41,7 +41,7 @@ export const DEFAULT_TEACHERS = [
     city: 'Bordeaux',
     image: '/imagenes-lp/teacher_jeremy.webp',
     video: '/videos/teacher_jeremy.mp4',
-    quote: "Mon objectif est que tu commences à t'exprimer en français de manière naturelle"
+    quote: "Mi objetivo es que empieces a expresarte en francés de forma natural."
   },
   {
     id: 'sophie',
@@ -51,7 +51,7 @@ export const DEFAULT_TEACHERS = [
     city: 'Lyon',
     image: '/imagenes-lp/teacher_sophie.webp',
     video: '/videos/teacher_sophie.mp4',
-    quote: "Je vous attends avec impatience pour apprendre le français dans la joie et la bonne humeur! Gastronomie, culture et conjugaison!"
+    quote: "Te espero para aprender francés con alegría y buen humor. ¡Gastronomía, cultura y conjugación!"
   },
   {
     id: 'itzel',
@@ -61,7 +61,7 @@ export const DEFAULT_TEACHERS = [
     city: 'Bordeaux',
     image: '/imagenes-lp/teacher_itzel.webp',
     video: '/videos/teacher_itzel.mp4',
-    quote: "Curieuse, patiente et attachée aux choses simples, j’aime transmettre avec douceur et bonne humeur."
+    quote: "Soy curiosa, paciente y disfruto de las cosas sencillas. Me gusta enseñar con calma y buen humor."
   },
   {
     id: 'fabien',
@@ -71,7 +71,7 @@ export const DEFAULT_TEACHERS = [
     city: 'Paris',
     image: '/imagenes-lp/teacher_fabien.webp',
     video: '/videos/teacher_fabien.mp4',
-    quote: "Oublie les classes ennuyantes, avec moi tu vas apprendre en rigolant"
+    quote: "Olvídate de las clases aburridas; conmigo aprenderás mientras te diviertes."
   },
   {
     id: 'pauline',
@@ -81,7 +81,7 @@ export const DEFAULT_TEACHERS = [
     city: 'Lyon',
     image: '/imagenes-lp/teacher_pauline.webp',
     video: '/videos/teacher_pauline.mp4',
-    quote: "Je serais ravie de vous accompagner pour que vous progressiez à votre rythme et que vous preniez confiance en vos capacités en français."
+    quote: "Me encantará acompañarte para que avances a tu ritmo y ganes confianza en tu francés."
   },
   {
     id: 'camille',
@@ -91,7 +91,7 @@ export const DEFAULT_TEACHERS = [
     city: 'Lyon',
     image: '/imagenes-lp/teacher_camille.webp',
     video: '/videos/teacher_camille.mp4',
-    quote: "Tu apprendras le vrai français qu'on entend dans les cafés et avec l'élégance à la française"
+    quote: "Aprenderás el francés de verdad, el que escuchas en los cafés, con la elegancia francesa."
   }
 ];
 
