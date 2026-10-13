@@ -1382,19 +1382,10 @@ export function LandingPage() {
                   <span className="lrd-portal-title-highlight">TODO EN UN SOLO LUGAR</span>
                 </h2>
 
-                {/* Frase Concepto y Subtítulo */}
-                <p className="lrd-portal-concept-phrase">
-                  Tu experiencia continúa más allá de las clases en vivo.
-                </p>
                 <p className="lrd-portal-desc">
                   Accede a tus clases, materiales y progreso desde un mismo portal.
                 </p>
               </div>
-
-              {/* Frase introductoria a los 3 beneficios como valor añadido */}
-              <p className="lrd-portal-benefits-intro">
-                Tu portal te permite:
-              </p>
 
               {/* 3 Beneficios Ligeros con Iconos SVG Minimalistas */}
               <div className="lrd-portal-benefits-list">
@@ -1406,7 +1397,7 @@ export function LandingPage() {
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">TODO EN UN SOLO LUGAR</h3>
                     <p className="lrd-portal-benefit-desc">
-                      Consulta clases, calendario y materiales en un solo espacio.
+                      Consulta clases, calendario y materiales.
                     </p>
                   </div>
                 </div>
@@ -1419,7 +1410,7 @@ export function LandingPage() {
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">SIGUE TU PROGRESO</h3>
                     <p className="lrd-portal-benefit-desc">
-                      Visualiza tu avance de forma clara.
+                      Visualiza tu avance.
                     </p>
                   </div>
                 </div>
@@ -1432,17 +1423,10 @@ export function LandingPage() {
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">RECURSOS DISPONIBLES</h3>
                     <p className="lrd-portal-benefit-desc">
-                      Accede a materiales y herramientas cuando los necesites.
+                      Accede a materiales y herramientas.
                     </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Frase de Cierre Sutil */}
-              <div className="lrd-portal-closing-wrap">
-                <p className="lrd-portal-closing-phrase">
-                  Tus clases y recursos, siempre contigo.
-                </p>
               </div>
             </div>
 
