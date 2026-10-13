@@ -2,6 +2,54 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-10-13] - Ajuste de Frase Superior en el Arte Oficial del Método MRAF®
+- **Sustitución de Frase en Cabecera MRAF®:** Reemplazo de `“¿CÓMO DIABLOS APRENDES FRANCÉS TAN RÁPIDO?”` por `“¿CÓMO APRENDES FRANCÉS TAN RÁPIDO?”` directamente sobre los assets gráficos oficiales (`mraf_header_official_hd.png` y `.webp`).
+- **Preservación Visual y Armonía:** Mantenidos trazos, texturas, tipografía de marcador manual, corona dorada (#D59B28) y destellos rojos (#DC0E10) con centrado simétrico geométrico.
+- **Cache-Buster v=9:** Actualizado a `?v=9` en `LandingPage.tsx` para recarga síncrona en producción.
+
+---
+
+## [2026-10-07] - Integración de 7 Profesores Reales, Distribución 4+3 en Escritorio y Auditoría de Contenido
+
+### 👑 1. Integración Oficial de los 7 Profesores Reales (#profesores)
+- **Sustitución de Profesores Provisionales:** Integrados los 7 profesores reales en orden y paridad pedagógica:
+  1. *Prof. Fanny* (Toulouse · Francés Real y Confianza)
+  2. *Prof. Jérémy* (Bordeaux · Expresión Natural y Conversación)
+  3. *Prof. Sophie* (Lyon · Cultura y Vida Cotidiana)
+  4. *Prof. Itzel* (Bordeaux · Paciencia y Aprendizaje Cercano)
+  5. *Prof. Fabien* (Paris · Aprendizaje Dinámico y Divertido)
+  6. *Prof. Pauline* (Lyon · Confianza y Progreso a tu Ritmo)
+  7. *Prof. Camille* (Lyon · Francés Real y Cultura Francesa)
+- **Optimización Integral de Multimedia:**
+  - 7 retratos profesionales optimizados a WebP (`/imagenes-lp/teacher_[id].webp`, 800px ancho, ~75 KB promedio) con encuadres faciales precisos (`object-position`).
+  - 7 videos reales de presentación en MP4 local (`/videos/teacher_[id].mp4`) cargados mediante modal interactivo (`activeTeacherVideo`).
+- **Botón Único Interactivo y Reducción de Altura:**
+  - Conservado exclusivamente el botón flotante con diseño glassmorphism sobre la fotografía (`.lrd-teacher-video-teaser`).
+  - Eliminado el botón repetido del pie de la tarjeta, reduciendo la altura vertical y compactando el cuerpo (`padding: 20px 20px 22px 20px`, `margin: 0` en cita).
+
+### 📐 2. Distribución Equilibrada 4 + 3 en Escritorio y Consistencia Geométrica
+- **Distribución Staggered 4 + 3 en Desktop:**
+  - Primera fila: 4 profesores (Fanny, Jérémy, Sophie, Itzel).
+  - Segunda fila: 3 profesores centrados simétricamente (Fabien, Pauline, Camille).
+  - Erradicado por completo el aislamiento de Camille (antiguo esquema 3 + 3 + 1).
+- **Uniformidad Geométrica Exacta (302px x 650px):**
+  - Todas las 7 tarjetas comparten idéntico ancho (`calc((100% - 3 * 24px) / 4)`) e idéntica altura visual (`min-height: 650px`).
+  - Etiquetas doradas de especialidad con `min-height: 36px`, `letter-spacing: 0.35px` y alineación central, logrando que todas queden en una sola línea y a la misma altura.
+- **Responsive Adaptativo Fluido:**
+  - Tablet / Laptop pequeña (641px - 1099px): 2 columnas con la 7ª tarjeta centrada.
+  - Móvil (<= 640px): 1 columna vertical limpia con cero scroll horizontal.
+
+### 🗄️ 3. Sincronización Segura en Supabase `AppSettings`
+- **Aislamiento Estricto:** Verificada la fila `id: "global"` en `https://fhbjfyivpkwlpefzmfit.supabase.co`. Sincronizado exclusivamente el arreglo `teachers` (7 elementos).
+- **Cero Efectos Secundarios:** Las columnas `heroSlides` (4 slides), `levelsData`, `schoolName`, presupuestos publicitarios y tablas de autenticación permanecen 100% intactas.
+
+### 📋 4. Auditoría Técnica para Futuras Correcciones de la Landing
+- **Inventario de Emojis Unicode:** Localizados 2 emojis en UI (`🔒` en mockup de portal, `🇲🇽` en modal) y 6 en mensajes precargados de WhatsApp (`🇫🇷`, `👤`, `📧`, `📱`, `📚`).
+- **Diagnóstico de Textos Pesados:** Mapeadas 5 oportunidades de simplificación de micro-copy (Método MRAF vs. Clase en vivo, Beneficios de la Realeza, Portal del Alumno, Precios y frecuencia de claims de marca).
+- **Compilación Limpia:** `npm run build` completado exitosamente sin errores de TypeScript ni Vite.
+
+---
+
 ## [2026-10-01] - Estandarización de Iconografía Vectorial (Lucide React) y Erradicación de Emojis Genéricos en Portales
 
 ### 💎 1. Limpieza y Modernización Estética en Portales Privados (Alumno, Profesor y Administrador)

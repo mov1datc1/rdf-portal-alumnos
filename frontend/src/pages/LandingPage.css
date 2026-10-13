@@ -5848,14 +5848,38 @@ html {
 }
 
 /* ==========================================================================
-   GRID DE 3 PROFESORES REALES VISIBLES AL MISMO TIEMPO (ALTO PROTAGONISMO)
+   DISTRIBUCIÓN DE 7 PROFESORES REALES (ALTO PROTAGONISMO Y ARMONÍA ROYAL)
+   Desktop: 4 en primera fila + 3 centrados en segunda fila
+   Tablet / Laptop pequeña: 2 columnas
+   Móvil: 1 columna
    ========================================================================== */
+@media (min-width: 1200px) {
+  #profesores .lrd-container {
+    max-width: 1320px;
+  }
+}
+
 .lrd-teachers-royal-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
   margin-top: 40px;
   margin-bottom: 44px;
+  width: 100%;
+}
+
+/* En Desktop amplio (>= 1100px): 4 en 1ª fila + 3 centrados en 2ª fila con idéntico ancho */
+@media (min-width: 1100px) {
+  .lrd-teacher-royal-card {
+    flex: 0 0 calc((100% - (3 * 24px)) / 4);
+    max-width: calc((100% - (3 * 24px)) / 4);
+    width: calc((100% - (3 * 24px)) / 4);
+    min-height: 650px;
+  }
+  .lrd-teacher-card-photo-wrap {
+    height: 350px;
+  }
 }
 
 .lrd-teacher-royal-card {
@@ -5883,13 +5907,14 @@ html {
   height: 380px;
   overflow: hidden;
   background: #001844;
+  cursor: pointer;
 }
 
 .lrd-teacher-card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 15%;
+  object-position: center 20%;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   display: block;
 }
@@ -5898,41 +5923,65 @@ html {
   transform: scale(1.04);
 }
 
-/* Espacio sutil preparado para futuro video real de cada profesor */
+/* Encuadres de retratos optimizados para cada profesor */
+.lrd-teacher-img-fanny {
+  object-position: center 18%;
+}
+.lrd-teacher-img-jeremy {
+  object-position: center 18%;
+}
+.lrd-teacher-img-sophie {
+  object-position: center 18%;
+}
+.lrd-teacher-img-itzel {
+  object-position: center 20%;
+}
+.lrd-teacher-img-fabien {
+  object-position: center 20%;
+}
+.lrd-teacher-img-pauline {
+  object-position: center 18%;
+}
+.lrd-teacher-img-camille {
+  object-position: center 20%;
+}
+
+/* Espacio interactivo sobre la foto para ver presentación en video */
 .lrd-teacher-video-teaser {
   position: absolute;
   bottom: 14px;
   right: 14px;
-  background: rgba(0, 24, 68, 0.78);
+  background: rgba(0, 24, 68, 0.82);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: #FFFFFF;
   font-size: 0.73rem;
   font-weight: 700;
   letter-spacing: 0.3px;
-  padding: 6px 13px;
+  padding: 6px 14px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  cursor: default;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
   user-select: none;
   z-index: 3;
   transition: all 0.25s ease;
 }
 
-.lrd-teacher-royal-card:hover .lrd-teacher-video-teaser {
-  background: rgba(217, 37, 52, 0.92);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 4px 16px rgba(217, 37, 52, 0.35);
-  transform: scale(1.02);
+.lrd-teacher-royal-card:hover .lrd-teacher-video-teaser,
+.lrd-teacher-video-teaser:hover {
+  background: rgba(217, 37, 52, 0.95);
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 4px 18px rgba(217, 37, 52, 0.45);
+  transform: scale(1.04);
 }
 
 /* Cuerpo Informativo Limpio, Humano y Jerárquico */
 .lrd-teacher-card-body {
-  padding: 24px 22px 26px 22px;
+  padding: 20px 20px 22px 20px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -5972,26 +6021,32 @@ html {
 .lrd-teacher-specialty-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   align-self: flex-start;
+  max-width: 100%;
+  min-height: 36px;
   background: rgba(213, 155, 40, 0.08);
   border: 1px solid rgba(213, 155, 40, 0.32);
   color: #9A6800;
   font-weight: 800;
-  font-size: 0.72rem;
-  letter-spacing: 0.9px;
+  font-size: 0.69rem;
+  letter-spacing: 0.35px;
+  line-height: 1.25;
   text-transform: uppercase;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
 }
 
 .lrd-teacher-card-quote-text {
   font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  font-size: 0.92rem;
+  font-size: 0.91rem;
   font-weight: 550;
   font-style: italic;
   color: #001844;
-  line-height: 1.5;
+  line-height: 1.48;
   margin: 0;
   border-left: 2.5px solid #D59B28;
   padding-left: 12px;
@@ -6067,18 +6122,145 @@ html {
 }
 
 /* ==========================================================================
-   RESPONSIVE TEACHERS SECTION
+   MODAL / LIGHTBOX DE VIDEO DE PRESENTACIÓN (PROFESORES REALES)
    ========================================================================== */
-@media (min-width: 641px) and (max-width: 1024px) {
-  .lrd-teachers-royal-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+.lrd-video-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 15, 45, 0.84);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: lrdTeacherModalFadeIn 0.22s ease-out;
+}
+
+@keyframes lrdTeacherModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lrdTeacherModalScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
   }
-  .lrd-teacher-royal-card:nth-child(3) {
-    grid-column: 1 / -1;
-    max-width: 460px;
-    margin: 0 auto;
-    width: 100%;
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.lrd-video-modal-dialog {
+  background: #001844;
+  border: 1.5px solid rgba(213, 155, 40, 0.45);
+  border-radius: 20px;
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: lrdTeacherModalScaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.lrd-video-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(0, 24, 68, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lrd-video-modal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lrd-video-modal-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  color: #D59B28;
+  text-transform: uppercase;
+}
+
+.lrd-video-modal-title {
+  margin: 0;
+  font-family: var(--lrd-font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.lrd-video-modal-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 550;
+}
+
+.lrd-video-modal-close-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.lrd-video-modal-close-btn:hover {
+  background: #D92534;
+  border-color: #D92534;
+  transform: rotate(90deg);
+}
+
+.lrd-video-modal-player-wrap {
+  position: relative;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 280px;
+  max-height: calc(90vh - 84px);
+  overflow: hidden;
+}
+
+.lrd-video-modal-player {
+  width: 100%;
+  max-height: calc(90vh - 84px);
+  object-fit: contain;
+  background: #000000;
+  display: block;
+  outline: none;
+}
+
+/* ==========================================================================
+   RESPONSIVE TEACHERS SECTION (TABLET Y MÓVIL)
+   ========================================================================== */
+@media (min-width: 641px) and (max-width: 1099px) {
+  .lrd-teachers-royal-grid {
+    gap: 22px;
+  }
+  /* En tablet / laptop pequeña (2 columnas): las tarjetas tienen idéntico ancho y la 7ª se centra automáticamente */
+  .lrd-teacher-royal-card {
+    flex: 0 0 calc((100% - 22px) / 2);
+    max-width: calc((100% - 22px) / 2);
+    width: calc((100% - 22px) / 2);
   }
   .lrd-teacher-card-photo-wrap {
     height: 350px;
@@ -6103,18 +6285,28 @@ html {
     font-size: 0.95rem;
   }
   .lrd-teachers-royal-grid {
-    grid-template-columns: 1fr;
-    max-width: 420px;
+    flex-direction: column;
+    align-items: center;
+    max-width: 440px;
     margin: 28px auto 32px auto;
     gap: 24px;
   }
+  .lrd-teacher-royal-card {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+  }
   .lrd-teacher-card-photo-wrap {
-    height: clamp(280px, 75vw, 360px);
+    height: clamp(300px, 80vw, 380px);
   }
   .lrd-teachers-trust-footer {
     grid-template-columns: 1fr;
     padding: 18px 16px;
     gap: 16px;
+  }
+  .lrd-video-modal-dialog {
+    max-width: 95vw;
+    border-radius: 16px;
   }
 }
 

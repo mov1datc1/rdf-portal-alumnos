@@ -226,31 +226,74 @@ export const LEVELS = DEFAULT_LEVELS;
 
 const DEFAULT_TEACHERS = [
   {
-    id: 'jean-luc',
-    name: 'Jean-Luc',
-    role: 'Profesor nativo de francés',
-    specialty: 'CONVERSACIÓN Y FLUIDEZ',
-    city: 'París',
-    image: '/imagenes-lp/teacher_royal_jean_luc.webp',
-    quote: 'Mi objetivo es que pierdas el miedo y empieces a expresarte en francés con naturalidad.'
+    id: 'fanny',
+    name: 'Fanny',
+    role: 'Profesora de francés',
+    specialty: 'FRANCÉS REAL Y CONFIANZA',
+    city: 'Toulouse',
+    image: '/imagenes-lp/teacher_fanny.webp',
+    video: '/videos/teacher_fanny.mp4',
+    quote: "Mon objectif c'est que tu apprennes le vrai français et que tu n'ais pas peur de t'exprimer. Dans mes classes la bienveillance sera toujours présente!"
+  },
+  {
+    id: 'jeremy',
+    name: 'Jérémy',
+    role: 'Profesor de francés',
+    specialty: 'EXPRESIÓN NATURAL Y CONVERSACIÓN',
+    city: 'Bordeaux',
+    image: '/imagenes-lp/teacher_jeremy.webp',
+    video: '/videos/teacher_jeremy.mp4',
+    quote: "Mon objectif est que tu commences à t'exprimer en français de manière naturelle"
   },
   {
     id: 'sophie',
     name: 'Sophie',
-    role: 'Profesora nativa de francés',
+    role: 'Profesora de francés',
     specialty: 'CULTURA Y VIDA COTIDIANA',
     city: 'Lyon',
-    image: '/imagenes-lp/teacher_royal_sophie.webp',
-    quote: 'Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.'
+    image: '/imagenes-lp/teacher_sophie.webp',
+    video: '/videos/teacher_sophie.mp4',
+    quote: "Je vous attends avec impatience pour apprendre le français dans la joie et la bonne humeur! Gastronomie, culture et conjugaison!"
   },
   {
-    id: 'pierre',
-    name: 'Pierre',
-    role: 'Profesor nativo de francés',
-    specialty: 'ESTRUCTURA Y PRÁCTICA ORAL',
-    city: 'Burdeos',
-    image: '/imagenes-lp/teacher_royal_pierre.webp',
-    quote: 'Olvídate de las clases aburridas; practicaremos para que hables con soltura y seguridad desde el primer día.'
+    id: 'itzel',
+    name: 'Itzel',
+    role: 'Profesora de francés',
+    specialty: 'PACIENCIA Y APRENDIZAJE CERCANO',
+    city: 'Bordeaux',
+    image: '/imagenes-lp/teacher_itzel.webp',
+    video: '/videos/teacher_itzel.mp4',
+    quote: "Curieuse, patiente et attachée aux choses simples, j’aime transmettre avec douceur et bonne humeur."
+  },
+  {
+    id: 'fabien',
+    name: 'Fabien',
+    role: 'Profesor de francés',
+    specialty: 'APRENDIZAJE DINÁMICO Y DIVERTIDO',
+    city: 'Paris',
+    image: '/imagenes-lp/teacher_fabien.webp',
+    video: '/videos/teacher_fabien.mp4',
+    quote: "Oublie les classes ennuyantes, avec moi tu vas apprendre en rigolant"
+  },
+  {
+    id: 'pauline',
+    name: 'Pauline',
+    role: 'Profesora de francés',
+    specialty: 'CONFIANZA Y PROGRESO A TU RITMO',
+    city: 'Lyon',
+    image: '/imagenes-lp/teacher_pauline.webp',
+    video: '/videos/teacher_pauline.mp4',
+    quote: "Je serais ravie de vous accompagner pour que vous progressiez à votre rythme et que vous preniez confiance en vos capacités en français."
+  },
+  {
+    id: 'camille',
+    name: 'Camille',
+    role: 'Profesora de francés',
+    specialty: 'FRANCÉS REAL Y CULTURA FRANCESA',
+    city: 'Lyon',
+    image: '/imagenes-lp/teacher_camille.webp',
+    video: '/videos/teacher_camille.mp4',
+    quote: "Tu apprendras le vrai français qu'on entend dans les cafés et avec l'élégance à la française"
   }
 ];
 
@@ -384,6 +427,31 @@ export function LandingPage() {
   const [leadModalOpen, setLeadModalOpen] = useState(false);
   const [leadOrigin, setLeadOrigin] = useState('Clase de Prueba Gratis');
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [activeTeacherVideo, setActiveTeacherVideo] = useState<{
+    id: string;
+    name: string;
+    video: string;
+    role: string;
+    city: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveTeacherVideo(null);
+      }
+    };
+    if (activeTeacherVideo) {
+      document.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [activeTeacherVideo]);
   const [pricingTab, setPricingTab] = useState<'grupales' | 'particulares'>('grupales');
   const [selectedGroupPlan, setSelectedGroupPlan] = useState<'regular' | 'sabatino' | 'intensivo' | null>(null);
   const [selectedPrivateType, setSelectedPrivateType] = useState<'individual' | 'duo'>('individual');
@@ -769,7 +837,7 @@ export function LandingPage() {
         <div className="lrd-container lrd-mraf-container-relative">
           {/* Header Ilustrado HD Oficial */}
           <div className="lrd-mraf-header-deluxe">
-            <img loading="lazy" decoding="async" src="/imagenes-lp/mraf_header_official_hd.webp?v=8"
+            <img loading="lazy" decoding="async" src="/imagenes-lp/mraf_header_official_hd.webp?v=9"
               alt="Método para hablar Francés sin sufrir MRAF®"
               className="lrd-mraf-official-header-img"
             />
@@ -980,57 +1048,53 @@ export function LandingPage() {
             </p>
           </div>
 
-          {/* GRID DE 3 PROFESORES VISIBLES AL MISMO TIEMPO (55-60% FOTO PROTAGONISTA) */}
+          {/* GRID DE 7 PROFESORES VISIBLES (ALTO PROTAGONISMO Y ORDEN EQUILIBRADO) */}
           <div className="lrd-teachers-royal-grid">
             {teachers.map((teacher, index) => {
-              const isFemale = teacher.id === 'sophie' || teacher.name?.toLowerCase().includes('sophie');
-              const nativeCondition = isFemale ? 'Profesora nativa de francés' : 'Profesor nativo de francés';
-              const confirmedSpecialty = teacher.specialty || (
-                teacher.id === 'jean-luc'
-                  ? 'CONVERSACIÓN Y FLUIDEZ'
-                  : teacher.id === 'sophie'
-                  ? 'CULTURA Y VIDA COTIDIANA'
-                  : teacher.id === 'pierre'
-                  ? 'ESTRUCTURA Y PRÁCTICA ORAL'
-                  : (teacher.role ? teacher.role.toUpperCase() : 'CONVERSACIÓN Y FLUIDEZ')
-              );
-              const personalPresentation = (
-                teacher.id === 'jean-luc'
-                  ? 'Mi objetivo es que pierdas el miedo y empieces a expresarte en francés con naturalidad.'
-                  : teacher.id === 'sophie'
-                  ? 'Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.'
-                  : teacher.id === 'pierre'
-                  ? 'Olvídate de las clases aburridas; practicaremos para que hables con soltura y seguridad desde el primer día.'
-                  : (teacher.quote ? teacher.quote.replace(/^[“"']|[”"']$/g, '') : '')
-              );
-
+              const isFemale = ['fanny', 'sophie', 'itzel', 'pauline', 'camille'].includes(teacher.id) ||
+                teacher.role?.toLowerCase().includes('profesora');
+              const nativeCondition = isFemale ? 'Profesora de francés' : 'Profesor de francés';
+              const confirmedSpecialty = teacher.specialty || 'FRANCÉS REAL Y CONVERSACIÓN';
+              const personalPresentation = teacher.quote ? teacher.quote.replace(/^[“"']|[”"']$/g, '') : '';
               const cleanCity = teacher.city ? teacher.city.replace(', Francia', '').trim() : '';
-              const teacherImg = (teacher.image && !teacher.image.includes('rey') && !teacher.image.includes('queen') && !teacher.image.includes('student'))
-                ? teacher.image
-                : (teacher.id === 'jean-luc'
-                    ? '/imagenes-lp/teacher_royal_jean_luc.webp'
-                    : teacher.id === 'sophie'
-                    ? '/imagenes-lp/teacher_royal_sophie.webp'
-                    : '/imagenes-lp/teacher_royal_pierre.webp');
+              const teacherImg = teacher.image || `/imagenes-lp/teacher_${teacher.id}.webp`;
+              const teacherVideo = teacher.video || `/videos/teacher_${teacher.id}.mp4`;
+
+              const handleOpenTeacherVideo = () => {
+                setActiveTeacherVideo({
+                  id: teacher.id,
+                  name: teacher.name,
+                  video: teacherVideo,
+                  role: nativeCondition,
+                  city: cleanCity
+                });
+              };
 
               return (
-                <article key={teacher.id || index} className="lrd-teacher-royal-card">
-                  {/* Fotografía Principal (55-60% de protagonismo visual) */}
-                  <div className="lrd-teacher-card-photo-wrap">
+                <article key={teacher.id || index} className={`lrd-teacher-royal-card lrd-teacher-card-${teacher.id}`}>
+                  {/* Fotografía Principal (Protagonismo Visual Con Proporción Optimizada) */}
+                  <div className="lrd-teacher-card-photo-wrap" onClick={handleOpenTeacherVideo} style={{ cursor: 'pointer' }}>
                     <img
-                      loading="eager"
-                      fetchPriority="high"
+                      loading="lazy"
                       decoding="async"
                       src={teacherImg}
                       alt={`Prof. ${teacher.name} - ${nativeCondition}`}
-                      className="lrd-teacher-card-img"
+                      className={`lrd-teacher-card-img lrd-teacher-img-${teacher.id}`}
                     />
 
-                    {/* Espacio sutil preparado para futuro video real */}
-                    <div className="lrd-teacher-video-teaser" title="Próximamente video de presentación">
+                    {/* Espacio sutil interactivo: Ver presentación */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenTeacherVideo();
+                      }}
+                      className="lrd-teacher-video-teaser"
+                      title={`Ver video de presentación de Prof. ${teacher.name}`}
+                    >
                       <Play size={11} fill="#FFFFFF" color="#FFFFFF" />
                       <span>Ver presentación</span>
-                    </div>
+                    </button>
                   </div>
 
                   {/* Cuerpo Informativo Limpio, Humano y Jerárquico */}
@@ -1040,22 +1104,22 @@ export function LandingPage() {
                       Prof. {teacher.name}
                     </h3>
 
-                    {/* Procedencia y Condición Nativa */}
+                    {/* Procedencia y Condición */}
                     <p className="lrd-teacher-card-meta">
                       <span className="lrd-meta-native-text">{nativeCondition}</span>
                       {cleanCity && (
-                        <span className="lrd-meta-city-text"> • {cleanCity}</span>
+                        <span className="lrd-meta-city-text"> · {cleanCity}</span>
                       )}
                     </p>
 
-                    {/* Especialidad Confirmada */}
+                    {/* Etiqueta de Enfoque */}
                     {confirmedSpecialty && (
                       <div className="lrd-teacher-specialty-badge">
                         <span>{confirmedSpecialty}</span>
                       </div>
                     )}
 
-                    {/* Presentación Personal Breve (Máximo 2 líneas) */}
+                    {/* Presentación Personal Breve */}
                     {personalPresentation && (
                       <p className="lrd-teacher-card-quote-text">
                         “{personalPresentation}”
@@ -1082,7 +1146,7 @@ export function LandingPage() {
               </div>
               <div className="lrd-trust-text-col">
                 <strong>100% Nativos de Francia</strong>
-                <span>Acentos reales de París, Lyon y Burdeos</span>
+                <span>Acentos reales de París, Lyon, Burdeos y Toulouse</span>
               </div>
             </div>
 
@@ -1119,6 +1183,56 @@ export function LandingPage() {
           </div>
 
         </div>
+
+        {/* Modal / Lightbox de Presentación de Profesores */}
+        {activeTeacherVideo && (
+          <div
+            className="lrd-video-modal-overlay"
+            onClick={() => setActiveTeacherVideo(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Video de presentación - Prof. ${activeTeacherVideo.name}`}
+          >
+            <div
+              className="lrd-video-modal-dialog"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Cabecera del Lightbox */}
+              <div className="lrd-video-modal-header">
+                <div className="lrd-video-modal-info">
+                  <span className="lrd-video-modal-badge">PRESENTACIÓN OFICIAL</span>
+                  <h3 className="lrd-video-modal-title">Prof. {activeTeacherVideo.name}</h3>
+                  <p className="lrd-video-modal-sub">
+                    {activeTeacherVideo.role} · {activeTeacherVideo.city}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTeacherVideo(null)}
+                  className="lrd-video-modal-close-btn"
+                  aria-label="Cerrar video"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Reproductor de Video */}
+              <div className="lrd-video-modal-player-wrap">
+                <video
+                  key={activeTeacherVideo.video}
+                  src={activeTeacherVideo.video}
+                  controls
+                  autoPlay={false}
+                  preload="metadata"
+                  playsInline
+                  className="lrd-video-modal-player"
+                >
+                  Tu navegador no soporta la reproducción de video.
+                </video>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* SECCIÓN: ASÍ SE VIVE UNA CLASE EN VIVO (EVIDENCIA REAL Y EXPERIENCIA) */}

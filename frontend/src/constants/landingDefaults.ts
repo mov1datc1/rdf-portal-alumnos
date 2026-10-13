@@ -24,31 +24,74 @@ export const DEFAULT_HERO_SLIDES = [
 
 export const DEFAULT_TEACHERS = [
   {
-    id: 'jean-luc',
-    name: 'Jean-Luc',
-    role: 'Profesor nativo de francés',
-    specialty: 'CONVERSACIÓN Y FLUIDEZ',
-    city: 'París',
-    image: '/imagenes-lp/teacher_royal_jean_luc.webp',
-    quote: 'Mi objetivo es que pierdas el miedo y empieces a expresarte en francés con naturalidad.'
+    id: 'fanny',
+    name: 'Fanny',
+    role: 'Profesora de francés',
+    specialty: 'FRANCÉS REAL Y CONFIANZA',
+    city: 'Toulouse',
+    image: '/imagenes-lp/teacher_fanny.webp',
+    video: '/videos/teacher_fanny.mp4',
+    quote: "Mon objectif c'est que tu apprennes le vrai français et que tu n'ais pas peur de t'exprimer. Dans mes classes la bienveillance sera toujours présente!"
+  },
+  {
+    id: 'jeremy',
+    name: 'Jérémy',
+    role: 'Profesor de francés',
+    specialty: 'EXPRESIÓN NATURAL Y CONVERSACIÓN',
+    city: 'Bordeaux',
+    image: '/imagenes-lp/teacher_jeremy.webp',
+    video: '/videos/teacher_jeremy.mp4',
+    quote: "Mon objectif est que tu commences à t'exprimer en français de manière naturelle"
   },
   {
     id: 'sophie',
     name: 'Sophie',
-    role: 'Profesora nativa de francés',
+    role: 'Profesora de francés',
     specialty: 'CULTURA Y VIDA COTIDIANA',
     city: 'Lyon',
-    image: '/imagenes-lp/teacher_royal_sophie.webp',
-    quote: 'Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.'
+    image: '/imagenes-lp/teacher_sophie.webp',
+    video: '/videos/teacher_sophie.mp4',
+    quote: "Je vous attends avec impatience pour apprendre le français dans la joie et la bonne humeur! Gastronomie, culture et conjugaison!"
   },
   {
-    id: 'pierre',
-    name: 'Pierre',
-    role: 'Profesor nativo de francés',
-    specialty: 'ESTRUCTURA Y PRÁCTICA ORAL',
-    city: 'Burdeos',
-    image: '/imagenes-lp/teacher_royal_pierre.webp',
-    quote: 'Olvídate de las clases aburridas; practicaremos para que hables con soltura y seguridad desde el primer día.'
+    id: 'itzel',
+    name: 'Itzel',
+    role: 'Profesora de francés',
+    specialty: 'PACIENCIA Y APRENDIZAJE CERCANO',
+    city: 'Bordeaux',
+    image: '/imagenes-lp/teacher_itzel.webp',
+    video: '/videos/teacher_itzel.mp4',
+    quote: "Curieuse, patiente et attachée aux choses simples, j’aime transmettre avec douceur et bonne humeur."
+  },
+  {
+    id: 'fabien',
+    name: 'Fabien',
+    role: 'Profesor de francés',
+    specialty: 'APRENDIZAJE DINÁMICO Y DIVERTIDO',
+    city: 'Paris',
+    image: '/imagenes-lp/teacher_fabien.webp',
+    video: '/videos/teacher_fabien.mp4',
+    quote: "Oublie les classes ennuyantes, avec moi tu vas apprendre en rigolant"
+  },
+  {
+    id: 'pauline',
+    name: 'Pauline',
+    role: 'Profesora de francés',
+    specialty: 'CONFIANZA Y PROGRESO A TU RITMO',
+    city: 'Lyon',
+    image: '/imagenes-lp/teacher_pauline.webp',
+    video: '/videos/teacher_pauline.mp4',
+    quote: "Je serais ravie de vous accompagner pour que vous progressiez à votre rythme et que vous preniez confiance en vos capacités en français."
+  },
+  {
+    id: 'camille',
+    name: 'Camille',
+    role: 'Profesora de francés',
+    specialty: 'FRANCÉS REAL Y CULTURA FRANCESA',
+    city: 'Lyon',
+    image: '/imagenes-lp/teacher_camille.webp',
+    video: '/videos/teacher_camille.mp4',
+    quote: "Tu apprendras le vrai français qu'on entend dans les cafés et avec l'élégance à la française"
   }
 ];
 

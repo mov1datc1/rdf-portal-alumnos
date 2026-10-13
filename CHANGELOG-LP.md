@@ -5,6 +5,53 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.5.23] — 2026-10-13
+
+### Ajuste de Frase Superior en el Arte Oficial del Método MRAF®
+- **Sustitución de Lenguaje en Arte Gráfico:**
+  - Sustituida la frase superior `“¿CÓMO DIABLOS APRENDES FRANCÉS TAN RÁPIDO?”` por la variante neutral y profesional `“¿CÓMO APRENDES FRANCÉS TAN RÁPIDO?”`.
+  - Re-edición directa en los assets oficiales de alta resolución [`/imagenes-lp/mraf_header_official_hd.png`](file:///c:/Users/Mariana/OneDrive/Desktop/MOVIDATCI/portalrdf_temp/frontend/public/imagenes-lp/mraf_header_official_hd.png) y [`/imagenes-lp/mraf_header_official_hd.webp`](file:///c:/Users/Mariana/OneDrive/Desktop/MOVIDATCI/portalrdf_temp/frontend/public/imagenes-lp/mraf_header_official_hd.webp).
+  - Preservación exacta de la tipografía de marcador manual, trazo azul marino (`#0B1A43`), espaciado simétrico con la corona dorada izquierda (`#D59B28`) y los destellos doodle rojos derechos (`#DC0E10`).
+  - Alineación simétrica calibrada al centro geométrico del titular principal (`x = 492.5px`).
+- **Cache-Busting Actualizado:**
+  - Actualizado query param a `?v=9` en [`LandingPage.tsx`](file:///c:/Users/Mariana/OneDrive/Desktop/MOVIDATCI/portalrdf_temp/frontend/src/pages/LandingPage.tsx) para asegurar actualización inmediata sin dependencias de caché en clientes.
+
+---
+
+## [3.5.22] — 2026-10-07
+
+### Sección Oficial de 7 Profesores Reales, Distribución 4+3 en Escritorio y Auditoría de Contenido
+- **1. Integración de los 7 Profesores Reales:**
+  - Sustitución de los profesores provisionales por los 7 docentes reales en orden pedagógico:
+    1. *Prof. Fanny* (Toulouse · Francés Real y Confianza)
+    2. *Prof. Jérémy* (Bordeaux · Expresión Natural y Conversación)
+    3. *Prof. Sophie* (Lyon · Cultura y Vida Cotidiana)
+    4. *Prof. Itzel* (Bordeaux · Paciencia y Aprendizaje Cercano)
+    5. *Prof. Fabien* (Paris · Aprendizaje Dinámico y Divertido)
+    6. *Prof. Pauline* (Lyon · Confianza y Progreso a tu Ritmo)
+    7. *Prof. Camille* (Lyon · Francés Real y Cultura Francesa)
+  - 7 retratos fotográficos reales optimizados a WebP (`/imagenes-lp/teacher_[id].webp`, ~75 KB c/u) con encuadres faciales precisos (`object-position`).
+  - 7 videos reales de presentación en MP4 local (`/videos/teacher_[id].mp4`) cargados mediante lightbox/modal reactivo (`activeTeacherVideo`).
+- **2. Depuración de Botón Duplicado y Reducción de Altura:**
+  - Conservado únicamente el botón interactivo sobre la fotografía (`.lrd-teacher-video-teaser`) con estilo glassmorphism y hover rojo carmesí (`#D92534`).
+  - Eliminado el botón repetido al pie de la tarjeta (`.lrd-teacher-video-btn`), reduciendo la altura vertical y compactando el cuerpo de la tarjeta (`padding: 20px 20px 22px 20px`, `margin: 0` en texto de cita).
+- **3. Distribución Equilibrada 4 + 3 en Desktop:**
+  - Primera fila: 4 profesores (Fanny, Jérémy, Sophie, Itzel).
+  - Segunda fila: 3 profesores centrados simétricamente respecto a la primera (Fabien, Pauline, Camille), erradicando el aislamiento de Camille (antiguo esquema 3 + 3 + 1).
+  - Ancho exacto e idéntico para las 7 tarjetas (`calc((100% - 3 * 24px) / 4)`) y altura uniforme garantizada (`min-height: 650px`).
+  - Etiquetas doradas de especialidad con `min-height: 36px`, `letter-spacing: 0.35px` y alineación central, logrando que todas quepan en una sola línea y a la misma altura.
+- **4. Responsive Adaptativo Fluido:**
+  - Tablet / Laptop pequeña (641px a 1099px): 2 columnas con la 7ª tarjeta centrada en la 4ª fila.
+  - Móvil (<= 640px): 1 columna vertical fluida sin scroll horizontal.
+- **5. Sincronización Segura en Supabase `AppSettings`:**
+  - Verificada la fila `id: "global"` en el entorno oficial (`fhbjfyivpkwlpefzmfit.supabase.co`).
+  - Sincronizado exclusivamente el arreglo `teachers` (7 elementos). Cero alteraciones en `heroSlides` (4 slides), `levelsData`, `schoolName` ni presupuestos de pauta.
+- **6. Auditoría Técnica de Emojis y Diagnóstico de Copys:**
+  - Mapeo de emojis Unicode reales en la landing y 5 oportunidades de simplificación de micro-copy para la próxima fase de correcciones del cliente.
+  - Compilación de producción (`npm run build`) validada con 0 errores (código de salida 0).
+
+---
+
 ## [3.5.21] — 2026-09-28
 
 ### Navegación Especializada del Menú Desplegable «CURSOS»
