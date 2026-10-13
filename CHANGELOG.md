@@ -2,6 +2,17 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-10-13] - Presentaciones en Español de Profesores, Simplificación de Copys y Despliegue Sincronizado v3.5.24
+- **Tarjetas de Profesores con Presentación en Español:** Sustituidas las citas de los 7 profesores reales (Fanny, Jérémy, Sophie, Itzel, Fabien, Pauline y Camille) por redacciones cálidas, directas y en español, facilitando la lectura para principiantes hispanohablantes sin duplicidad de texto en francés. Fotos WebP, videos en francés en modal, etiquetas y layout 4+3 intactos.
+- **Simplificación de Copys (Clase en Vivo y Portal):**
+  - *Clase en Vivo:* Nuevo titular *“No solo aprendes francés. Lo hablas.”* y 3 beneficios limpios (*Conversación Real*, *Interacción en Vivo*, *Grupos Reducidos*).
+  - *Portal Académico:* Eliminadas frases redundantes (*“Tu experiencia continúa más allá...”*, etc.), dejando subtítulo único *“Accede a tus clases, materiales y progreso desde un mismo portal.”* y los 3 beneficios directos (*Todo en un solo lugar*, *Sigue tu progreso*, *Recursos disponibles*).
+  - *Costura de Transición:* Ajustada la separación de la frase *“Profesores reales • Alumnos reales • Francés en práctica.”* (`margin-top: 14px`) eliminando el efecto flotante.
+- **Sincronización en Supabase:** Actualizada la fila `AppSettings` (`id: 'global'`) asegurando persistencia de las nuevas presentaciones en español.
+- **Validación E2E & Despliegue Git:** Auditoría completa con 0 scroll horizontal (Desktop, Laptop, Tablet, Móvil), 0 errores TypeScript, y push alineado en `origin/dev` y `origin/main` (commit `0a23f18`).
+
+---
+
 ## [2026-10-13] - Ajuste de Frase Superior en el Arte Oficial del Método MRAF®
 - **Sustitución de Frase en Cabecera MRAF®:** Reemplazo de `“¿CÓMO DIABLOS APRENDES FRANCÉS TAN RÁPIDO?”` por `“¿CÓMO APRENDES FRANCÉS TAN RÁPIDO?”` directamente sobre los assets gráficos oficiales (`mraf_header_official_hd.png` y `.webp`).
 - **Preservación Visual y Armonía:** Mantenidos trazos, texturas, tipografía de marcador manual, corona dorada (#D59B28) y destellos rojos (#DC0E10) con centrado simétrico geométrico.

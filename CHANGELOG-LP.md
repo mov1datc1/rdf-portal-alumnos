@@ -5,6 +5,40 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.5.24] — 2026-10-13
+
+### Presentaciones de Profesores en Español, Simplificación de Copys y Despliegue Sincronizado
+- **1. Presentaciones Escritas de Profesores en Español en Tarjetas:**
+  - Sustituidas las presentaciones originales en francés por textos en español, dirigidos a aprendices hispanohablantes para hacer la lectura ligera, accesible y sin sobrecarga cognitiva:
+    1. *Prof. Fanny*: “Mi objetivo es que aprendas el francés de verdad y que no tengas miedo de expresarte. En mis clases siempre habrá un ambiente de confianza.”
+    2. *Prof. Jérémy*: “Mi objetivo es que empieces a expresarte en francés de forma natural.”
+    3. *Prof. Sophie*: “Te espero para aprender francés con alegría y buen humor. ¡Gastronomía, cultura y conjugación!”
+    4. *Prof. Itzel*: “Soy curiosa, paciente y disfruto de las cosas sencillas. Me gusta enseñar con calma y buen humor.”
+    5. *Prof. Fabien*: “Olvídate de las clases aburridas; conmigo aprenderás mientras te diviertes.”
+    6. *Prof. Pauline*: “Me encantará acompañarte para que avances a tu ritmo y ganes confianza en tu francés.”
+    7. *Prof. Camille*: “Aprenderás el francés de verdad, el que escuchas en los cafés, con la elegancia francesa.”
+  - Erradicado cualquier texto duplicado en francés debajo de las tarjetas.
+  - Preservadas intactas las fotografías reales WebP, los videos reales en francés en el modal reactivo (`activeTeacherVideo`), las etiquetas de especialidad y la distribución 4+3 en escritorio.
+  - Sincronización persistida en Supabase `AppSettings` (`id: 'global'`) y defaults locales en [`landingDefaults.ts`](file:///c:/Users/Mariana/OneDrive/Desktop/MOVIDATCI/portalrdf_temp/frontend/src/constants/landingDefaults.ts) y [`LandingPage.tsx`](file:///c:/Users/Mariana/OneDrive/Desktop/MOVIDATCI/portalrdf_temp/frontend/src/pages/LandingPage.tsx).
+- **2. Simplificación Editorial y Desaturación Visual:**
+  - *Sección «Así se vive una clase en vivo»:*
+    - Frase principal concisa: “No solo aprendes francés. Lo hablas.”
+    - Párrafo de apoyo directo: “Clases en vivo donde hablas, participas y practicas francés desde el primer día.”
+    - 3 beneficios limpios: CONVERSACIÓN REAL (“Habla francés desde tu primera clase.”), INTERACCIÓN EN VIVO (“Participa y recibe correcciones al momento.”) y GRUPOS REDUCIDOS (“Máximo 8 alumnos por grupo.”).
+  - *Sección «Tu francés, todo en un solo lugar» (Portal Académico):*
+    - Subtítulo único debajo del título: “Accede a tus clases, materiales y progreso desde un mismo portal.”
+    - Eliminadas frases redundantes: *“Tu experiencia continúa más allá...”*, *“Tu portal te permite:”*, *“Tus clases y recursos, siempre contigo.”*.
+    - Presentación directa de los 3 beneficios: TODO EN UN SOLO LUGAR (“Consulta clases, calendario y materiales.”), SIGUE TU PROGRESO (“Visualiza tu avance.”) y RECURSOS DISPONIBLES (“Accede a materiales y herramientas.”).
+  - *Calibración de Costura de Transición:*
+    - Anclada la frase divisoria *“Profesores reales • Alumnos reales • Francés en práctica.”* con `margin-top: 14px`, eliminando la sensación de elemento flotante aislado entre la clase en vivo y el portal.
+- **3. Auditoría de Calidad E2E y Despliegue:**
+  - Certificado 0 scroll horizontal en Desktop (1440px), Laptop (1024px), Tablet (768px) y Móvil (390px).
+  - Verificada la detención inmediata de audio y video al cerrar los modales de profesores.
+  - Compilación de producción (`tsc -b && vite build`) limpia en 10.72s.
+  - Sincronización idéntica y simultánea en `origin/dev` y `origin/main` en el commit `0a23f18`.
+
+---
+
 ## [3.5.23] — 2026-10-13
 
 ### Ajuste de Frase Superior en el Arte Oficial del Método MRAF®
