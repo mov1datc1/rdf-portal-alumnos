@@ -6314,7 +6314,7 @@ html {
    SECCIÓN: ASÍ SE VIVE UNA CLASE EN VIVO (EVIDENCIA REAL Y EXPERIENCIA)
    ========================================================================== */
 .lrd-live-class-section {
-  padding: 42px 0 25px 0;
+  padding: 42px 0 12px 0;
   background: #FFFFFF;
   position: relative;
   overflow: hidden;
@@ -6602,7 +6602,7 @@ html {
 
 /* Frase Final de Cierre Centrada */
 .lrd-live-class-footer-row {
-  margin-top: 40px;
+  margin-top: 14px;
   padding-top: 0;
   display: flex;
   align-items: center;
@@ -6687,7 +6687,7 @@ html {
   }
   .lrd-live-class-footer-row {
     order: 4;
-    margin-top: 28px;
+    margin-top: 16px;
     padding-top: 0;
   }
   .lrd-live-closing-phrase {
@@ -6701,7 +6701,7 @@ html {
    SECCIÓN: PORTAL DEL ALUMNO (TU ESPACIO DIGITAL)
    ========================================================================== */
 .lrd-portal-section {
-  padding: 20px 0 105px 0;
+  padding: 12px 0 105px 0;
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFD 50%, #FFFFFF 100%);
   position: relative;
   overflow: hidden;
