@@ -13,13 +13,11 @@ import {
   ChevronRight,
   Menu,
   X,
-  Send,
   Phone,
   Mail,
   MapPin,
   Video,
   MessageSquare,
-  Heart,
   Clock,
   Calendar,
   Sparkles,
@@ -32,7 +30,9 @@ import {
   BadgeCheck,
   LayoutDashboard,
   TrendingUp,
-  GraduationCap
+  GraduationCap,
+  Lock,
+  FileText
 } from 'lucide-react';
 import './LandingPage.css';
 import { useAuthStore } from '../store/authStore';
@@ -305,11 +305,96 @@ const DEFAULT_HERO_SLIDES = [
 ];
 
 
+const GRID_LEVELS = [
+  {
+    code: 'A1',
+    rank: 'BÁSICO 1',
+    title: 'Fundamentos del francés',
+    quote: '“Empieza a hablar.”',
+    badgeBg: '#001844',
+    bullets: [
+      'Presentarte y desenvolverte en situaciones cotidianas',
+      'Vocabulario y gramática básica',
+      'Hablar, escuchar, leer y escribir'
+    ]
+  },
+  {
+    code: 'A2',
+    rank: 'BÁSICO 2',
+    title: 'Comunicación en francés',
+    quote: '“Exprésate con confianza.”',
+    badgeBg: '#D92534',
+    bullets: [
+      'Hablar de rutina, gustos y experiencias',
+      'Comprender y construir frases más completas',
+      'Mejorar comunicación oral y escrita'
+    ]
+  },
+  {
+    code: 'A2+',
+    rank: 'INTERMEDIO 1',
+    title: 'Gana fluidez',
+    quote: '“Comunícate cada vez mejor.”',
+    badgeBg: '#001844',
+    bullets: [
+      'Contar experiencias y hablar del pasado y futuro',
+      'Comprender conversaciones cotidianas',
+      'Expresarte con mayor facilidad'
+    ]
+  },
+  {
+    code: 'B1',
+    rank: 'INTERMEDIO 2',
+    title: 'Francés independiente',
+    quote: '“Habla con más autonomía.”',
+    badgeBg: '#D92534',
+    bullets: [
+      'Expresar opiniones y contar historias',
+      'Comprender textos y conversaciones más complejas',
+      'Comunicarte con mayor espontaneidad'
+    ]
+  },
+  {
+    code: 'B1+',
+    rank: 'AVANZADO 1',
+    title: 'Consolida tu francés',
+    quote: '“Afina tu expresión.”',
+    badgeBg: '#001844',
+    bullets: [
+      'Argumentar y debatir',
+      'Comprender documentos más elaborados',
+      'Expresarte con mayor precisión'
+    ]
+  },
+  {
+    code: 'B2',
+    rank: 'AVANZADO 2',
+    title: 'Domina el francés',
+    quote: '“Comunícate con soltura.”',
+    badgeBg: '#D92534',
+    bullets: [
+      'Defender ideas y participar en debates',
+      'Comprender contenidos complejos',
+      'Expresarte con fluidez y precisión'
+    ]
+  },
+  {
+    code: 'B2-C1',
+    rank: 'PERFECCIONAMIENTO',
+    title: 'Perfecciona tu francés',
+    quote: '“Habla, argumenta y certifícate.”',
+    badgeBg: '#D59B28',
+    bullets: [
+      'Conversación avanzada',
+      'Fluidez y precisión',
+      'Preparación DELF, DALF y TCF'
+    ]
+  }
+];
+
 export function LandingPage() {
   const { user, isAdmin, isTeacher } = useAuthStore();
   const accountPortalLink = !user ? '/login' : isAdmin ? '/admin/groups' : isTeacher ? '/teacher' : '/dashboard';
-  const [activeLevel, setActiveLevel] = useState<string>('A1');
-  const [levelCardTab, setLevelCardTab] = useState<'competencias' | 'enfoque'>('competencias');
   const [heroSlideIndex, setHeroSlideIndex] = useState<number>(0);
 
   // Dynamic Landing Page Config (Loaded from Supabase with instant fallback)
@@ -424,8 +509,6 @@ export function LandingPage() {
       }
     }
   };
-  const [leadModalOpen, setLeadModalOpen] = useState(false);
-  const [leadOrigin, setLeadOrigin] = useState('Clase de Prueba Gratis');
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [activeTeacherVideo, setActiveTeacherVideo] = useState<{
     id: string;
@@ -438,10 +521,11 @@ export function LandingPage() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setActiveTeacherVideo(null);
+        if (activeTeacherVideo) setActiveTeacherVideo(null);
+        if (videoModalOpen) setVideoModalOpen(false);
       }
     };
-    if (activeTeacherVideo) {
+    if (activeTeacherVideo || videoModalOpen) {
       document.addEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'hidden';
     } else {
@@ -451,58 +535,37 @@ export function LandingPage() {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [activeTeacherVideo]);
+  }, [activeTeacherVideo, videoModalOpen]);
   const [pricingTab, setPricingTab] = useState<'grupales' | 'particulares'>('grupales');
   const [selectedGroupPlan, setSelectedGroupPlan] = useState<'regular' | 'sabatino' | 'intensivo' | null>(null);
   const [selectedPrivateType, setSelectedPrivateType] = useState<'individual' | 'duo'>('individual');
   const [selectedPrivateRate, setSelectedPrivateRate] = useState<number>(3);
   const [selectedDuoRate, setSelectedDuoRate] = useState<number>(2);
   const [selectedPromoMonths, setSelectedPromoMonths] = useState<3 | 6 | 9>(6);
-  const [regularDays, setRegularDays] = useState<'LMV' | 'MJV'>('LMV');
-  const [regularShift, setRegularShift] = useState<'matutino' | 'vespertino'>('matutino');
-  const [sabatinoShift, setSabatinoShift] = useState<'08:00' | '11:00' | '14:00'>('11:00');
-  const [intensivoShift, setIntensivoShift] = useState<'matutino' | 'vespertino'>('matutino');
 
   // MRAF Section State
   const [activeMrafIndex, setActiveMrafIndex] = useState<number>(0);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (videoModalOpen) setVideoModalOpen(false);
-        if (leadModalOpen) setLeadModalOpen(false);
+  const WHATSAPP_PHONE = '522223437074';
+
+  const openLeadModal = (origin?: string) => {
+    let message = 'Hola, me gustaría solicitar mi clase de prueba gratis.';
+    if (origin) {
+      if (origin.includes('Sabatino')) {
+        message = 'Hola, me gustaría solicitar mi clase de prueba gratis para la modalidad Sabatino.';
+      } else if (origin.includes('Regular')) {
+        message = 'Hola, me gustaría solicitar mi clase de prueba gratis para la modalidad Regular.';
+      } else if (origin.includes('Intensivo')) {
+        message = 'Hola, me gustaría solicitar mi clase de prueba gratis para la modalidad Intensivo.';
+      } else if (origin.includes('Particulares') || origin.includes('Part Duo')) {
+        message = `Hola, me gustaría solicitar informes para clases ${origin.includes('Part Duo') ? 'Part Duo' : 'Particulares'}.`;
+      } else if (origin.includes('Promoción')) {
+        message = `Hola, me gustaría solicitar informes para la ${origin}.`;
+      } else if (origin.includes('Nivel')) {
+        message = `Hola, me gustaría solicitar informes para el ${origin}.`;
       }
-    };
-    if (videoModalOpen || leadModalOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.body.style.overflow = '';
     }
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [videoModalOpen, leadModalOpen]);
-
-  // Form State
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    schedule: 'Regular'
-  });
-  const [formSubmitted, setFormSubmitted] = useState(false);
-
-  const openLeadModal = (origin: string) => {
-    setLeadOrigin(origin);
-    let detectedSchedule = 'Regular';
-    if (origin.toLowerCase().includes('sabatino')) detectedSchedule = 'Sabatino';
-    else if (origin.toLowerCase().includes('intensivo')) detectedSchedule = 'Intensivo';
-    else if (origin.toLowerCase().includes('particular') || origin.toLowerCase().includes('duo')) detectedSchedule = 'Particular';
-    setFormData(prev => ({ ...prev, schedule: detectedSchedule }));
-    setFormSubmitted(false);
-    setLeadModalOpen(true);
+    window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleNavAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
@@ -532,15 +595,6 @@ export function LandingPage() {
       }, 50);
       window.history.pushState(null, '', `#${targetId}`);
     }
-  };
-
-  const handleLeadSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormSubmitted(true);
-    const msg = encodeURIComponent(
-      `¡Hola Les Rois du Français! 🇫🇷\n\nQuiero reservar mi Clase de Prueba Gratis.\n\n👤 *Nombre:* ${formData.name}\n📧 *Correo:* ${formData.email}\n📱 *WhatsApp:* ${formData.phone}\n📚 *Plan elegido:* ${leadOrigin || formData.schedule}\n\n¿Me pueden confirmar los detalles de mi acceso a Zoom por favor?`
-    );
-    window.open(`https://api.whatsapp.com/send?phone=522223437074&text=${msg}`, '_blank');
   };
 
   return (
@@ -696,10 +750,10 @@ export function LandingPage() {
               />
               <div className="lrd-hero-vip-badge">
                 <span className="lrd-vip-badge-text-main">
-                  Profesores nativos
+                  Profesores franceses
                 </span>
 
-                <span className="lrd-vip-badge-star" aria-hidden="true">✦</span>
+                <span className="lrd-vip-badge-star" aria-hidden="true">•</span>
 
                 <span className="lrd-vip-badge-text-sub">
                   100% online en vivo
@@ -713,13 +767,10 @@ export function LandingPage() {
               <span className="lrd-hero-red-word">francés</span> en línea
             </h1>
 
-            {/* Method Text */}
+            {/* Supporting Hero Message */}
             <div className="lrd-hero-method-text">
               <p className="lrd-method-line1">
-                El método <span className="lrd-mraf-red">MRAF®</span>.
-              </p>
-              <p className="lrd-method-line2">
-                El método que te hace hablar francés.
+                Cualquiera puede hablar francés
               </p>
             </div>
 
@@ -835,12 +886,21 @@ export function LandingPage() {
         />
 
         <div className="lrd-container lrd-mraf-container-relative">
-          {/* Header Ilustrado HD Oficial */}
+          {/* Header Método MRAF */}
           <div className="lrd-mraf-header-deluxe">
-            <img loading="lazy" decoding="async" src="/imagenes-lp/mraf_header_official_hd.webp?v=9"
-              alt="Método para hablar Francés sin sufrir MRAF®"
-              className="lrd-mraf-official-header-img"
-            />
+            <h2 className="lrd-mraf-clean-title">
+              <span className="lrd-mraf-title-line1">EL MÉTODO PARA HABLAR</span>
+              <span className="lrd-mraf-title-line2">
+                <span className="lrd-text-red">FRANCÉS</span>{' '}
+                <span className="lrd-text-navy">SIN SUFRIR</span>
+              </span>
+            </h2>
+
+            <div className="lrd-mraf-ribbon-wrap">
+              <span className="lrd-mraf-ribbon-pill">
+                MRAF® – Méthode Rapide d'Apprentissage du Français
+              </span>
+            </div>
 
             {/* Distintivo de Edad: Desde los 12 años · Sin límite de edad */}
             <div className="lrd-mraf-age-badge-wrap">
@@ -861,7 +921,6 @@ export function LandingPage() {
               onClick={() => setActiveMrafIndex(0)}
               onMouseEnter={() => setActiveMrafIndex(0)}
             >
-              <div className="lrd-card-tape-blue-corner"></div>
               <div className="lrd-card-top-icon">
                 <img loading="lazy" decoding="async" src="/imagenes-lp/crown_m.webp?v=2" alt="Corona M" className="lrd-crown-icon-sm" />
               </div>
@@ -895,7 +954,6 @@ export function LandingPage() {
               onClick={() => setActiveMrafIndex(1)}
               onMouseEnter={() => setActiveMrafIndex(1)}
             >
-              <div className="lrd-card-paperclip-gold"></div>
               <div className="lrd-card-top-icon">
                 <img loading="lazy" decoding="async" src="/imagenes-lp/crown_r.webp" alt="Corona R" className="lrd-crown-icon-sm" />
               </div>
@@ -939,10 +997,6 @@ export function LandingPage() {
               </div>
               <div className="lrd-letter-wrap-f">
                 <span className="lrd-giant-letter lrd-navy-letter">F</span>
-                <img loading="lazy" decoding="async" src="/imagenes-lp/beret_doodle_navy.webp?v=77777"
-                  alt="Gorrito Francés"
-                  className="lrd-beret-doodle-img"
-                />
               </div>
               <div className="lrd-title-wrap-f">
                 <h3 className="lrd-mraf-title-label">FRANCÉS</h3>
@@ -1041,7 +1095,7 @@ export function LandingPage() {
               CONOCE A NUESTROS <span className="lrd-text-red-gradient">PROFESORES</span>
             </h2>
             <p className="lrd-teachers-concept-phrase">
-              Profesores nativos que harán que el francés cobre vida.
+              Profesores franceses que harán que el francés cobre vida.
             </p>
             <p className="lrd-teachers-human-sub">
               Conoce a las personas que estarán contigo clase a clase.
@@ -1261,9 +1315,6 @@ export function LandingPage() {
                 <p className="lrd-live-class-concept-phrase">
                   No solo aprendes francés. Lo hablas.
                 </p>
-                <p className="lrd-live-class-desc">
-                  Clases en vivo donde hablas, participas y practicas francés desde el primer día.
-                </p>
               </div>
 
               {/* 3 Beneficios Ligeros con Iconos SVG Minimalistas */}
@@ -1271,33 +1322,30 @@ export function LandingPage() {
                 {/* 1. Conversación Real */}
                 <div className="lrd-live-benefit-item">
                   <div className="lrd-live-benefit-icon-box">
-                    <MessageCircle size={21} color="#001844" strokeWidth={1.9} />
+                    <MessageCircle size={20} color="#001844" strokeWidth={2} />
                   </div>
                   <div className="lrd-live-benefit-content">
                     <h3 className="lrd-live-benefit-title">CONVERSACIÓN REAL</h3>
-                    <p className="lrd-live-benefit-desc">Habla francés desde tu primera clase.</p>
                   </div>
                 </div>
 
                 {/* 2. Interacción en Vivo */}
                 <div className="lrd-live-benefit-item">
                   <div className="lrd-live-benefit-icon-box">
-                    <Video size={21} color="#001844" strokeWidth={1.9} />
+                    <Video size={20} color="#001844" strokeWidth={2} />
                   </div>
                   <div className="lrd-live-benefit-content">
                     <h3 className="lrd-live-benefit-title">INTERACCIÓN EN VIVO</h3>
-                    <p className="lrd-live-benefit-desc">Participa y recibe correcciones al momento.</p>
                   </div>
                 </div>
 
                 {/* 3. Grupos Reducidos */}
                 <div className="lrd-live-benefit-item">
                   <div className="lrd-live-benefit-icon-box">
-                    <UsersRound size={21} color="#001844" strokeWidth={1.9} />
+                    <UsersRound size={20} color="#001844" strokeWidth={2} />
                   </div>
                   <div className="lrd-live-benefit-content">
                     <h3 className="lrd-live-benefit-title">GRUPOS REDUCIDOS</h3>
-                    <p className="lrd-live-benefit-desc">Máximo 8 alumnos por grupo.</p>
                   </div>
                 </div>
               </div>
@@ -1396,9 +1444,6 @@ export function LandingPage() {
                   </div>
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">TODO EN UN SOLO LUGAR</h3>
-                    <p className="lrd-portal-benefit-desc">
-                      Consulta clases, calendario y materiales.
-                    </p>
                   </div>
                 </div>
 
@@ -1409,9 +1454,6 @@ export function LandingPage() {
                   </div>
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">SIGUE TU PROGRESO</h3>
-                    <p className="lrd-portal-benefit-desc">
-                      Visualiza tu avance.
-                    </p>
                   </div>
                 </div>
 
@@ -1422,9 +1464,6 @@ export function LandingPage() {
                   </div>
                   <div className="lrd-portal-benefit-content">
                     <h3 className="lrd-portal-benefit-title">RECURSOS DISPONIBLES</h3>
-                    <p className="lrd-portal-benefit-desc">
-                      Accede a materiales y herramientas.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -1441,7 +1480,7 @@ export function LandingPage() {
                     <span className="lrd-browser-dot lrd-dot-green"></span>
                   </div>
                   <div className="lrd-browser-address-bar">
-                    <span className="lrd-browser-lock-icon">🔒</span>
+                    <Lock size={12} className="lrd-browser-lock-icon" strokeWidth={2.4} />
                     <span className="lrd-browser-url-text">portal.lesroisdufrancais.com</span>
                   </div>
                 </div>
@@ -1469,224 +1508,93 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 2: TODOS LOS NIVELES - SHOWCASE INTERACTIVO (REDISEÑO MAQUETA) */}
-      <section className="lrd-section-levels-new" id="cursos">
-        {/* Adorno de esquina barroco en la parte superior izquierda del fondo */}
-        <img loading="lazy" decoding="async" src="/imagenes-lp/corner_flourish_bg.webp?v=888"
-          alt="Adorno Fondo"
-          className="lrd-levels-corner-flourish"
-        />
-
-        {/* Ilustración de Mapa de Francia en el fondo superior derecho (En reemplazo de Torre Eiffel) */}
-        <img loading="lazy" decoding="async" src="/imagenes-lp/france_map_adventure_bg.webp"
-          alt="Le français, ton aventure"
-          className="lrd-levels-france-map-bg"
-        />
-
+      {/* SECCIÓN 2: TODOS LOS NIVELES - REDISEÑO VISUAL LIMPIO Y ELEGANTE */}
+      <section className="lrd-section-levels-grid" id="cursos">
         <div className="lrd-container lrd-levels-relative-container">
           {/* Header de la sección */}
           <div className="lrd-levels-header-stepper">
             <div className="lrd-levels-headline-wrap">
-              {/* Badge "TODOS LOS NIVELES" arriba del título a la izquierda */}
               <div className="lrd-levels-tag-badge">
-                <span className="lrd-tag-text-red">TODOS LOS NIVELES</span>
+                TODOS LOS NIVELES
               </div>
 
               <h2 className="lrd-levels-main-title">
-                Del “¿qué dijo?” <br className="lrd-br-desktop-only" />
-                al <span className="lrd-title-red-highlight">“je parle français”</span>.
+                DEL “¿QUÉ DIJO?” <br className="lrd-br-desktop-only" />
+                AL <span className="lrd-title-red-highlight">“JE PARLE FRANÇAIS”.</span>
               </h2>
-
-
             </div>
 
             <p className="lrd-levels-subtitle">
-              Encuentra tu nivel y empieza a subir de rango.
+              Encuentra tu nivel y empieza a avanzar con claridad.
             </p>
           </div>
 
-          {/* Stepper Horizontal Interactivo de 6 Niveles con Doodles en Esquinas y Puntos en Línea */}
-          <div className="lrd-levels-stepper-container">
-            <div className="lrd-stepper-connecting-line"></div>
-
-            <div className="lrd-stepper-items-row">
-              {['A1', 'A2', 'A2+', 'B1', 'B1+', 'B2', 'B2-C1'].map((lvlKey) => {
-                const lvlData = levelsData[lvlKey] || DEFAULT_LEVELS[lvlKey];
-                const isActive = activeLevel === lvlKey;
-                const isB2C1 = lvlKey === 'B2-C1';
-
-                return (
+          {/* Cuadrícula de Tarjetas Elegantes y Compactas */}
+          <div className="lrd-levels-cards-wrap">
+            {GRID_LEVELS.map((lvl) => (
+              <div key={lvl.code} className="lrd-level-card-clean">
+                {/* Header: Badge a la izquierda + Categoría y Título a la derecha */}
+                <div className="lrd-card-header-clean">
                   <div
-                    key={lvlKey}
-                    className={`lrd-stepper-node-item ${isActive ? 'lrd-node-active' : ''}`}
-                    onClick={() => setActiveLevel(lvlKey)}
+                    className={`lrd-card-badge-box ${lvl.code === 'B2-C1' ? 'is-code-b2c1' : ''}`}
+                    style={{ backgroundColor: lvl.badgeBg }}
                   >
-                    {/* Tarjeta del Nivel con Doodle superpuesto en su esquina correspondiente */}
-                    <div className={`lrd-stepper-card-box ${isActive ? 'lrd-box-active-red' : ''}`}>
-                      {/* Pura Corona Dorada Oficial: se coloca exclusivamente sobre el nivel seleccionado sin fondo ni recuadro azul */}
-                      {isActive && (
-                        <img
-                          loading="lazy"
-                          decoding="async"
-                          src="/imagenes-lp/gold_crown_icon.webp"
-                          alt="Corona Dorada Real"
-                          className="lrd-selected-level-crown-img"
-                        />
-                      )}
-
-                      <span className={`lrd-stepper-code-text ${isB2C1 ? 'lrd-stepper-code-b2c1' : ''}`}>{lvlData.code}</span>
-                      <span className={`lrd-stepper-sub-text ${isB2C1 ? 'lrd-stepper-sub-b2c1' : ''}`}>{lvlData.subLabel || lvlData.sub}</span>
-                    </div>
+                    <span className={`lrd-card-badge-code ${lvl.code === 'B2-C1' ? 'is-code-b2c1-text' : ''}`}>
+                      {lvl.code}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="lrd-card-header-text">
+                    <span className="lrd-card-category">{lvl.rank}</span>
+                    <h3 className="lrd-card-title">{lvl.title}</h3>
+                  </div>
+                </div>
+
+                {/* Frase corta oficial en dorado */}
+                <p className="lrd-card-quote">{lvl.quote}</p>
+
+                {/* Exactamente 3 puntos clave con checks dorados */}
+                <ul className="lrd-card-bullets">
+                  {lvl.bullets.map((point, idx) => (
+                    <li key={idx} className="lrd-card-bullet-item">
+                      <Check size={16} strokeWidth={2.8} className="lrd-card-check-icon" />
+                      <span className="lrd-card-bullet-text">{point}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Botón CTA Elegir nivel en rojo oficial hacia WhatsApp */}
+                <button
+                  type="button"
+                  className="lrd-card-cta-btn"
+                  onClick={() => openLeadModal(`Nivel ${lvl.code} - ${lvl.title}`)}
+                >
+                  <span>Elegir nivel</span>
+                  <ChevronRight size={15} strokeWidth={2.6} />
+                </button>
+              </div>
+            ))}
           </div>
 
-          {/* Tarjeta Principal Interactiva Royal Navy de Nivel Activo */}
-          {(() => {
-            const activeLvl = levelsData[activeLevel] || DEFAULT_LEVELS[activeLevel] || DEFAULT_LEVELS['A1'];
-            return (
-              <div className="lrd-royal-level-card-dark">
-                {/* Contenido Izquierdo */}
-                <div className="lrd-card-dark-left">
-                  {/* Sello Circular Rojo del Nivel */}
-                  <div className="lrd-level-red-stamp">
-                    <span className="lrd-stamp-nivel-label">NIVEL</span>
-                    <span className={`lrd-stamp-code ${activeLevel === 'B2-C1' ? 'lrd-stamp-code-b2c1' : ''}`}>{activeLvl.code}</span>
-                    <span className="lrd-stamp-stars">★★★</span>
-                  </div>
-
-                  {/* Encabezado del Nivel */}
-                  <div className="lrd-card-dark-header">
-                    <div className="lrd-level-subtag-row">
-                      <span className="lrd-level-subtag-red">{activeLvl.levelTag}</span>
-                      {activeLvl.durationBadge && (
-                        <span className="lrd-level-duration-pill">{activeLvl.durationBadge}</span>
-                      )}
-                    </div>
-                    <h3 className="lrd-level-card-main-title">
-                      {activeLvl.titleLine1} <br />
-                      <span className="lrd-text-gold-handwriting">{activeLvl.titleLine2}</span>
-                    </h3>
-                  </div>
-
-                  {/* Selector de Pestañas Interactivas: Competencias vs Enfoque Oficial */}
-                  <div className="lrd-level-inner-tabs-wrap">
-                    <div className="lrd-level-inner-tabs">
-                      <button
-                        type="button"
-                        className={`lrd-level-inner-tab ${levelCardTab === 'competencias' ? 'active' : ''}`}
-                        onClick={() => setLevelCardTab('competencias')}
-                      >
-                        <Sparkles size={14} /> 4 Competencias Clave
-                      </button>
-                      <button
-                        type="button"
-                        className={`lrd-level-inner-tab ${levelCardTab === 'enfoque' ? 'active' : ''}`}
-                        onClick={() => setLevelCardTab('enfoque')}
-                      >
-                        <BookOpen size={14} /> Enfoque del Nivel
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Contenido Dinámico según la Pestaña Activa */}
-                  <div className="lrd-level-tab-content-container">
-                    {levelCardTab === 'competencias' ? (
-                      <div className="lrd-level-bullets-2x2 lrd-tab-fade-in">
-                        {(activeLvl.bullets || []).map((b: any, idx: number) => (
-                          <div className="lrd-bullet-item-dark" key={idx}>
-                            <div className="lrd-bullet-icon-box">
-                              {b.icon === 'chat' && (
-                                <img loading="lazy" decoding="async" src="/imagenes-lp/gold_speech_bubble_icon.webp?v=555" alt="Chat" className="lrd-gold-bullet-icon" />
-                              )}
-                              {b.icon === 'trophy' && (
-                                <img loading="lazy" decoding="async" src="/imagenes-lp/gold_trophy_icon.webp?v=555" alt="Trophy" className="lrd-gold-bullet-icon" />
-                              )}
-                              {b.icon === 'people' && (
-                                <img loading="lazy" decoding="async" src="/imagenes-lp/gold_person_speaking_icon.webp?v=555" alt="People" className="lrd-gold-bullet-icon" />
-                              )}
-                              {b.icon === 'book' && (
-                                <img loading="lazy" decoding="async" src="/imagenes-lp/gold_open_book_icon.webp?v=555" alt="Book" className="lrd-gold-bullet-icon" />
-                              )}
-                            </div>
-                            <span className="lrd-bullet-text-dark">
-                              {b.title ? (
-                                <>
-                                  <strong className="lrd-bullet-title-clean">{b.title}</strong>
-                                  <span className="lrd-bullet-desc-clean">{b.text}</span>
-                                </>
-                              ) : (
-                                b.text
-                              )}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="lrd-level-enfoque-box lrd-tab-fade-in">
-                        <p className="lrd-level-official-desc-clean">
-                          {activeLvl.desc}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Botón CTA + Sello Circular Dorado Petit à Petit */}
-                  <div className="lrd-card-dark-bottom-row">
-                    <button
-                      className="lrd-btn-red-main lrd-btn-level-cta"
-                      onClick={() => openLeadModal(`Inscripción ${activeLvl.subLabel || activeLvl.sub}`)}
-                    >
-                      {activeLvl.ctaText || 'QUIERO SUBIR DE NIVEL'} <ChevronRight size={18} style={{ marginLeft: '4px' }} />
-                    </button>
-
-                    <div className="lrd-petit-stamp-wrap">
-                      <img loading="lazy" decoding="async" src="/imagenes-lp/petit_a_petit_stamp.webp"
-                        alt="Petit à petit on y arrive"
-                        className="lrd-petit-stamp-img"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contenido Derecho: Personaje Exclusivo de Cada Nivel */}
-                <div className="lrd-card-dark-right">
-                  <div className={`lrd-french-guy-photo-wrap lrd-char-wrap-${activeLevel.toLowerCase().replace('+', '-plus')}`}>
-                    <img
-                      loading="eager"
-                      fetchPriority="high"
-                      decoding="async"
-                      key={activeLevel}
-                      src={(() => {
-                        const baseSrc = activeLvl.characterImage || DEFAULT_LEVELS[activeLevel]?.characterImage || '/imagenes-lp/estudiante_sonriente_con_mochila_y_cuadernos.webp';
-                        return baseSrc.includes('?') ? baseSrc : `${baseSrc}?v=20260926_polished`;
-                      })()}
-                      alt={activeLvl.characterAlt || 'Estudiante de Nivel Les Rois du Français'}
-                      className={`lrd-french-guy-img lrd-character-fade-in lrd-char-img-${activeLevel.toLowerCase().replace('+', '-plus')}`}
-                    />
-                  </div>
-                </div>
-
-                {/* Sticker Flotante Esquina Inferior Izquierda: Je peux le faire! */}
-                <div className="lrd-sticker-note-je-peux">
-                  <img loading="lazy" decoding="async" src="/imagenes-lp/je_peux_le_faire_note.webp?v=7777"
-                    alt="Je peux le faire !"
-                    className="lrd-sticker-note-img"
-                  />
-                </div>
-
-                {/* Sticker Flotante Esquina Inferior Derecha: J'❤️ LE FRANÇAIS */}
-                <div className="lrd-sticker-j-adore">
-                  <img loading="lazy" decoding="async" src="/imagenes-lp/j_adore_le_francais.webp"
-                    alt="J'adore le français"
-                    className="lrd-sticker-j-adore-img"
-                  />
-                </div>
+          {/* Franja horizontal compacta: Todos los niveles incluyen */}
+          <div className="lrd-levels-strip-compact">
+            <div className="lrd-strip-title">Todos los niveles incluyen:</div>
+            <div className="lrd-strip-items">
+              <div className="lrd-strip-item">
+                <BookOpen size={20} className="lrd-strip-icon-red" strokeWidth={2.2} />
+                <span>4 unidades de aprendizaje</span>
               </div>
-            );
-          })()}
+              <div className="lrd-strip-divider" />
+              <div className="lrd-strip-item">
+                <FileText size={20} className="lrd-strip-icon-gold" strokeWidth={2.2} />
+                <span>Libro de actividades incluido</span>
+              </div>
+              <div className="lrd-strip-divider" />
+              <div className="lrd-strip-item">
+                <GraduationCap size={20} className="lrd-strip-icon-red" strokeWidth={2.2} />
+                <span>Evaluación final</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1695,11 +1603,6 @@ export function LandingPage() {
         <div className="lrd-container lrd-pricing-container-rel">
           {/* Header de Sección de Lujo */}
           <div className="lrd-pricing-header-wrap">
-            <div className="lrd-pricing-badge-pill">
-              <Crown size={15} color="#D59B28" fill="#D59B28" />
-              <span>PLANES Y HORARIOS OFICIALES • GRUPOS MÁXIMO 8 ALUMNOS</span>
-            </div>
-
             <h2 className="lrd-pricing-title">
               ELIGE TU PLAN REAL <span className="lrd-text-gold-highlight">A TU RITMO</span>
             </h2>
@@ -1711,7 +1614,7 @@ export function LandingPage() {
             </div>
 
             <p className="lrd-pricing-subtitle">
-              Clases 100% en vivo por Zoom con profesores nativos de Francia (París, Lyon, Burdeos). Personaliza tus días y turnos favoritos con total flexibilidad.
+              Clases online en vivo con profesores franceses.
             </p>
           </div>
 
@@ -1736,8 +1639,6 @@ export function LandingPage() {
             <div className="lrd-free-enrollment-badge">
               <BadgeCheck size={18} color="#D59B28" strokeWidth={2.4} />
               <span className="lrd-free-enrollment-main">INSCRIPCIÓN 100% GRATUITA</span>
-              <span className="lrd-free-enrollment-divider">·</span>
-              <span className="lrd-free-enrollment-sub">Sin cuota de inscripción al comenzar.</span>
             </div>
           </div>
 
@@ -1763,8 +1664,6 @@ export function LandingPage() {
                   </div>
                 </div>
 
-                <p className="lrd-pcard-pace-clean">Avanza en una sola sesión semanal intensiva sin interferir con tu trabajo o estudios.</p>
-
                 {/* Precio */}
                 <div className="lrd-pcard-price-row">
                   <span className="lrd-pcard-price-currency">$</span>
@@ -1772,56 +1671,19 @@ export function LandingPage() {
                   <span className="lrd-pcard-price-suffix">MXN / mes</span>
                 </div>
 
-                {/* Selector Interactivo de Horario Sabatino */}
-                <div className="lrd-schedule-selector-box">
-                  <span className="lrd-schedule-selector-title">
-                    <Clock size={13} color="#001844" /> Selecciona tu turno en sábado:
-                  </span>
-                  <div className="lrd-schedule-options-row">
-                    <button
-                      type="button"
-                      className={`lrd-opt-pill ${sabatinoShift === '08:00' ? 'selected' : ''}`}
-                      onClick={(e) => { e.stopPropagation(); setSabatinoShift('08:00'); setSelectedGroupPlan('sabatino'); }}
-                    >
-                      08:00 - 10:50
-                    </button>
-                    <button
-                      type="button"
-                      className={`lrd-opt-pill ${sabatinoShift === '11:00' ? 'selected' : ''}`}
-                      onClick={(e) => { e.stopPropagation(); setSabatinoShift('11:00'); setSelectedGroupPlan('sabatino'); }}
-                    >
-                      11:00 - 13:50
-                    </button>
-                    <button
-                      type="button"
-                      className={`lrd-opt-pill ${sabatinoShift === '14:00' ? 'selected' : ''}`}
-                      onClick={(e) => { e.stopPropagation(); setSabatinoShift('14:00'); setSelectedGroupPlan('sabatino'); }}
-                    >
-                      14:00 - 16:50
-                    </button>
-                  </div>
-                </div>
-
+                {/* Máximo 3 Beneficios Sabatino */}
                 <ul className="lrd-pcard-benefits-clean">
                   <li>
                     <Check size={15} color="#001844" strokeWidth={3} />
-                    <span><strong>1 sesión intensiva</strong> semanal de 2h 50 min</span>
+                    <span>1 sesión semanal de 2 h 50 min</span>
                   </li>
                   <li>
                     <Check size={15} color="#001844" strokeWidth={3} />
-                    <span>Grupos reducidos de <strong>máx. 8 alumnos</strong></span>
+                    <span>Máximo 8 alumnos</span>
                   </li>
                   <li>
                     <Check size={15} color="#001844" strokeWidth={3} />
-                    <span>Profesor 100% nativo con dinámicas orales</span>
-                  </li>
-                  <li>
-                    <Check size={15} color="#001844" strokeWidth={3} />
-                    <span>Libro de actividades y material <strong>GRATIS</strong></span>
-                  </li>
-                  <li>
-                    <Check size={15} color="#001844" strokeWidth={3} />
-                    <span>Evaluación dual y diploma oficial de nivel</span>
+                    <span>Profesor francés + material incluido</span>
                   </li>
                 </ul>
 
@@ -1830,7 +1692,7 @@ export function LandingPage() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedGroupPlan('sabatino');
-                    openLeadModal(`Modalidad Sabatino (Turno ${sabatinoShift})`);
+                    openLeadModal('Modalidad Sabatino');
                   }}
                 >
                   {selectedGroupPlan === 'sabatino' ? '✓ SABATINO SELECCIONADO' : 'ELEGIR PLAN SABATINO'}
@@ -1852,12 +1714,10 @@ export function LandingPage() {
                     <Crown size={26} color="#D59B28" strokeWidth={2.4} />
                   </div>
                   <div className="lrd-pcard-title-col">
-                    <span className="lrd-pcard-cat-label lrd-text-gold">MÁXIMA CONSTANCIA</span>
+                    <span className="lrd-pcard-cat-label lrd-text-gold">3 CLASES POR SEMANA</span>
                     <h3 className="lrd-pcard-name-clean lrd-regular-card-title">Modalidad Regular</h3>
                   </div>
                 </div>
-
-                <p className="lrd-pcard-pace-clean">El ritmo ideal para hablar con fluidez natural sin sobrecargar tu semana.</p>
 
                 {/* Precio */}
                 <div className="lrd-pcard-price-row">
@@ -1866,81 +1726,19 @@ export function LandingPage() {
                   <span className="lrd-pcard-price-suffix">MXN / mes</span>
                 </div>
 
-                {/* Selectores Interactivos de Días y Horarios */}
-                <div className="lrd-schedule-selector-box lrd-hero-selector-box">
-                  {/* Fila 1: Días de Clase */}
-                  <div className="lrd-selector-subrow">
-                    <span className="lrd-schedule-selector-title">
-                      <Calendar size={13} color="#D59B28" /> Elige tus días de clase:
-                    </span>
-                    <div className="lrd-schedule-options-row">
-                      <button
-                        type="button"
-                        className={`lrd-opt-pill lrd-opt-gold ${regularDays === 'LMV' ? 'selected' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); setRegularDays('LMV'); setSelectedGroupPlan('regular'); }}
-                      >
-                        Lun - Mié - Vie
-                      </button>
-                      <button
-                        type="button"
-                        className={`lrd-opt-pill lrd-opt-gold ${regularDays === 'MJV' ? 'selected' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); setRegularDays('MJV'); setSelectedGroupPlan('regular'); }}
-                      >
-                        Mié - Jue - Vie
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Fila 2: Turno Horario */}
-                  <div className="lrd-selector-subrow">
-                    <span className="lrd-schedule-selector-title">
-                      <Clock size={13} color="#D59B28" /> Franja horaria:
-                    </span>
-                    <div className="lrd-schedule-options-row">
-                      <button
-                        type="button"
-                        className={`lrd-opt-pill lrd-opt-gold lrd-opt-pill-stacked ${regularShift === 'matutino' ? 'selected' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); setRegularShift('matutino'); setSelectedGroupPlan('regular'); }}
-                      >
-                        <span className="lrd-opt-pill-shift">Matutino</span>
-                        <span className="lrd-opt-pill-time">08:00 – 12:00 h</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`lrd-opt-pill lrd-opt-gold lrd-opt-pill-stacked ${regularShift === 'vespertino' ? 'selected' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); setRegularShift('vespertino'); setSelectedGroupPlan('regular'); }}
-                      >
-                        <span className="lrd-opt-pill-shift">Vespertino</span>
-                        <span className="lrd-opt-pill-time">13:00 – 21:00 h</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
+                {/* Máximo 3 Beneficios Regular */}
                 <ul className="lrd-pcard-benefits-clean lrd-hero-benefits">
                   <li>
                     <Check size={16} color="#D92534" strokeWidth={3} />
-                    <span><strong>3 clases en vivo</strong> por semana (50 min c/u)</span>
+                    <span>3 clases por semana</span>
                   </li>
                   <li>
                     <Check size={16} color="#D92534" strokeWidth={3} />
-                    <span>Grupos reducidos VIP: <strong>máximo 8 alumnos</strong></span>
+                    <span>Máximo 8 alumnos</span>
                   </li>
                   <li>
                     <Check size={16} color="#D92534" strokeWidth={3} />
-                    <span>Profesores nativos con <strong>rotación de acentos</strong></span>
-                  </li>
-                  <li>
-                    <Check size={16} color="#D92534" strokeWidth={3} />
-                    <span>Libro de actividades y audios <strong>100% GRATIS</strong></span>
-                  </li>
-                  <li>
-                    <Check size={16} color="#D92534" strokeWidth={3} />
-                    <span>Evaluación dual y <strong>certificado oficial avalado</strong></span>
-                  </li>
-                  <li>
-                    <Check size={16} color="#D92534" strokeWidth={3} />
-                    <span>Enlace permanente y grabaciones de respaldo</span>
+                    <span>Profesores franceses + material incluido</span>
                   </li>
                 </ul>
 
@@ -1949,7 +1747,7 @@ export function LandingPage() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedGroupPlan('regular');
-                    openLeadModal(`Modalidad Regular (${regularDays === 'LMV' ? 'Lun-Mié-Vie' : 'Mié-Jue-Vie'} - Turno ${regularShift})`);
+                    openLeadModal('Modalidad Regular');
                   }}
                 >
                   <Crown size={16} fill="#FFFFFF" color="#FFFFFF" style={{ marginRight: '6px' }} />
@@ -1971,12 +1769,10 @@ export function LandingPage() {
                     <Zap size={24} fill="#FFFFFF" color="#FFFFFF" />
                   </div>
                   <div className="lrd-pcard-title-col">
-                    <span className="lrd-pcard-cat-label lrd-text-red">INMERSIÓN DIARIA</span>
+                    <span className="lrd-pcard-cat-label lrd-text-red">5 CLASES POR SEMANA</span>
                     <h3 className="lrd-pcard-name-clean">Modalidad Intensivo</h3>
                   </div>
                 </div>
-
-                <p className="lrd-pcard-pace-clean">Aprende al doble de velocidad con práctica conversacional diaria de lunes a viernes.</p>
 
                 {/* Precio */}
                 <div className="lrd-pcard-price-row">
@@ -1985,51 +1781,19 @@ export function LandingPage() {
                   <span className="lrd-pcard-price-suffix">MXN / mes</span>
                 </div>
 
-                {/* Selector Interactivo de Turno Intensivo */}
-                <div className="lrd-schedule-selector-box">
-                  <span className="lrd-schedule-selector-title">
-                    <Clock size={13} color="#D92534" /> 5 clases/sem (Lun a Vie) - Elige turno:
-                  </span>
-                  <div className="lrd-schedule-options-row">
-                    <button
-                      type="button"
-                      className={`lrd-opt-pill lrd-opt-red lrd-opt-pill-stacked ${intensivoShift === 'matutino' ? 'selected' : ''}`}
-                      onClick={(e) => { e.stopPropagation(); setIntensivoShift('matutino'); setSelectedGroupPlan('intensivo'); }}
-                    >
-                      <span className="lrd-opt-pill-shift">Matutino</span>
-                      <span className="lrd-opt-pill-time">08:00 – 12:00 h</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`lrd-opt-pill lrd-opt-red lrd-opt-pill-stacked ${intensivoShift === 'vespertino' ? 'selected' : ''}`}
-                      onClick={(e) => { e.stopPropagation(); setIntensivoShift('vespertino'); setSelectedGroupPlan('intensivo'); }}
-                    >
-                      <span className="lrd-opt-pill-shift">Vespertino</span>
-                      <span className="lrd-opt-pill-time">13:00 – 21:00 h</span>
-                    </button>
-                  </div>
-                </div>
-
+                {/* Máximo 3 Beneficios Intensivo */}
                 <ul className="lrd-pcard-benefits-clean">
                   <li>
                     <Check size={15} color="#D92534" strokeWidth={3} />
-                    <span><strong>5 clases por semana</strong> (50 min c/u diaria)</span>
+                    <span>5 clases por semana</span>
                   </li>
                   <li>
                     <Check size={15} color="#D92534" strokeWidth={3} />
-                    <span>Inmersión total: termina el nivel en la mitad del tiempo</span>
+                    <span>Máximo 8 alumnos</span>
                   </li>
                   <li>
                     <Check size={15} color="#D92534" strokeWidth={3} />
-                    <span>Rotación activa con profesores 100% nativos</span>
-                  </li>
-                  <li>
-                    <Check size={15} color="#D92534" strokeWidth={3} />
-                    <span>Todo el material digital y libro pedagógico <strong>GRATIS</strong></span>
-                  </li>
-                  <li>
-                    <Check size={15} color="#D92534" strokeWidth={3} />
-                    <span>Evaluación dual y diploma oficial de nivel</span>
+                    <span>Profesores franceses + material incluido</span>
                   </li>
                 </ul>
 
@@ -2038,7 +1802,7 @@ export function LandingPage() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedGroupPlan('intensivo');
-                    openLeadModal(`Modalidad Intensivo (Turno ${intensivoShift})`);
+                    openLeadModal('Modalidad Intensivo');
                   }}
                 >
                   <Zap size={15} fill="#FFFFFF" color="#FFFFFF" style={{ marginRight: '6px' }} />
@@ -2061,7 +1825,7 @@ export function LandingPage() {
                   <div className="lrd-private-tag">1 A 1 PERSONALIZADO</div>
                   <h3 className="lrd-private-title">Clases Particulares Individuales</h3>
                   <p className="lrd-private-desc">
-                    1 alumno con profesor nativo exclusivo. El ritmo, objetivos (viajes, negocios) y horarios se adaptan 100% a tu disponibilidad.
+                    1 alumno con profesor nativo exclusivo y horarios 100% a tu medida.
                   </p>
                 </div>
 
@@ -2071,44 +1835,39 @@ export function LandingPage() {
                     onClick={(e) => { e.stopPropagation(); setSelectedPrivateRate(1); setSelectedPrivateType('individual'); }}
                   >
                     {selectedPrivateRate === 1 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
-                    <span className="lrd-rate-freq">1 clase / semana</span>
+                    <span className="lrd-rate-freq">1 clase / sem</span>
                     <span className="lrd-rate-price">$1,500 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">4 clases al mes</span>
                   </div>
                   <div
                     className={`lrd-rate-box ${selectedPrivateRate === 2 ? 'lrd-rate-selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedPrivateRate(2); setSelectedPrivateType('individual'); }}
                   >
                     {selectedPrivateRate === 2 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
-                    <span className="lrd-rate-freq">2 clases / semana</span>
+                    <span className="lrd-rate-freq">2 clases / sem</span>
                     <span className="lrd-rate-price">$2,500 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">8 clases al mes</span>
                   </div>
                   <div
                     className={`lrd-rate-box ${selectedPrivateRate === 3 ? 'lrd-rate-selected lrd-rate-popular' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedPrivateRate(3); setSelectedPrivateType('individual'); }}
                   >
                     <span className="lrd-rate-badge-mini">{selectedPrivateRate === 3 ? '✓ Seleccionado' : 'Recomendado'}</span>
-                    <span className="lrd-rate-freq">3 clases / sem (Regular)</span>
+                    <span className="lrd-rate-freq">3 clases / sem</span>
                     <span className="lrd-rate-price">$3,750 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">12 clases al mes</span>
                   </div>
                   <div
                     className={`lrd-rate-box ${selectedPrivateRate === 5 ? 'lrd-rate-selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedPrivateRate(5); setSelectedPrivateType('individual'); }}
                   >
                     {selectedPrivateRate === 5 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
-                    <span className="lrd-rate-freq">5 clases / sem (Intensiva)</span>
+                    <span className="lrd-rate-freq">5 clases / sem</span>
                     <span className="lrd-rate-price">$6,500 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">20 clases al mes</span>
                   </div>
                 </div>
 
                 <ul className="lrd-private-features-list">
-                  <li><Check size={16} color="#D92534" /> <span>Profesor nativo dedicado a tus objetivos específicos</span></li>
-                  <li><Check size={16} color="#D92534" /> <span>Horarios coordinados a tu medida de lunes a sábado</span></li>
-                  <li><Check size={16} color="#D92534" /> <span>Flexibilidad de reprogramación de clases con aviso previo</span></li>
-                  <li><Check size={16} color="#D92534" /> <span>Material pedagógico, libros y certificaciones oficiales incluidos</span></li>
+                  <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Profesor nativo 100% exclusivo</span></li>
+                  <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Horarios y reprogramación a tu medida</span></li>
+                  <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Material pedagógico y certificaciones incluidos</span></li>
                 </ul>
 
                 <button
@@ -2130,17 +1889,10 @@ export function LandingPage() {
               >
                 <div className="lrd-duo-ribbon-tag">DUPLA EXCLUSIVA</div>
                 <div className="lrd-duo-header">
-                  <Users size={28} color="#D59B28" />
+                  <Users size={24} color="#D59B28" />
                   <h3 className="lrd-duo-title">Modalidad Part Duo</h3>
                   <p className="lrd-duo-desc">
-                    2 alumnos que toman clases juntos con el mismo profesor y horario personalizado. Ideal para parejas, amigos, colegas de trabajo o familiares.
-                  </p>
-                </div>
-
-                <div className="lrd-duo-highlight-banner">
-                  <span className="lrd-duo-badge">Ahorro Compartido</span>
-                  <p className="lrd-duo-banner-text">
-                    Disfruten de la atención de una clase particular pagando una tarifa reducida al estudiar en pareja.
+                    2 alumnos con el mismo profesor nativo. Ideal para parejas o amigos.
                   </p>
                 </div>
 
@@ -2150,44 +1902,39 @@ export function LandingPage() {
                     onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(1); setSelectedPrivateType('duo'); }}
                   >
                     {selectedDuoRate === 1 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
-                    <span className="lrd-rate-freq">1 clase / semana</span>
+                    <span className="lrd-rate-freq">1 clase / sem</span>
                     <span className="lrd-rate-price">$2,000 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">4 clases al mes</span>
                   </div>
                   <div
                     className={`lrd-rate-box ${selectedDuoRate === 2 ? 'lrd-rate-selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(2); setSelectedPrivateType('duo'); }}
                   >
                     {selectedDuoRate === 2 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
-                    <span className="lrd-rate-freq">2 clases / semana</span>
+                    <span className="lrd-rate-freq">2 clases / sem</span>
                     <span className="lrd-rate-price">$3,500 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">8 clases al mes</span>
                   </div>
                   <div
                     className={`lrd-rate-box ${selectedDuoRate === 3 ? 'lrd-rate-selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(3); setSelectedPrivateType('duo'); }}
                   >
                     {selectedDuoRate === 3 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
-                    <span className="lrd-rate-freq">3 clases / semana</span>
+                    <span className="lrd-rate-freq">3 clases / sem</span>
                     <span className="lrd-rate-price">$5,240 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">12 clases al mes</span>
                   </div>
                   <div
                     className={`lrd-rate-box ${selectedDuoRate === 5 ? 'lrd-rate-selected' : ''}`}
                     onClick={(e) => { e.stopPropagation(); setSelectedDuoRate(5); setSelectedPrivateType('duo'); }}
                   >
                     {selectedDuoRate === 5 && <span className="lrd-rate-badge-mini">Seleccionado</span>}
-                    <span className="lrd-rate-freq">5 clases / semana</span>
+                    <span className="lrd-rate-freq">5 clases / sem</span>
                     <span className="lrd-rate-price">$9,000 <small>MXN/mes</small></span>
-                    <span className="lrd-rate-detail">20 clases al mes</span>
                   </div>
                 </div>
 
                 <ul className="lrd-private-features-list">
-                  <li><Check size={16} color="#001844" /> <span>Mismo horario y profesor asignado para ambos</span></li>
-                  <li><Check size={16} color="#001844" /> <span>Práctica conversacional activa y roleplays en pareja</span></li>
-                  <li><Check size={16} color="#001844" /> <span>Libros de actividades individuales gratuitos para cada alumno</span></li>
-                  <li><Check size={16} color="#001844" /> <span>Certificado oficial individual para cada estudiante al finalizar</span></li>
+                  <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Mismo horario y profesor nativo para ambos</span></li>
+                  <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Práctica conversacional activa en pareja</span></li>
+                  <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Material y certificados oficiales individuales</span></li>
                 </ul>
 
                 <button
@@ -2323,14 +2070,14 @@ export function LandingPage() {
           {/* BANNER CLASE DE PRUEBA GRATIS DE REFUERZO */}
           <div className="lrd-trial-callout-box">
             <div className="lrd-trial-text">
-              <h4 className="lrd-trial-title">¿Aún tienes dudas sobre tu nivel o la metodología?</h4>
+              <h4 className="lrd-trial-title">¿AÚN TIENES DUDAS SOBRE TU NIVEL O METODOLOGÍA?</h4>
               <p className="lrd-trial-desc">
-                Toma una <strong>Clase de Prueba 100% GRATIS</strong> y sin compromiso con uno de nuestros profesores nativos para conocer la plataforma y resolver todas tus preguntas.
+                Prueba una clase gratis y descubre qué modalidad es ideal para ti.
               </p>
             </div>
             <button
               className="lrd-btn-trial-action"
-              onClick={() => openLeadModal('Clase de Prueba Gratis desde Precios')}
+              onClick={() => openLeadModal('Clase de Prueba Gratis')}
             >
               AGENDAR MI CLASE GRATIS
             </button>
@@ -2347,9 +2094,8 @@ export function LandingPage() {
         />
 
         <div className="lrd-container lrd-why-container-rel">
-          {/* Composición Gráfica del Título Principal + Stickers y Doodles Exactos a la Referencia */}
+          {/* Composición Gráfica del Título Principal */}
           <div className="lrd-why-header-composition">
-            {/* Título Principal Nítido en HTML/CSS Vectorial */}
             <div className="lrd-why-header-text-block">
               <h2 className="lrd-why-heading-title">
                 <span className="lrd-why-title-left-group">
@@ -2360,33 +2106,19 @@ export function LandingPage() {
                 </span>
               </h2>
               <p className="lrd-why-heading-sub">
-                ¿Por qué miles de alumnos eligen estudiar con Les Rois du Français?
+                Aprende francés de forma práctica y cercana.
               </p>
-              <div className="lrd-why-heading-results-wrap">
-                <div className="lrd-why-handwritten-block">
-                  <span className="lrd-why-results-handwritten">¡Resultados Reales!</span>
-                  <img loading="lazy" decoding="async" src="/imagenes-lp/sketch_red_underline.svg"
-                    alt="Subrayado"
-                    className="lrd-why-handwritten-underline"
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* Bloque Principal: Columna izquierda (Escritorio / Laptop / Libreta) + Columna derecha (Grid de 5 Tarjetas) */}
+          {/* Bloque Principal: Columna izquierda (Escritorio / Laptop / Libreta) + Columna derecha (Grid de 4 Tarjetas) */}
           <div className="lrd-why-main-layout">
-            {/* Columna Izquierda: Foto de Estudio / Laptop con Logo, Taza, Libreta "Parle. Comprends. Conquiers. ❤️" */}
+            {/* Columna Izquierda: Foto de Estudio / Laptop con Logo, Taza, Libreta "Parle. Comprends. Conquiers." */}
             <div className="lrd-why-desk-col">
               {/* Halftone azul detrás de la laptop */}
               <img loading="lazy" decoding="async" src="/imagenes-lp/navy_halftone_dots.webp"
                 alt="Puntos decorativos laptop"
                 className="lrd-why-halftone-laptop"
-              />
-              {/* Dashes azules sobre la planta */}
-              <img loading="lazy" decoding="async" src="/imagenes-lp/blue_dashes_splash.webp"
-                alt="Dashes"
-                className="lrd-why-laptop-blue-dashes"
               />
               <div className="lrd-why-desk-inner">
                 <img loading="lazy" decoding="async" src="/imagenes-lp/beneficios_desk_laptop.webp"
@@ -2396,158 +2128,51 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Columna Derecha: 5 Tarjetas en 2 Filas */}
+            {/* Columna Derecha: 4 Tarjetas en Grid 2x2 */}
             <div className="lrd-why-cards-col">
-              {/* Fila 1: 3 Tarjetas (Método propio MRAF, Enfoque 100% Práctico, Resultados Acelerados) */}
-              <div className="lrd-why-cards-row1">
-                {/* Card 1: Método propio MRAF® */}
+              <div className="lrd-why-cards-grid-4">
+                {/* Card 1: Método Propio MRAF */}
                 <div className="lrd-bcard-v2 lrd-bcard-accent-gold">
                   <div className="lrd-bcard-icon-badge lrd-bbadge-gold">
                     <Crown size={26} color="#FFFFFF" strokeWidth={2.4} />
                   </div>
-                  <h4 className="lrd-bcard-title">
-                    <span>Método propio</span>
-                    <span className="lrd-bcard-sub">MRAF®</span>
-                  </h4>
+                  <h4 className="lrd-bcard-title">MÉTODO PROPIO MRAF</h4>
                   <p className="lrd-bcard-desc">
-                    Diseñado exclusivamente para hispanohablantes. Aprendes sin rodeos, con estructura clara y resultados reales desde tu primera clase.
+                    Aprende con una metodología práctica y estructurada.
                   </p>
-                  <div className="lrd-bcard-footer">
-                    <span className="lrd-bcard-tag lrd-btag-red">#MétodoRegistrado</span>
-                    {/* Patrón de puntos dorados */}
-                    <svg className="lrd-bcard-dots lrd-dots-gold" width="45" height="32" viewBox="0 0 45 32" fill="none">
-                      <circle cx="6" cy="24" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="16" cy="24" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="26" cy="24" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="36" cy="24" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="16" cy="14" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="26" cy="14" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="36" cy="14" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="26" cy="4" r="2.2" fill="#D59B28" opacity="0.75" />
-                      <circle cx="36" cy="4" r="2.2" fill="#D59B28" opacity="0.75" />
-                    </svg>
-                  </div>
                 </div>
 
-                {/* Card 2: Enfoque 100% Práctico */}
+                {/* Card 2: Enfoque Práctico */}
                 <div className="lrd-bcard-v2 lrd-bcard-accent-red">
                   <div className="lrd-bcard-icon-badge lrd-bbadge-red">
                     <MessageSquare size={26} color="#FFFFFF" strokeWidth={2.4} />
                   </div>
-                  <h4 className="lrd-bcard-title">
-                    <span>Enfoque 100%</span>
-                    <span className="lrd-bcard-sub lrd-text-red">Práctico</span>
-                  </h4>
+                  <h4 className="lrd-bcard-title">ENFOQUE PRÁCTICO</h4>
                   <p className="lrd-bcard-desc">
-                    Hablas francés desde el día 1. Olvídate del miedo al error y empieza a conversar con total confianza y fluidez real.
+                    Habla francés desde el primer día.
                   </p>
-                  <div className="lrd-bcard-footer">
-                    <span className="lrd-bcard-tag lrd-btag-navy">#HablaSinPena</span>
-                    {/* Patrón de puntos rojos */}
-                    <svg className="lrd-bcard-dots lrd-dots-red" width="45" height="32" viewBox="0 0 45 32" fill="none">
-                      <circle cx="6" cy="24" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="16" cy="24" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="26" cy="24" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="36" cy="24" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="16" cy="14" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="26" cy="14" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="36" cy="14" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="26" cy="4" r="2.2" fill="#D92534" opacity="0.75" />
-                      <circle cx="36" cy="4" r="2.2" fill="#D92534" opacity="0.75" />
-                    </svg>
-                  </div>
                 </div>
 
                 {/* Card 3: Resultados Acelerados */}
-                <div className="lrd-bcard-wrapper-card3">
-                  <div className="lrd-bcard-v2 lrd-bcard-accent-navy">
+                <div className="lrd-bcard-v2 lrd-bcard-accent-navy">
                   <div className="lrd-bcard-icon-badge lrd-bbadge-navy">
-                    {/* Rocket / Speed energy icon */}
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-                      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-4 11a22.35 22.35 0 0 1-4 2z"/>
-                      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-                      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
-                    </svg>
+                    <TrendingUp size={26} color="#FFFFFF" strokeWidth={2.4} />
                   </div>
-                  <h4 className="lrd-bcard-title">
-                    <span>Resultados</span>
-                    <span className="lrd-bcard-sub lrd-text-red">Acelerados</span>
-                  </h4>
+                  <h4 className="lrd-bcard-title">RESULTADOS ACELERADOS</h4>
                   <p className="lrd-bcard-desc">
-                    Avanza hasta 3 veces más rápido que en escuelas tradicionales con situaciones dinámicas de la vida real y roleplays.
+                    Avanza con práctica constante y situaciones reales.
                   </p>
-                  <div className="lrd-bcard-footer">
-                    <span className="lrd-bcard-tag lrd-btag-gold">#FluidezRápida</span>
-                  </div>
                 </div>
-              </div>
-            </div>
 
-              {/* Fila 2: 2 Tarjetas (Comunidad Real [1 Col] + Trato VIP & Realeza [2 Cols]) */}
-              <div className="lrd-why-cards-row2">
                 {/* Card 4: Comunidad Real */}
                 <div className="lrd-bcard-v2 lrd-bcard-accent-community">
                   <div className="lrd-bcard-icon-badge lrd-bbadge-navy">
                     <Users size={26} color="#FFFFFF" strokeWidth={2.4} />
                   </div>
-                  <h4 className="lrd-bcard-title">
-                    <span>Comunidad</span>
-                    <span className="lrd-bcard-sub lrd-text-red">Real</span>
-                  </h4>
+                  <h4 className="lrd-bcard-title">COMUNIDAD REAL</h4>
                   <p className="lrd-bcard-desc">
-                    Conecta con compañeros motivados de todo el mundo y practica francés en un ambiente cercano y divertido.
+                    Practica con alumnos de distintos lugares.
                   </p>
-                  <div className="lrd-bcard-footer-community">
-                  </div>
-                </div>
-
-                {/* Card 5: Trato VIP & Realeza (Ancha - Ocupa 2 Columnas) */}
-                <div className="lrd-bcard-v2 lrd-bcard-vip-featured">
-                  {/* Listón dorado diagonal 100% NATIVOS */}
-                  <div className="lrd-vip-ribbon-tag">100% NATIVOS</div>
-
-                  <div className="lrd-vip-card-body">
-                    <div className="lrd-vip-header-flex">
-                      {/* Badge con diamante de destellos */}
-                      <div className="lrd-bcard-icon-badge lrd-bbadge-gold-diamond">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M6 3h12l4 6-10 12L2 9z"/>
-                          <path d="M2 9h20"/>
-                          <path d="m6 3 4 6 2 12"/>
-                          <path d="m18 3-4 6-2 12"/>
-                          <line x1="2" y1="4" x2="4" y2="4" strokeWidth="2" />
-                          <line x1="20" y1="4" x2="22" y2="4" strokeWidth="2" />
-                          <line x1="12" y1="0.5" x2="12" y2="2" strokeWidth="2" />
-                        </svg>
-                      </div>
-
-                      <div className="lrd-vip-text-content">
-                        <h4 className="lrd-vip-title">
-                          Trato VIP & Realeza <Sparkles size={18} color="#D59B28" style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px' }} />
-                        </h4>
-                        <p className="lrd-vip-desc">
-                          Profesores nativos franceses con actitud royal, cero aburrimiento y atención personalizada digna de un verdadero rey.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Fila horizontal con los 3 beneficios clave */}
-                    <div className="lrd-vip-bullets-row">
-                      <div className="lrd-vip-bullet-item">
-                        <Crown size={18} color="#D59B28" strokeWidth={2.4} />
-                        <span>Atención personalizada</span>
-                      </div>
-                      <div className="lrd-vip-bullet-item">
-                        <Star size={18} color="#D59B28" strokeWidth={2.4} />
-                        <span>Clases dinámicas y divertidas</span>
-                      </div>
-                      <div className="lrd-vip-bullet-item">
-                        <Heart size={18} color="#D59B28" strokeWidth={2.4} />
-                        <span>Apoyo constante en tu camino</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -2745,7 +2370,7 @@ export function LandingPage() {
           <div className="lrd-footer-col-brand">
             <img loading="lazy" decoding="async" src="/imagenes-lp/logo_official.webp" alt="Les Rois du Français" className="lrd-footer-brand-logo" />
             <p className="lrd-footer-brand-desc">
-              Te prometemos un aprendizaje estructurado, rápido y lleno de humor y conversaciones para este hermoso idioma.
+              Aprende francés de forma práctica, cercana y en vivo.
             </p>
           </div>
 
@@ -2758,22 +2383,10 @@ export function LandingPage() {
               <li><MapPin size={15} /> Clases 100% Online · Sede: Puebla, México</li>
             </ul>
             <div className="lrd-footer-socials-row">
-              <a href="https://www.facebook.com/people/Les-Rois-du-Fran%C3%A7ais/61554418860885/" target="_blank" rel="noreferrer" className="lrd-social-btn"><FacebookIcon size={14} color="#FFFFFF" /></a>
-              <a href="https://www.instagram.com/lesroisdufrancais?igsh=MTNxbWR1OHM1Z2h6dA==" target="_blank" rel="noreferrer" className="lrd-social-btn"><InstagramIcon size={14} color="#FFFFFF" /></a>
-              <a href="https://www.youtube.com/@RoisduFrancais" target="_blank" rel="noreferrer" className="lrd-social-btn"><YoutubeIcon size={14} color="#FFFFFF" /></a>
+              <a href="https://www.facebook.com/people/Les-Rois-du-Fran%C3%A7ais/61554418860885/" target="_blank" rel="noreferrer" className="lrd-social-btn" aria-label="Facebook"><FacebookIcon size={14} color="#FFFFFF" /></a>
+              <a href="https://www.instagram.com/lesroisdufrancais?igsh=MTNxbWR1OHM1Z2h6dA==" target="_blank" rel="noreferrer" className="lrd-social-btn" aria-label="Instagram"><InstagramIcon size={14} color="#FFFFFF" /></a>
+              <a href="https://www.youtube.com/@RoisduFrancais" target="_blank" rel="noreferrer" className="lrd-social-btn" aria-label="YouTube"><YoutubeIcon size={14} color="#FFFFFF" /></a>
             </div>
-          </div>
-
-          {/* Columna 3: Boletín */}
-          <div className="lrd-footer-col-newsletter">
-            <h4 className="lrd-footer-heading">BOLETÍN</h4>
-            <p className="lrd-newsletter-desc">Recibe promos exclusivas y tips para aprender francés.</p>
-            <form className="lrd-newsletter-form-flex" onSubmit={(e) => { e.preventDefault(); alert('¡Gracias por suscribirte!'); }}>
-              <input type="email" placeholder="Tu correo electrónico" required />
-              <button type="submit" className="lrd-newsletter-btn" aria-label="Enviar">
-                <Send size={18} color="#FFFFFF" />
-              </button>
-            </form>
           </div>
         </div>
 
@@ -2799,228 +2412,7 @@ export function LandingPage() {
         </svg>
       </a>
 
-      {/* Modals */}
-      {leadModalOpen && (
-        <div className="lrd-modal-backdrop" onClick={() => setLeadModalOpen(false)}>
-          <div className="lrd-modal-card lrd-lead-modal-pro" onClick={(e) => e.stopPropagation()}>
-            {/* Barra Tricolor Francesa & Oro Real en el borde superior */}
-            <div className="lrd-modal-tricolor-bar">
-              <span className="lrd-tbar-blue"></span>
-              <span className="lrd-tbar-gold"></span>
-              <span className="lrd-tbar-red"></span>
-            </div>
 
-            {/* Botón de Cierre Elegante */}
-            <button
-              className="lrd-modal-close-btn"
-              onClick={() => setLeadModalOpen(false)}
-              aria-label="Cerrar modal"
-            >
-              <X size={20} />
-            </button>
-
-            {formSubmitted ? (
-              <div className="lrd-modal-success-wrap">
-                <div className="lrd-success-badge-icon">
-                  <Check size={40} strokeWidth={3} color="#FFFFFF" />
-                </div>
-                <span className="lrd-success-tag">¡RÉSERVATION CONFIRMÉE!</span>
-                <h3 className="lrd-success-title">¡Félicitations, {formData.name || 'Futuro Alumno'}!</h3>
-                <p className="lrd-success-desc">
-                  Pre-registramos tu lugar para la <strong>Clase de Prueba Diagnóstica en Vivo</strong>. Tu asesor académico exclusivo te contactará por WhatsApp para coordinar el acceso a Zoom y entregarte el libro de actividades sin costo.
-                </p>
-
-                {/* Plan Summary Card */}
-                <div className="lrd-success-plan-box">
-                  <div className="lrd-splan-icon">
-                    <Crown size={20} color="#D59B28" />
-                  </div>
-                  <div className="lrd-splan-text">
-                    <span className="lrd-splan-label">MODALIDAD DE INTERÉS</span>
-                    <strong className="lrd-splan-name">{leadOrigin || formData.schedule}</strong>
-                  </div>
-                </div>
-
-                <a
-                  href={`https://api.whatsapp.com/send?phone=522223437074&text=${encodeURIComponent(
-                    `¡Hola Les Rois du Français! 🇫🇷\n\nAcabo de registrarme para la Clase de Prueba Gratis.\n👤 *Nombre:* ${formData.name}\n📚 *Plan:* ${leadOrigin || formData.schedule}\n\n¿Me pueden confirmar los detalles por favor?`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="lrd-btn-whatsapp-direct"
-                >
-                  <MessageSquare size={18} fill="#FFFFFF" color="#FFFFFF" />
-                  CONTINUAR EN WHATSAPP AHORA
-                </a>
-
-                <button
-                  type="button"
-                  className="lrd-btn-close-clean"
-                  onClick={() => setLeadModalOpen(false)}
-                >
-                  Cerrar ventana
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Header Pro con Escudo/Corona Royal */}
-                <div className="lrd-lead-modal-header">
-                  <div className="lrd-lead-crest-wrap">
-                    <div className="lrd-lead-crest-circle">
-                      <Crown size={22} color="#D59B28" strokeWidth={2.4} />
-                    </div>
-                  </div>
-
-                  <div className="lrd-lead-badge-pill">
-                    <Sparkles size={13} color="#D59B28" />
-                    <span>PLAZAS LIMITADAS • MÁX. 8 ALUMNOS</span>
-                  </div>
-
-                  <h3 className="lrd-lead-title">
-                    Reserva Tu Clase de Prueba <span className="lrd-text-red-strong">GRATIS</span>
-                  </h3>
-                  <p className="lrd-lead-subtitle">
-                    Habla francés desde tu primera sesión en vivo con profesores 100% nativos.
-                  </p>
-                </div>
-
-                {/* Banner de Modalidad / Nivel Seleccionado en tiempo real */}
-                {leadOrigin && leadOrigin !== 'Clase de Prueba Gratis' && (
-                  <div className="lrd-lead-selected-plan-banner">
-                    <div className="lrd-plan-banner-icon">
-                      <Crown size={18} color="#D59B28" strokeWidth={2.4} />
-                    </div>
-                    <div className="lrd-plan-banner-info">
-                      <span className="lrd-pbi-tag">Tu selección actual:</span>
-                      <strong className="lrd-pbi-name">{leadOrigin}</strong>
-                    </div>
-                    <div className="lrd-plan-banner-check">
-                      <Check size={14} color="#001b50" strokeWidth={3.2} />
-                    </div>
-                  </div>
-                )}
-
-                {/* Formulario Pro */}
-                <form onSubmit={handleLeadSubmit} className="lrd-lead-form-pro">
-                  {/* Campo 1: Nombre */}
-                  <div className="lrd-pro-field-wrap">
-                    <label className="lrd-pro-label">
-                      <span>Nombre completo</span>
-                      <span className="lrd-req-star">*</span>
-                    </label>
-                    <div className="lrd-pro-input-container">
-                      <span className="lrd-pro-input-icon">
-                        <User size={18} color="#64748B" />
-                      </span>
-                      <input
-                        type="text"
-                        required
-                        className="lrd-pro-input"
-                        placeholder="Ej. Ana María López"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Campo 2: Correo */}
-                  <div className="lrd-pro-field-wrap">
-                    <label className="lrd-pro-label">
-                      <span>Correo electrónico</span>
-                      <span className="lrd-req-star">*</span>
-                    </label>
-                    <div className="lrd-pro-input-container">
-                      <span className="lrd-pro-input-icon">
-                        <Mail size={18} color="#64748B" />
-                      </span>
-                      <input
-                        type="email"
-                        required
-                        className="lrd-pro-input"
-                        placeholder="tu@correo.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Campo 3: WhatsApp */}
-                  <div className="lrd-pro-field-wrap">
-                    <label className="lrd-pro-label">
-                      <span>WhatsApp (para enviarte el acceso a Zoom)</span>
-                      <span className="lrd-req-star">*</span>
-                    </label>
-                    <div className="lrd-pro-input-container">
-                      <span className="lrd-pro-prefix-pill">
-                        🇲🇽 +52
-                      </span>
-                      <input
-                        type="tel"
-                        required
-                        className="lrd-pro-input lrd-pro-input-phone"
-                        placeholder="222 123 4567"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Campo 4: Modalidad Preferida */}
-                  <div className="lrd-pro-field-wrap">
-                    <label className="lrd-pro-label">
-                      <span>Modalidad de preferencia</span>
-                    </label>
-                    <div className="lrd-pro-input-container">
-                      <span className="lrd-pro-input-icon">
-                        <Clock size={18} color="#64748B" />
-                      </span>
-                      <select
-                        className="lrd-pro-select"
-                        value={formData.schedule}
-                        onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
-                      >
-                        <option value="Regular">Modalidad Regular · 3 clases/sem (Lun-Mié-Vie o Mié-Jue-Vie)</option>
-                        <option value="Sabatino">Modalidad Sabatino · 1 sesión semanal (Sábados 2h 50 min)</option>
-                        <option value="Intensivo">Modalidad Intensivo · 5 clases/sem (Lun a Vie)</option>
-                        <option value="Particular">Clases Particulares 1 a 1 o Part Duo (A tu ritmo)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Botón CTA Master Pro */}
-                  <button type="submit" className="lrd-btn-submit-master">
-                    <span className="lrd-btn-sub-spark">
-                      <Sparkles size={17} fill="#FFFFFF" color="#FFFFFF" />
-                    </span>
-                    <span className="lrd-btn-sub-text">CONFIRMAR MI CLASE GRATIS</span>
-                    <span className="lrd-btn-sub-arrow">
-                      <ChevronRight size={18} strokeWidth={2.8} />
-                    </span>
-                  </button>
-
-                  {/* Microcopy & Trust Badges */}
-                  <div className="lrd-lead-trust-row">
-                    <div className="lrd-trust-item">
-                      <ShieldCheck size={14} color="#16A34A" />
-                      <span>100% Gratuito</span>
-                    </div>
-                    <span className="lrd-trust-dot">•</span>
-                    <div className="lrd-trust-item">
-                      <MessageSquare size={14} color="#001b50" />
-                      <span>Confirmación inmediata</span>
-                    </div>
-                    <span className="lrd-trust-dot">•</span>
-                    <div className="lrd-trust-item">
-                      <Crown size={14} color="#D59B28" />
-                      <span>Profesor nativo</span>
-                    </div>
-                  </div>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       {videoModalOpen && (
         <div

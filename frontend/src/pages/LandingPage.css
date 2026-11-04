@@ -1794,7 +1794,7 @@ html {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  background: rgba(213, 155, 40, 0.12);
   border: 1.8px solid #FDE68A;
   display: flex;
   align-items: center;
@@ -2933,15 +2933,15 @@ html {
     font-weight: 800;
     letter-spacing: 0.5px;
     color: #001b50;
-    background: #FFFBEB;
-    border: 1.5px solid #FDE68A;
+    background: rgba(213, 155, 40, 0.1);
+    border: 1.5px solid rgba(213, 155, 40, 0.35);
     text-decoration: none;
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(213, 155, 40, 0.15);
   }
 
   .lrd-btn-mobile-portal-link:hover {
-    background: #FEF3C7;
+    background: rgba(213, 155, 40, 0.18);
     border-color: #D59B28;
   }
 }
@@ -4216,20 +4216,20 @@ html {
 }
 
 .lrd-vip-badge-star {
-  color: #E2A732;
+  color: #D59B28;
   font-size: 0.82rem;
   opacity: 0.95;
   margin: 0 2px;
-  text-shadow: 0 0 8px rgba(226, 167, 50, 0.7);
+  text-shadow: 0 0 8px rgba(213, 155, 40, 0.7);
   flex-shrink: 0;
 }
 
 .lrd-vip-badge-text-sub {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #FBD364;
+  color: #D59B28;
   letter-spacing: 0.25px;
-  text-shadow: 0 0 12px rgba(226, 167, 50, 0.4);
+  text-shadow: 0 0 12px rgba(213, 155, 40, 0.4);
   white-space: nowrap;
 }
 
@@ -4571,10 +4571,16 @@ html {
     align-items: center;
   }
 
+  .lrd-hero-vip-badge {
+    padding: 6px 14px;
+    gap: 7px;
+    max-width: 95vw;
+  }
+
   .lrd-vip-badge-text-main,
   .lrd-vip-badge-text-sub {
-    font-size: 0.78rem;
-    letter-spacing: 0.2px;
+    font-size: 0.72rem;
+    letter-spacing: 0.15px;
   }
 
   .lrd-hero-buttons-row {
@@ -5280,7 +5286,7 @@ html {
 
 .lrd-testi-tag-gold {
   background: rgba(213, 155, 40, 0.12);
-  color: #B37D1A;
+  color: #D59B28;
 }
 
 .lrd-testi-tag-red {
@@ -5520,20 +5526,24 @@ html {
 }
 
 .lrd-footer-flex-container {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr 1.2fr;
-  gap: 0;
-  padding-bottom: 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 48px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-bottom: 45px;
 }
 
 .lrd-footer-col-brand {
-  padding-left: 25px;
-  padding-right: 35px;
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  flex: 0 0 auto;
+  max-width: 380px;
+  padding: 0;
+  border-right: none;
 }
 
 .lrd-footer-brand-logo {
-  height: 75px;
+  height: 72px;
   width: auto;
   object-fit: contain;
   margin-bottom: 14px;
@@ -5541,16 +5551,18 @@ html {
 }
 
 .lrd-footer-brand-desc {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.35;
-  max-width: 215px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
+  max-width: 340px;
+  margin: 0;
 }
 
 .lrd-footer-col-contact {
-  padding-left: 40px;
-  padding-right: 35px;
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  flex: 0 0 auto;
+  min-width: 300px;
+  padding: 0;
+  border-right: none;
 }
 
 .lrd-footer-heading {
@@ -5605,72 +5617,7 @@ html {
   transform: translateY(-2px);
 }
 
-.lrd-footer-col-newsletter {
-  padding-left: 40px;
-}
 
-.lrd-newsletter-desc {
-  font-size: 0.84rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0 0 14px 0;
-}
-
-.lrd-newsletter-form-flex {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 50px;
-  padding: 0 0 0 18px;
-  max-width: 360px;
-  height: 44px;
-  position: relative;
-  overflow: visible;
-  transition: border-color 0.2s, background-color 0.2s;
-}
-
-.lrd-newsletter-form-flex:focus-within {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.lrd-newsletter-form-flex input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: #FFFFFF;
-  font-size: 0.84rem;
-  outline: none;
-  padding: 8px 0;
-}
-
-.lrd-newsletter-form-flex input::placeholder {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.lrd-newsletter-btn {
-  width: 47px;
-  height: 47px;
-  border-radius: 50%;
-  background-color: #D92534;
-  border: none;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  margin-right: -1px;
-  margin-left: 6px;
-  box-shadow: 0 4px 12px rgba(217, 37, 52, 0.35);
-  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-}
-
-.lrd-newsletter-btn:hover {
-  background-color: #B81B28;
-  transform: scale(1.06);
-  box-shadow: 0 6px 18px rgba(217, 37, 52, 0.6);
-}
 
 .lrd-footer-copyright-bar {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -5689,22 +5636,14 @@ html {
 /* Responsividad para Footer y nuevas secciones */
 @media (max-width: 1024px) {
   .lrd-footer-flex-container {
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    padding-bottom: 35px;
+    max-width: 100%;
+    padding: 0 24px 35px 24px;
+    gap: 36px;
   }
-  .lrd-footer-col-brand {
-    border-right: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 0 20px 0 0;
-  }
+  .lrd-footer-col-brand,
   .lrd-footer-col-contact {
     border-right: none;
-    padding: 0 0 0 20px;
-  }
-  .lrd-footer-col-newsletter {
-    grid-column: span 2;
-    padding: 25px 0 0 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0;
   }
   .lrd-copyright-flex {
     justify-content: center;
@@ -5730,30 +5669,27 @@ html {
     padding-top: 40px;
   }
   .lrd-footer-flex-container {
-    grid-template-columns: 1fr;
-    gap: 22px;
-    padding-bottom: 25px;
+    flex-direction: column;
+    gap: 28px;
+    padding: 0 16px 30px 16px;
   }
   .lrd-footer-col-brand,
-  .lrd-footer-col-contact,
-  .lrd-footer-col-newsletter {
-    grid-column: span 1;
+  .lrd-footer-col-contact {
+    max-width: 100%;
     border-right: none !important;
-    padding: 0 0 20px 0 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .lrd-footer-col-newsletter {
-    border-bottom: none;
-    padding-bottom: 0 !important;
+    border-bottom: none !important;
+    padding: 0 !important;
   }
   .lrd-footer-brand-desc {
     max-width: 100%;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
   }
-  .lrd-newsletter-form-flex {
-    max-width: 100%;
-    width: 100%;
+  .lrd-copyright-flex {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
   }
+
   .lrd-footer-copyright-bar {
     padding: 16px 0;
   }
@@ -6028,7 +5964,7 @@ html {
   min-height: 36px;
   background: rgba(213, 155, 40, 0.08);
   border: 1px solid rgba(213, 155, 40, 0.32);
-  color: #9A6800;
+  color: #D59B28;
   font-weight: 800;
   font-size: 0.69rem;
   letter-spacing: 0.35px;
@@ -6322,14 +6258,14 @@ html {
 
 .lrd-live-class-grid {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 48px;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: 52px;
   align-items: center;
 }
 
 /* Columna Izquierda: Bloque de Texto */
 .lrd-live-class-header-block {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .lrd-live-class-eyebrow-wrap {
@@ -6375,40 +6311,30 @@ html {
 
 .lrd-live-class-concept-phrase {
   font-family: var(--lrd-font-serif, 'Playfair Display', Georgia, serif);
-  font-size: clamp(1.2rem, 2.2vw, 1.42rem);
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
   font-weight: 700;
   font-style: italic;
   color: #001844;
-  margin: 0 0 10px 0;
+  margin: 0;
   line-height: 1.35;
 }
 
-.lrd-live-class-desc {
-  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  font-size: clamp(0.96rem, 1.5vw, 1.05rem);
-  color: #001b50;
-  font-weight: 500;
-  line-height: 1.6;
-  margin: 0;
-  max-width: 520px;
-}
-
-/* 3 Beneficios Ligeros e Informativos (Sin Cajas Pesadas) */
+/* 3 Beneficios Ligeros e Informativos */
 .lrd-live-class-benefits-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 18px;
+  margin-top: 24px;
 }
 
 .lrd-live-benefit-item {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  align-items: center;
+  gap: 16px;
   background: transparent;
   border: none;
   border-radius: 0;
-  padding: 4px 0;
+  padding: 0;
   box-shadow: none;
   transition: transform 0.25s ease;
 }
@@ -6421,20 +6347,21 @@ html {
 }
 
 .lrd-live-benefit-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 24, 68, 0.04);
-  border: 1.5px solid rgba(0, 24, 68, 0.08);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(0, 24, 68, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 24, 68, 0.05);
   transition: all 0.25s ease;
 }
 
 .lrd-live-benefit-item:hover .lrd-live-benefit-icon-box {
-  background: rgba(0, 24, 68, 0.08);
+  background: rgba(0, 24, 68, 0.04);
   border-color: rgba(213, 155, 40, 0.4);
 }
 
@@ -6449,21 +6376,12 @@ html {
 
 .lrd-live-benefit-title {
   font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   font-weight: 800;
   color: #001844;
-  letter-spacing: 0.5px;
-  margin: 0 0 2px 0;
-  text-transform: uppercase;
-}
-
-.lrd-live-benefit-desc {
-  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  font-size: 0.88rem;
-  color: #001b50;
-  font-weight: 500;
-  line-height: 1.4;
+  letter-spacing: 0.6px;
   margin: 0;
+  text-transform: uppercase;
 }
 
 /* Columna Derecha: Tarjeta de Video Vertical con Mayor Protagonismo */
@@ -6475,7 +6393,7 @@ html {
 
 .lrd-live-class-video-card {
   width: 100%;
-  max-width: 390px;
+  max-width: 435px;
   aspect-ratio: 9 / 16;
   position: relative;
   border-radius: 28px;
@@ -6483,7 +6401,7 @@ html {
   background: #000E26;
   box-shadow: 0 25px 60px -12px rgba(0, 24, 68, 0.22),
               0 0 0 1px rgba(0, 24, 68, 0.1),
-              0 0 0 4px rgba(213, 155, 40, 0.2);
+              0 0 0 4px rgba(213, 155, 40, 0.25);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -6701,7 +6619,7 @@ html {
    SECCIÓN: PORTAL DEL ALUMNO (TU ESPACIO DIGITAL)
    ========================================================================== */
 .lrd-portal-section {
-  padding: 12px 0 105px 0;
+  padding: 85px 0 45px 0;
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFD 50%, #FFFFFF 100%);
   position: relative;
   overflow: hidden;
@@ -6805,7 +6723,7 @@ html {
 
 .lrd-portal-benefit-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   transition: transform 0.2s ease;
 }
@@ -6833,11 +6751,11 @@ html {
 
 .lrd-portal-benefit-title {
   font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  font-size: 0.88rem;
+  font-size: 0.94rem;
   font-weight: 800;
   letter-spacing: 0.6px;
   color: #001b50;
-  margin: 0 0 3px 0;
+  margin: 0;
   text-transform: uppercase;
 }
 
@@ -7007,7 +6925,7 @@ html {
 /* Mobile Media Query */
 @media (max-width: 768px) {
   .lrd-portal-section {
-    padding: 18px 0 65px 0;
+    padding: 55px 0 65px 0;
   }
   .lrd-portal-grid {
     display: flex;
@@ -7424,53 +7342,7 @@ html {
   margin: 0 0 10px 0;
 }
 
-/* ¡Resultados Reales! */
-.lrd-why-heading-results-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  position: relative;
-  margin-top: 2px;
-}
 
-.lrd-why-results-burst-left {
-  width: 26px;
-  height: auto;
-  pointer-events: none;
-  transform: scaleX(-1);
-}
-
-.lrd-why-results-burst-right {
-  width: 26px;
-  height: auto;
-  pointer-events: none;
-  transform: none;
-}
-
-.lrd-why-handwritten-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-}
-
-.lrd-why-results-handwritten {
-  font-family: var(--lrd-font-cursive);
-  font-size: 3.1rem;
-  font-weight: 700;
-  color: #D59B28;
-  line-height: 1;
-  display: block;
-}
-
-.lrd-why-handwritten-underline {
-  width: 100%;
-  max-width: 240px;
-  height: auto;
-  margin-top: -6px;
-  display: block;
-}
 
 /* Elementos Flotantes de la Derecha: Avión y Ça va? */
 .lrd-why-paper-plane-trail {
@@ -7547,17 +7419,19 @@ html {
 /* Disposición Principal de 2 Columnas */
 .lrd-why-main-layout {
   display: flex;
-  align-items: stretch;
-  gap: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
   position: relative;
   z-index: 3;
-  transform: translateX(-65px);
+  max-width: 1100px;
+  margin: 0 auto;
   transition: transform 0.3s ease;
 }
 
 /* Columna Izquierda: Foto de Escritorio (Agrandada y prominente) */
 .lrd-why-desk-col {
-  width: 395px;
+  width: 380px;
   flex-shrink: 0;
   position: relative;
   display: flex;
@@ -7576,7 +7450,7 @@ html {
 
 .lrd-why-desk-photo {
   width: 100%;
-  max-width: 405px;
+  max-width: 380px;
   height: auto;
   display: block;
   object-fit: contain;
@@ -7589,23 +7463,15 @@ html {
   filter: drop-shadow(0 22px 42px rgba(0, 27, 80, 0.22));
 }
 
-/* Columna Derecha: Tarjetas */
+/* Columna Derecha: 4 Tarjetas en Grid 2x2 */
 .lrd-why-cards-col {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  min-width: 0;
 }
 
-.lrd-why-cards-row1 {
+.lrd-why-cards-grid-4 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.lrd-why-cards-row2 {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
@@ -7715,32 +7581,23 @@ html {
 
 /* Tipografía de Títulos de Tarjetas */
 .lrd-bcard-title {
-  font-family: var(--lrd-font-serif, 'Playfair Display', Georgia, serif);
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 1.12rem;
+  font-weight: 850;
   color: #001b50;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   line-height: 1.25;
-  display: flex;
-  flex-direction: column;
-}
-
-.lrd-bcard-title .lrd-bcard-sub {
-  font-weight: 900;
-}
-
-.lrd-text-red {
-  color: #D92534 !important;
+  letter-spacing: 0.2px;
 }
 
 /* Descripción de Tarjetas */
 .lrd-bcard-desc {
-  font-size: 0.88rem;
-  color: #001b50;
-  line-height: 1.58;
-  margin: 0 0 18px 0;
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.94rem;
+  color: #001844;
+  line-height: 1.52;
+  margin: 0;
   font-weight: 500;
-  flex-grow: 1;
 }
 
 /* Footer de Tarjetas */
@@ -7798,93 +7655,7 @@ html {
   margin-bottom: -4px;
 }
 
-/* ==========================================================================
-   TARJETA VIP FEATURED (Oscura - Realeza & Trato Real)
-   ========================================================================== */
-.lrd-bcard-vip-featured {
-  background: linear-gradient(135deg, #001848 0%, #001032 100%);
-  color: #ffffff;
-  border: 1.5px solid rgba(213, 155, 40, 0.35);
-  border-radius: 26px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 14px 34px rgba(0, 27, 80, 0.25);
-  padding: 24px 28px 20px 28px;
-}
 
-.lrd-vip-ribbon-tag {
-  position: absolute;
-  top: 14px;
-  right: -32px;
-  background: linear-gradient(135deg, #F5C647 0%, #D59B28 100%);
-  color: #001b50;
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  padding: 4px 34px;
-  transform: rotate(35deg);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-}
-
-.lrd-vip-card-body {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: space-between;
-}
-
-.lrd-vip-header-flex {
-  display: flex;
-  align-items: flex-start;
-  gap: 18px;
-}
-
-.lrd-vip-text-content {
-  flex: 1;
-  padding-right: 35px;
-}
-
-.lrd-vip-title {
-  font-family: var(--lrd-font-serif, 'Playfair Display', Georgia, serif);
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 0 0 6px 0;
-}
-
-.lrd-vip-desc {
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.88);
-  line-height: 1.52;
-  margin: 0;
-  font-weight: 400;
-}
-
-.lrd-vip-bullets-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  row-gap: 12px;
-  column-gap: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 16px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-.lrd-vip-bullet-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.lrd-vip-bullet-item:nth-child(3) {
-  width: 100%;
-  justify-content: center;
-}
 
 /* ==========================================================================
    RESPONSIVIDAD
@@ -7959,20 +7730,9 @@ html {
   .lrd-why-results-handwritten {
     font-size: 2.3rem;
   }
-  .lrd-why-cards-row1 {
+  .lrd-why-cards-grid-4 {
     grid-template-columns: 1fr;
-  }
-  .lrd-why-cards-row2 {
-    grid-template-columns: 1fr;
-  }
-  .lrd-vip-bullets-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .lrd-vip-bullet-item:nth-child(3) {
-    width: auto;
-    justify-content: flex-start;
+    gap: 16px;
   }
   .lrd-why-floating-salut {
     position: static;
@@ -8047,20 +7807,71 @@ html {
   z-index: 2;
 }
 
-/* Header Deluxe */
+/* Header Limpio Método MRAF (Tipografía clara, moderna y sin doodles) */
 .lrd-mraf-header-deluxe {
   text-align: center;
-  margin-top: -10px;
+  margin-top: 10px;
   margin-bottom: 0;
 }
 
-.lrd-mraf-official-header-img {
-  max-width: 780px;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
+.lrd-mraf-clean-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   margin: 0 auto;
-  display: block;
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  text-transform: uppercase;
+}
+
+.lrd-mraf-title-line1 {
+  font-size: clamp(1.35rem, 3.2vw, 2.3rem);
+  font-weight: 800;
+  color: #001844;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.lrd-mraf-title-line2 {
+  font-size: clamp(1.85rem, 4.6vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.lrd-mraf-title-line2 .lrd-text-red {
+  color: #D92534;
+}
+
+.lrd-mraf-title-line2 .lrd-text-navy {
+  color: #001844;
+}
+
+.lrd-mraf-ribbon-wrap {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.lrd-mraf-ribbon-pill {
+  background: #001844;
+  color: #FFFFFF;
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 6px 22px;
+  border-radius: 999px;
+  display: inline-block;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 14px rgba(0, 24, 68, 0.15);
+}
+
+@media (max-width: 600px) {
+  .lrd-mraf-ribbon-pill {
+    font-size: 0.76rem;
+    padding: 6px 16px;
+  }
 }
 
 /* Distintivo de Edad Método MRAF */
@@ -8586,17 +8397,7 @@ html {
   justify-content: center;
 }
 
-.lrd-beret-doodle-img {
-  position: absolute;
-  right: -88px;
-  top: -10px;
-  width: 76px;
-  height: auto;
-  object-fit: contain;
-  transform: rotate(3deg);
-  pointer-events: none;
-  opacity: 1;
-}
+
 
 .lrd-title-wrap-f {
   position: relative;
@@ -8805,7 +8606,7 @@ html {
 .lrd-mraf-cta-gold-brush-line {
   width: 110%;
   height: 4.5px;
-  background: linear-gradient(90deg, transparent, #D59B28 20%, #F5C767 50%, #D59B28 80%, transparent);
+  background: linear-gradient(90deg, transparent, #D59B28 20%, #D59B28 80%, transparent);
   border-radius: 4px;
   margin-top: 5px;
   box-shadow: 0 2px 8px rgba(213, 155, 40, 0.35);
@@ -10154,7 +9955,7 @@ html {
 }
 
 .lrd-tag-gold {
-  background: linear-gradient(135deg, #D59B28 0%, #F59E0B 100%);
+  background: #D59B28;
   color: #FFFFFF;
   box-shadow: 0 4px 14px rgba(213, 155, 40, 0.45);
 }
@@ -10189,8 +9990,8 @@ html {
 }
 
 .lrd-icon-gold {
-  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
-  border: 1.5px solid #FDE68A;
+  background: rgba(213, 155, 40, 0.12);
+  border: 1.5px solid rgba(213, 155, 40, 0.35);
   box-shadow: 0 6px 16px rgba(213, 155, 40, 0.2);
 }
 
@@ -10302,7 +10103,7 @@ html {
 
 .lrd-hero-selector-box {
   background: #FFFDF7;
-  border: 1.5px solid #FDE68A;
+  border: 1.5px solid rgba(213, 155, 40, 0.35);
 }
 
 .lrd-selector-subrow {
@@ -10502,7 +10303,7 @@ html {
 
 .lrd-btn-gold-subtle:hover,
 .lrd-btn-gold-subtle.lrd-btn-active {
-  background: linear-gradient(135deg, #D59B28 0%, #E6A72E 100%);
+  background: #D59B28;
   border-color: #D59B28;
   color: #FFFFFF;
   box-shadow: 0 6px 20px rgba(213, 155, 40, 0.35);
@@ -10537,8 +10338,8 @@ html {
 .lrd-private-card,
 .lrd-duo-card {
   background: #FFFFFF;
-  border-radius: 24px;
-  padding: 34px 30px;
+  border-radius: 20px;
+  padding: 26px 22px;
   border: 1.5px solid rgba(0, 27, 80, 0.1);
   box-shadow: 0 10px 30px rgba(0, 27, 80, 0.05);
   position: relative;
@@ -10550,62 +10351,64 @@ html {
 
 .lrd-private-card:hover,
 .lrd-duo-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 18px 45px rgba(0, 27, 80, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(0, 27, 80, 0.1);
 }
 
 .lrd-private-card.lrd-private-active {
-  border: 2.5px solid #D92534;
-  box-shadow: 0 18px 50px rgba(217, 37, 52, 0.22);
-  transform: scale(1.015);
+  border: 2px solid #D92534;
+  box-shadow: 0 14px 40px rgba(217, 37, 52, 0.18);
+  transform: scale(1.01);
 }
 
 .lrd-duo-card.lrd-duo-active {
-  border: 2.5px solid #D59B28;
-  box-shadow: 0 18px 50px rgba(213, 155, 40, 0.25);
-  transform: scale(1.015);
+  border: 2px solid #D59B28;
+  box-shadow: 0 14px 40px rgba(213, 155, 40, 0.2);
+  transform: scale(1.01);
 }
 
 .lrd-private-tag {
   display: inline-block;
   background: rgba(217, 37, 52, 0.1);
   color: #D92534;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 800;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 999px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-.lrd-private-title {
+.lrd-private-title,
+.lrd-duo-title {
   font-family: 'Cinzel', serif;
-  font-size: 1.65rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: #001844;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
 }
 
-.lrd-private-desc {
+.lrd-private-desc,
+.lrd-duo-desc {
   font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  font-size: 0.94rem;
+  font-size: 0.88rem;
   font-weight: 550;
   color: #001844;
-  margin: 0 0 18px 0;
-  line-height: 1.5;
+  margin: 0 0 14px 0;
+  line-height: 1.4;
 }
 
 .lrd-private-rates-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin-bottom: 22px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .lrd-rate-box {
   background: #FFFFFF;
   border: 1.5px solid rgba(0, 24, 68, 0.16);
-  border-radius: 14px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 10px 10px;
   text-align: center;
   position: relative;
   cursor: pointer;
@@ -10626,7 +10429,7 @@ html {
 .lrd-rate-box.lrd-rate-selected {
   border: 2px solid #D59B28;
   background: rgba(213, 155, 40, 0.1);
-  box-shadow: 0 6px 18px rgba(213, 155, 40, 0.22);
+  box-shadow: 0 4px 14px rgba(213, 155, 40, 0.2);
   transform: translateY(-2px);
 }
 
@@ -10636,20 +10439,20 @@ html {
 
 .lrd-rate-badge-mini {
   position: absolute;
-  top: -9px;
-  right: 12px;
+  top: -8px;
+  right: 8px;
   background: #D59B28;
   color: #FFFFFF;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  padding: 2px 8px;
+  padding: 1px 6px;
   border-radius: 999px;
 }
 
 .lrd-rate-freq {
   font-family: var(--lrd-font-main, 'Outfit', sans-serif);
   display: block;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   color: #001844;
   font-weight: 750;
 }
@@ -10657,45 +10460,41 @@ html {
 .lrd-rate-price {
   font-family: var(--lrd-font-main, 'Outfit', sans-serif);
   display: block;
-  font-size: 1.48rem;
+  font-size: 1.25rem;
   font-weight: 900;
   color: #001844;
-  margin: 3px 0;
+  margin: 2px 0 0 0;
 }
 
 .lrd-rate-price small {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #001844;
 }
 
 .lrd-rate-detail {
-  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #001844;
+  display: none;
 }
 
 .lrd-private-features-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 24px 0;
+  margin: 0 0 18px 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex-grow: 1;
 }
 
 .lrd-private-features-list li {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   font-family: var(--lrd-font-main, 'Outfit', sans-serif);
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 550;
   color: #001844;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 /* Bloque Compartido de Exámenes Oficiales (Clases Particulares & Part Duo) */
@@ -11309,8 +11108,12 @@ html {
     font-size: 0.84rem;
   }
   .lrd-private-rates-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .lrd-private-card,
+  .lrd-duo-card {
+    padding: 22px 16px !important;
   }
   .lrd-promos-banner-container {
     padding: 22px 14px;
@@ -11351,3 +11154,449 @@ html {
     font-size: 0.82rem;
   }
 }
+
+/* ==========================================================================
+   BLOQUE 3: SECCIÓN DE NIVELES CUADROS ROYAL NAVY (FONDO CLARO)
+   Fondo claro con cuadrícula de cuadros individuales Royal Navy (Ejemplo)
+   ========================================================================== */
+.lrd-section-levels-grid {
+  padding: 45px 0 95px 0;
+  background: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+  color: #001844;
+}
+
+.lrd-section-levels-grid .lrd-levels-header-stepper {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto 46px auto;
+}
+
+.lrd-section-levels-grid .lrd-levels-tag-badge {
+  display: inline-block;
+  background: #FFFFFF;
+  border: 1px solid rgba(213, 155, 40, 0.45);
+  padding: 6px 18px;
+  border-radius: 999px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(0, 24, 68, 0.04);
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #001844;
+  text-transform: uppercase;
+}
+
+.lrd-section-levels-grid .lrd-levels-main-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 3.8vw, 2.9rem);
+  font-weight: 800;
+  color: #001844;
+  line-height: 1.2;
+  margin: 0 0 14px 0;
+}
+
+.lrd-section-levels-grid .lrd-title-red-highlight {
+  color: #D92534;
+}
+
+.lrd-section-levels-grid .lrd-levels-subtitle {
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #001844;
+  margin: 0;
+}
+
+/* ==========================================================================
+   TARJETAS DE NIVELES - ESTILO BLANCO, LIMPIO Y COMPACTO
+   ========================================================================== */
+.lrd-levels-cards-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto 40px auto;
+}
+
+.lrd-level-card-clean {
+  background: #FFFFFF;
+  border: 1.5px solid rgba(0, 24, 68, 0.08);
+  border-radius: 20px;
+  padding: 24px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px -2px rgba(0, 24, 68, 0.05), 0 2px 6px -1px rgba(0, 24, 68, 0.03);
+  box-sizing: border-box;
+}
+
+.lrd-level-card-clean:hover {
+  transform: translateY(-4px);
+  border-color: rgba(213, 155, 40, 0.4);
+  box-shadow: 0 12px 28px -4px rgba(0, 24, 68, 0.1), 0 4px 10px rgba(213, 155, 40, 0.1);
+}
+
+/* Header de la Tarjeta */
+.lrd-card-header-clean {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.lrd-card-badge-box {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 24, 68, 0.12);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.lrd-card-badge-box.is-code-b2c1 {
+  width: 62px;
+  min-width: 62px;
+  padding: 0 4px;
+}
+
+.lrd-card-badge-code {
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lrd-card-badge-code.is-code-b2c1-text {
+  font-size: 0.84rem;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.lrd-card-header-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.lrd-card-category {
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #001844;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  line-height: 1.2;
+  margin-bottom: 3px;
+}
+
+.lrd-card-title {
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 1.02rem;
+  font-weight: 750;
+  color: #001844;
+  line-height: 1.25;
+  margin: 0;
+}
+
+/* Frase Corta Oficial */
+.lrd-card-quote {
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-style: italic;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #D59B28;
+  margin: 0 0 16px 0;
+  text-align: left;
+  line-height: 1.35;
+}
+
+/* Viñetas Oficiales con Checks Dorados */
+.lrd-card-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  text-align: left;
+  flex-grow: 1;
+}
+
+.lrd-card-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #001844 !important;
+  line-height: 1.42;
+}
+
+.lrd-card-check-icon {
+  flex-shrink: 0;
+  color: #D59B28;
+  margin-top: 2px;
+}
+
+.lrd-card-bullet-text {
+  flex-grow: 1;
+  color: #001844 !important;
+  font-weight: 600;
+}
+
+/* Botón CTA Elegir Nivel en Rojo */
+.lrd-card-cta-btn {
+  width: 100%;
+  height: 40px;
+  border-radius: 999px;
+  background: #D92534;
+  color: #FFFFFF;
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.88rem;
+  font-weight: 750;
+  letter-spacing: 0.3px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(217, 37, 52, 0.25);
+  margin-top: auto;
+}
+
+.lrd-card-cta-btn:hover {
+  background: #B91C1C;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(217, 37, 52, 0.4);
+}
+
+/* ==========================================================================
+   FRANJA HORIZONTAL COMPACTA: TODOS LOS NIVELES INCLUYEN
+   ========================================================================== */
+.lrd-levels-strip-compact {
+  max-width: 1080px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border: 1.5px solid rgba(0, 24, 68, 0.08);
+  border-radius: 16px;
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0 4px 16px -2px rgba(0, 24, 68, 0.04);
+}
+
+.lrd-strip-title {
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #001844;
+  white-space: nowrap;
+}
+
+.lrd-strip-items {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.lrd-strip-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--lrd-font-main, 'Outfit', sans-serif);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #001844;
+  white-space: nowrap;
+}
+
+.lrd-strip-icon-red {
+  color: #D92534;
+  flex-shrink: 0;
+}
+
+.lrd-strip-icon-gold {
+  color: #D59B28;
+  flex-shrink: 0;
+}
+
+.lrd-strip-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(0, 24, 68, 0.12);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (DESKTOP 4+3, TABLET 2 COL, MOBILE 1 COL)
+   ========================================================================== */
+@media (min-width: 1025px) {
+  .lrd-level-card-clean {
+    flex: 0 0 calc((100% - 3 * 20px) / 4 - 0.5px);
+    max-width: calc((100% - 3 * 20px) / 4 - 0.5px);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .lrd-levels-cards-wrap {
+    gap: 18px;
+    max-width: 760px;
+  }
+  .lrd-level-card-clean {
+    flex: 0 0 calc((100% - 18px) / 2 - 0.5px);
+    max-width: calc((100% - 18px) / 2 - 0.5px);
+    padding: 22px 18px 18px 18px;
+  }
+  .lrd-levels-strip-compact {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+    padding: 18px 20px;
+  }
+  .lrd-strip-items {
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .lrd-strip-divider {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .lrd-br-desktop-only {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .lrd-section-levels-grid {
+    padding: 35px 0 65px 0;
+  }
+  .lrd-section-levels-grid .lrd-levels-main-title {
+    font-size: 1.55rem;
+    line-height: 1.25;
+  }
+  .lrd-section-levels-grid .lrd-title-red-highlight {
+    display: inline-block;
+  }
+  .lrd-levels-cards-wrap {
+    gap: 16px;
+    max-width: 400px;
+    margin-bottom: 28px;
+  }
+  .lrd-level-card-clean {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 20px 16px 18px 16px;
+  }
+  .lrd-card-badge-box {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+  .lrd-card-badge-box.is-code-b2c1 {
+    width: 56px;
+    min-width: 56px;
+    height: 44px;
+  }
+  .lrd-card-badge-code {
+    font-size: 1.05rem;
+  }
+  .lrd-card-badge-code.is-code-b2c1-text {
+    font-size: 0.78rem;
+  }
+  .lrd-card-title {
+    font-size: 0.98rem;
+  }
+  .lrd-card-quote {
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+  }
+  .lrd-card-bullets {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .lrd-card-bullet-item {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #001844 !important;
+  }
+  .lrd-levels-strip-compact {
+    flex-direction: column;
+    text-align: center;
+    gap: 14px;
+    padding: 16px 16px;
+  }
+  .lrd-strip-items {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .lrd-strip-item {
+    font-size: 0.88rem;
+    white-space: normal;
+    text-align: center;
+  }
+  .lrd-strip-divider {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   BLOQUE 3: PRECIOS COMPACTOS (SABATINO, REGULAR, INTENSIVO)
+   ========================================================================== */
+.lrd-schedule-compact {
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+
+.lrd-schedule-compact-title {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #001844;
+  margin-bottom: 6px;
+}
+
+.lrd-days-row {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 992px) {
+  .lrd-compact-level-card {
+    flex: 0 1 calc(50% - 16px);
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 640px) {
+  .lrd-compact-levels-grid {
+    gap: 14px;
+  }
+  .lrd-compact-level-card {
+    flex: 0 1 100%;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 18px 16px;
+  }
+}
+

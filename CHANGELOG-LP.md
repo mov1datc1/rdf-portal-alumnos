@@ -5,6 +5,36 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.5.25] — 2026-10-21
+
+### Rediseño de Niveles 4+3, Optimización Editorial de Clase en Vivo y Edición de Video Prof. Fanny
+- **1. Rediseño Visual de la Sección de Niveles (#cursos):**
+  - Implementada nueva cuadrícula de tarjetas con estilo limpio sobre fondo blanco (`#FFFFFF`) y distribución desktop 4+3 (Fila 1: A1, A2, A2+, B1; Fila 2 centrada: B1+, B2, B2-C1).
+  - Estricta restricción de paleta de 4 colores: Blanco (`#FFFFFF`), Azul Marino Oficial (`#001844` / `#001b50`), Rojo Oficial (`#D92534`) y Dorado Oficial (`#D59B28`). Cero textos negros o grises.
+  - Cada tarjeta incluye:
+    - Badge superior con código de nivel alternando azul marino, rojo y dorado (`#D59B28` en B2-C1).
+    - Calibración especial para el badge de `B2-C1` (`.is-code-b2c1`) con `width: 62px; white-space: nowrap; font-size: 0.84rem;` evitando saltos de línea antiestéticos.
+    - Categoría en mayúsculas y título del nivel en azul marino oficial.
+    - Frase corta oficial del nivel en cursiva dorada.
+    - 3 viñetas clave con palomas/checks dorados (`✓`) y textos en azul marino oficial (`color: #001844 !important; font-weight: 600;`).
+    - Botón de acción redondeado en rojo oficial *“Elegir nivel >”* vinculado a modal de contacto/WhatsApp.
+  - Franja horizontal compacta inferior *“Todos los niveles incluyen: 4 unidades de aprendizaje | Libro de actividades incluido | Evaluación final”*.
+- **2. Optimización Editorial y Visual en «Así se vive una clase en vivo» (#clase-en-vivo):**
+  - Eliminado párrafo redundante de apoyo en la cabecera; preservada la frase concepto principal: *“No solo aprendes francés. Lo hablas.”*.
+  - Simplificados los 3 beneficios a títulos ejecutivos en cajas de iconos de 44x44px con estilo portal: **CONVERSACIÓN REAL**, **INTERACCIÓN EN VIVO** y **GRUPOS REDUCIDOS**, eliminando subtítulos pesados.
+  - Mayor protagonismo a la imagen/video de la plataforma en clase: ajustada la cuadrícula a `0.92fr` vs `1.08fr` y ampliado el ancho máximo de la tarjeta de video a `435px` con resplandor dorado sutil.
+- **3. Calibración de Transiciones y Ajuste de Espaciado:**
+  - Corregido espaciado y costura visual entre `#portal-alumno` y `#cursos`.
+  - Removidas salpicaduras azules secundarias (`blue_dashes_splash.webp`) y unificado el color de descripciones a azul marino oficial en tarjetas de Método RDF.
+- **4. Edición Quirúrgica de Video de Prof. Fanny (/videos/teacher_fanny.mp4):**
+  - Recorte de video al segundo `19.75s` con `ffmpeg`, eliminando el blooper final (cámara cayendo hacia la mesa, taza de café, laptop y piso al intentar apagar la grabación).
+  - Micro fade-out de audio de 300 ms en la salida asegurando un cierre suave y profesional tras su despedida (*“...À bientôt !”*).
+- **5. Unificación de Color Dorado Oficial (#D59B28) y Copy de Profesores:**
+  - Actualizada la frase concepto de `#profesores` a *“Profesores franceses que harán que el francés cobre vida.”*.
+  - Unificados todos los acentos, etiquetas, botones e insignias doradas en `LandingPage.css` al dorado oficial `#D59B28` (`rgb(213, 155, 40)`).
+
+---
+
 ## [3.5.24] — 2026-10-13
 
 ### Presentaciones de Profesores en Español, Simplificación de Copys y Despliegue Sincronizado

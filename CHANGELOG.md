@@ -2,6 +2,15 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-10-21] - Rediseño de Niveles 4+3, Optimización Editorial de Clase en Vivo y Edición de Video Prof. Fanny
+- **Rediseño de Niveles (#cursos):** Cuadrícula limpia sobre fondo blanco con 7 tarjetas en distribución 4+3 (A1, A2, A2+, B1 arriba; B1+, B2, B2-C1 centrados abajo). Paleta estricta de 4 colores oficiales (blanco, azul marino #001844, rojo #D92534 y dorado #D59B28). Badges alternados, corrección de badge B2-C1 sin salto de línea, citas en cursiva dorada, viñetas en azul marino oficial con checks dorados y franja inferior compacta de inclusiones.
+- **Optimización de Clase en Vivo (#clase-en-vivo):** Eliminación de párrafos redundantes, lema conciso *“No solo aprendes francés. Lo hablas.”*, beneficios en cajas de 44x44px con estilo portal (Conversación Real, Interacción en Vivo, Grupos Reducidos) y ampliación de tarjeta de video/plataforma a 435px con grid rebalanceado para máximo impacto visual.
+- **Edición Quirúrgica de Video de Prof. Fanny:** Recorte exacto a 19.75s con ffmpeg eliminando el blooper final (caída de cámara hacia mesa/piso) y micro fade-out de audio de 300 ms, cerrando con saludo cálido y sonrisa a la cámara.
+- **Calibración de Costura de Transición:** Ajuste de paddings entre `#portal-alumno` y `#cursos`, eliminación de salpicaduras azules y unificación de textos en azul marino oficial.
+- **Unificación de Dorado Oficial (#D59B28) y Copy de Profesores:** Actualización de la frase concepto en `#profesores` a *“Profesores franceses que harán que el francés cobre vida.”* y estandarización de todos los acentos dorados al tono oficial `#D59B28`.
+
+---
+
 ## [2026-10-13] - Presentaciones en Español de Profesores, Simplificación de Copys y Despliegue Sincronizado v3.5.24
 - **Tarjetas de Profesores con Presentación en Español:** Sustituidas las citas de los 7 profesores reales (Fanny, Jérémy, Sophie, Itzel, Fabien, Pauline y Camille) por redacciones cálidas, directas y en español, facilitando la lectura para principiantes hispanohablantes sin duplicidad de texto en francés. Fotos WebP, videos en francés en modal, etiquetas y layout 4+3 intactos.
 - **Simplificación de Copys (Clase en Vivo y Portal):**
