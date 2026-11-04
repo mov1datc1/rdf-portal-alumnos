@@ -5,6 +5,20 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.5.26] — 2026-11-04
+
+### Unificación de Dorado Oficial (#D59B28) y Ajuste de Copy en Profesores
+- **1. Ajuste de Copy en Sección de Profesores (`#profesores`):**
+  - Actualizada la frase concepto principal en `LandingPage.tsx` de *“Profesores nativos que harán que el francés cobre vida.”* a *“Profesores franceses que harán que el francés cobre vida.”*.
+- **2. Estandarización del Color Dorado Oficial (`#D59B28`) en `LandingPage.css`:**
+  - Unificados todos los acentos dorados de elementos activos al tono oficial `#D59B28` (`rgb(213, 155, 40)`):
+    - Insignia del Hero (`.lrd-vip-badge-star` y `.lrd-vip-badge-text-sub`).
+    - Etiquetas de especialidad de profesores (`.lrd-teacher-specialty-badge`) y testimonios (`.lrd-testi-tag-gold`).
+    - Etiqueta recomendada (`.lrd-tag-gold`), estado activo/hover de botones dorados (`.lrd-btn-gold-subtle:hover`) y línea decorativa inferior de MRAF (`.lrd-mraf-cta-gold-brush-line`).
+    - Fondos y bordes suaves (`.lrd-icon-gold` y `.lrd-btn-mobile-portal-link`) ajustados a transparencias directas `rgba(213, 155, 40, ...)`.
+
+---
+
 ## [3.5.25] — 2026-10-21
 
 ### Rediseño de Niveles 4+3, Optimización Editorial de Clase en Vivo y Edición de Video Prof. Fanny

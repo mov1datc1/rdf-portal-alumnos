@@ -2,6 +2,12 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-11-04] - Unificación de Dorado Oficial (#D59B28) y Ajuste de Copy en Profesores v3.5.26
+- **Copy de Profesores (`#profesores`):** Actualizada la frase concepto en `LandingPage.tsx` a *“Profesores franceses que harán que el francés cobre vida.”*.
+- **Estandarización de Dorado Oficial (`#D59B28`):** Unificados todos los textos, etiquetas, botones, bordes y fondos dorados en `LandingPage.css` al tono oficial `#D59B28` (`rgb(213, 155, 40)`), eliminando variaciones secundarias (`#E2A732`, `#FBD364`, `#9A6800`, `#B37D1A`, `#F59E0B`, `#E6A72E`, `#F5C767`).
+
+---
+
 ## [2026-10-21] - Rediseño de Niveles 4+3, Optimización Editorial de Clase en Vivo y Edición de Video Prof. Fanny
 - **Rediseño de Niveles (#cursos):** Cuadrícula limpia sobre fondo blanco con 7 tarjetas en distribución 4+3 (A1, A2, A2+, B1 arriba; B1+, B2, B2-C1 centrados abajo). Paleta estricta de 4 colores oficiales (blanco, azul marino #001844, rojo #D92534 y dorado #D59B28). Badges alternados, corrección de badge B2-C1 sin salto de línea, citas en cursiva dorada, viñetas en azul marino oficial con checks dorados y franja inferior compacta de inclusiones.
 - **Optimización de Clase en Vivo (#clase-en-vivo):** Eliminación de párrafos redundantes, lema conciso *“No solo aprendes francés. Lo hablas.”*, beneficios en cajas de 44x44px con estilo portal (Conversación Real, Interacción en Vivo, Grupos Reducidos) y ampliación de tarjeta de video/plataforma a 435px con grid rebalanceado para máximo impacto visual.
