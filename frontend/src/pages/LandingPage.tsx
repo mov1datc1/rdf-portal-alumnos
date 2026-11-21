@@ -78,8 +78,8 @@ interface LevelData {
 export const DEFAULT_LEVELS: Record<string, LevelData> = {
   A1: {
     code: 'A1',
-    sub: 'Básico 1',
-    subLabel: 'Básico 1',
+    sub: 'Basique 1',
+    subLabel: 'Basique 1',
     levelTag: 'Básico 1 – Fundamentos • 4 Meses',
     titleLine1: 'Fundamentos del francés.',
     titleLine2: '¡Empieza a hablar!',
@@ -89,15 +89,15 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'chat', text: 'Presentación personal, saludos y situaciones cotidianas' },
       { icon: 'trophy', text: 'Desarrollo de las 4 competencias: habla, escucha, lectura y escritura' },
       { icon: 'book', text: '4 unidades (~1 mes c/u) con libro de actividades 100% gratis' },
-      { icon: 'people', text: 'Examen escrito y oral al finalizar con certificación oficial' }
+      { icon: 'people', text: 'Examen escrito y oral al finalizar con certificado del nivel' }
     ],
     characterImage: '/imagenes-lp/estudiante_con_portatil_y_auriculares.webp',
     characterAlt: 'Chica adolescente con audífonos blancos, laptop y cuaderno - Nivel A1'
   },
   A2: {
     code: 'A2',
-    sub: 'Básico 2',
-    subLabel: 'Básico 2',
+    sub: 'Basique 2',
+    subLabel: 'Basique 2',
     levelTag: 'Básico 2 – Supervivencia y Rutina • 4 Meses',
     titleLine1: 'Profundiza tu comunicación.',
     titleLine2: '¡Conéctate con Francia!',
@@ -114,8 +114,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   'A2+': {
     code: 'A2+',
-    sub: 'Intermedio 1',
-    subLabel: 'Intermedio 1',
+    sub: 'Intermédiaire 1',
+    subLabel: 'Intermédiaire 1',
     levelTag: 'Intermedio 1 – Exploración y Fluidez • 4 Meses',
     titleLine1: 'Explora temas complejos.',
     titleLine2: '¡Gana fluidez y precisión!',
@@ -125,15 +125,15 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'chat', text: 'Autonomía para viajar y desenvolverte en países francófonos' },
       { icon: 'people', text: 'Expresión fluida de opiniones, ambiciones, proyectos y relatos' },
       { icon: 'book', text: '4 unidades de estudio práctico con material pedagógico gratuito' },
-      { icon: 'trophy', text: 'Acreditación oficial mediante examen oral y escrito final' }
+      { icon: 'trophy', text: 'Acreditación mediante examen oral y escrito con certificado del nivel' }
     ],
     characterImage: '/imagenes-lp/estudiante_celebrando_frente_al_portatil.webp',
     characterAlt: 'Joven con camisa verde, laptop y cuaderno - Nivel A2+'
   },
   B1: {
     code: 'B1',
-    sub: 'Intermedio 2',
-    subLabel: 'Intermedio 2',
+    sub: 'Intermédiaire 2',
+    subLabel: 'Intermédiaire 2',
     levelTag: 'Intermedio 2 – Consolidación y Debate • 4 Meses',
     titleLine1: 'Consolida tu autonomía.',
     titleLine2: '¡Debate y exprésate!',
@@ -150,8 +150,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   'B1+': {
     code: 'B1+',
-    sub: 'Avanzado 1',
-    subLabel: 'Avanzado 1',
+    sub: 'Avancé 1',
+    subLabel: 'Avancé 1',
     levelTag: 'Avanzado 1 – Argumentación y Dominio • 4 Meses',
     titleLine1: 'Argumenta con claridad.',
     titleLine2: '¡Comunica con soltura!',
@@ -161,15 +161,15 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
       { icon: 'chat', text: 'Debates sobre temas complejos, culturales, profesionales y abstractos' },
       { icon: 'people', text: 'Comprensión auditiva completa de nativos y modismos cotidianos' },
       { icon: 'book', text: '4 unidades avanzadas con dinámicas interactivas y roleplays' },
-      { icon: 'trophy', text: 'Examen oral y escrito riguroso con certificado avalado' }
+      { icon: 'trophy', text: 'Examen oral y escrito riguroso con certificado del nivel' }
     ],
     characterImage: '/imagenes-lp/profesora_remota_explicando_ante_su_portatil.webp',
     characterAlt: 'Alumna adulta en clase online con laptop y libreta - Nivel B1+'
   },
   B2: {
     code: 'B2',
-    sub: 'Avanzado 2',
-    subLabel: 'Avanzado 2',
+    sub: 'Avancé 2',
+    subLabel: 'Avancé 2',
     levelTag: 'Avanzado 2 – Perfeccionamiento y Certificación • 4 Meses',
     titleLine1: 'Fluidez y precisión nativa.',
     titleLine2: '¡Sé un verdadero rey!',
@@ -186,8 +186,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   'B2-C1': {
     code: 'B2-C1',
-    sub: 'Perfeccionamiento',
-    subLabel: 'Perfeccionamiento',
+    sub: 'Perfectionnement',
+    subLabel: 'Perfectionnement',
     levelTag: 'Perfeccionamiento • Conversación y certificación',
     durationBadge: '4 meses',
     titleLine1: 'Perfecciona tu francés.',
@@ -308,7 +308,7 @@ const DEFAULT_HERO_SLIDES = [
 const GRID_LEVELS = [
   {
     code: 'A1',
-    rank: 'BÁSICO 1',
+    rank: 'BASIQUE 1',
     title: 'Fundamentos del francés',
     quote: '“Empieza a hablar.”',
     badgeBg: '#001844',
@@ -320,7 +320,7 @@ const GRID_LEVELS = [
   },
   {
     code: 'A2',
-    rank: 'BÁSICO 2',
+    rank: 'BASIQUE 2',
     title: 'Comunicación en francés',
     quote: '“Exprésate con confianza.”',
     badgeBg: '#D92534',
@@ -332,7 +332,7 @@ const GRID_LEVELS = [
   },
   {
     code: 'A2+',
-    rank: 'INTERMEDIO 1',
+    rank: 'INTERMÉDIAIRE 1',
     title: 'Gana fluidez',
     quote: '“Comunícate cada vez mejor.”',
     badgeBg: '#001844',
@@ -344,7 +344,7 @@ const GRID_LEVELS = [
   },
   {
     code: 'B1',
-    rank: 'INTERMEDIO 2',
+    rank: 'INTERMÉDIAIRE 2',
     title: 'Francés independiente',
     quote: '“Habla con más autonomía.”',
     badgeBg: '#D92534',
@@ -356,7 +356,7 @@ const GRID_LEVELS = [
   },
   {
     code: 'B1+',
-    rank: 'AVANZADO 1',
+    rank: 'AVANCÉ 1',
     title: 'Consolida tu francés',
     quote: '“Afina tu expresión.”',
     badgeBg: '#001844',
@@ -368,7 +368,7 @@ const GRID_LEVELS = [
   },
   {
     code: 'B2',
-    rank: 'AVANZADO 2',
+    rank: 'AVANCÉ 2',
     title: 'Domina el francés',
     quote: '“Comunícate con soltura.”',
     badgeBg: '#D92534',
@@ -380,7 +380,7 @@ const GRID_LEVELS = [
   },
   {
     code: 'B2-C1',
-    rank: 'PERFECCIONAMIENTO',
+    rank: 'PERFECTIONNEMENT',
     title: 'Perfecciona tu francés',
     quote: '“Habla, argumenta y certifícate.”',
     badgeBg: '#D59B28',
@@ -640,7 +640,7 @@ export function LandingPage() {
                     CURSOS <ChevronDown size={12} color="#FFFFFF" />
                   </a>
                   <ul className="lrd-dropdown-menu">
-                    <li><a href="#cursos" onClick={(e) => handleCourseNavClick(e, 'cursos')}>6 Niveles Oficiales (Básico a Avanzado)</a></li>
+                    <li><a href="#cursos" onClick={(e) => handleCourseNavClick(e, 'cursos')}>7 Niveles Oficiales (Basique a Perfectionnement)</a></li>
                     <li><a href="#precios" onClick={(e) => handleCourseNavClick(e, 'precios', 'grupales')}>Clases Grupales (Regular, Sabatino, Intensivo)</a></li>
                     <li><a href="#precios" onClick={(e) => handleCourseNavClick(e, 'precios', 'particulares')}>Clases Particulares & Part Duo</a></li>
                   </ul>
@@ -649,7 +649,7 @@ export function LandingPage() {
                   <a href="#precios" className="lrd-nav-link-clean" onClick={() => setIsMobileMenuOpen(false)}>PRECIOS Y HORARIOS</a>
                 </li>
                 <li className="lrd-nav-item">
-                  <a href="#metodo" className="lrd-nav-link-clean" onClick={() => setIsMobileMenuOpen(false)}>MÉTODO MRAF</a>
+                  <a href="#metodo" className="lrd-nav-link-clean" onClick={() => setIsMobileMenuOpen(false)}>MÉTODO MRAF®</a>
                 </li>
                 <li className="lrd-nav-item">
                   <a href="#promos" className="lrd-nav-link-clean" onClick={() => setIsMobileMenuOpen(false)}>PROMOCIONES</a>
@@ -1076,7 +1076,7 @@ export function LandingPage() {
             <div className="lrd-cta-btn-arrow-row">
               <button
                 className="lrd-btn-red-main lrd-btn-cta-royal-mraf"
-                onClick={() => openLeadModal('Probar el Método MRAF')}
+                onClick={() => openLeadModal('Probar el Método MRAF®')}
               >
                 QUIERO PROBAR EL MÉTODO <Crown size={16} fill="#D59B28" color="#D59B28" style={{ display: 'inline', marginLeft: '6px', verticalAlign: 'middle' }} />
               </button>
@@ -1230,8 +1230,8 @@ export function LandingPage() {
                 </svg>
               </div>
               <div className="lrd-trust-text-col">
-                <strong>Rotación Real de Acentos</strong>
-                <span>Entrena tu oído para la vida y los viajes</span>
+                <strong>Clases con Diferentes Profesores Franceses</strong>
+                <span>Acostúmbrate a escuchar distintos acentos del francés</span>
               </div>
             </div>
           </div>
@@ -1614,7 +1614,7 @@ export function LandingPage() {
             </div>
 
             <p className="lrd-pricing-subtitle">
-              Clases online en vivo con profesores franceses.
+              Clases online en vivo con diferentes profesores franceses para acostumbrarte a escuchar distintos acentos del francés.
             </p>
           </div>
 
@@ -1734,11 +1734,15 @@ export function LandingPage() {
                   </li>
                   <li>
                     <Check size={16} color="#D92534" strokeWidth={3} />
+                    <span>Clases de 50 minutos</span>
+                  </li>
+                  <li>
+                    <Check size={16} color="#D92534" strokeWidth={3} />
                     <span>Máximo 8 alumnos</span>
                   </li>
                   <li>
                     <Check size={16} color="#D92534" strokeWidth={3} />
-                    <span>Profesores franceses + material incluido</span>
+                    <span>Diferentes profesores franceses + material incluido</span>
                   </li>
                 </ul>
 
@@ -1789,11 +1793,15 @@ export function LandingPage() {
                   </li>
                   <li>
                     <Check size={15} color="#D92534" strokeWidth={3} />
+                    <span>Clases de 50 minutos</span>
+                  </li>
+                  <li>
+                    <Check size={15} color="#D92534" strokeWidth={3} />
                     <span>Máximo 8 alumnos</span>
                   </li>
                   <li>
                     <Check size={15} color="#D92534" strokeWidth={3} />
-                    <span>Profesores franceses + material incluido</span>
+                    <span>Diferentes profesores franceses + material incluido</span>
                   </li>
                 </ul>
 
@@ -1825,7 +1833,7 @@ export function LandingPage() {
                   <div className="lrd-private-tag">1 A 1 PERSONALIZADO</div>
                   <h3 className="lrd-private-title">Clases Particulares Individuales</h3>
                   <p className="lrd-private-desc">
-                    1 alumno con profesor nativo exclusivo y horarios 100% a tu medida.
+                    1 alumno con profesores franceses y horarios 100% a tu medida.
                   </p>
                 </div>
 
@@ -1865,9 +1873,9 @@ export function LandingPage() {
                 </div>
 
                 <ul className="lrd-private-features-list">
-                  <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Profesor nativo 100% exclusivo</span></li>
+                  <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Clases 1 a 1 con diferentes profesores franceses</span></li>
                   <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Horarios y reprogramación a tu medida</span></li>
-                  <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Material pedagógico y certificaciones incluidos</span></li>
+                  <li><Check size={15} color="#D92534" strokeWidth={2.5} /> <span>Material pedagógico y certificado del nivel incluidos</span></li>
                 </ul>
 
                 <button
@@ -1892,7 +1900,7 @@ export function LandingPage() {
                   <Users size={24} color="#D59B28" />
                   <h3 className="lrd-duo-title">Modalidad Part Duo</h3>
                   <p className="lrd-duo-desc">
-                    2 alumnos con el mismo profesor nativo. Ideal para parejas o amigos.
+                    2 alumnos por clase con profesores franceses. Ideal para parejas o amigos.
                   </p>
                 </div>
 
@@ -1932,9 +1940,9 @@ export function LandingPage() {
                 </div>
 
                 <ul className="lrd-private-features-list">
-                  <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Mismo horario y profesor nativo para ambos</span></li>
+                  <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Mismo horario de clase para ambos</span></li>
                   <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Práctica conversacional activa en pareja</span></li>
-                  <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Material y certificados oficiales individuales</span></li>
+                  <li><Check size={15} color="#001844" strokeWidth={2.5} /> <span>Diferentes profesores franceses + material y certificado del nivel</span></li>
                 </ul>
 
                 <button
@@ -2062,7 +2070,11 @@ export function LandingPage() {
             <div className="lrd-guarantee-bottom-row">
               <div className="lrd-guarantee-col">
                 <Crown size={20} color="#D59B28" />
-                <span>Certificado oficial avalado con evaluación dual</span>
+                <span>Certificado del nivel</span>
+              </div>
+              <div className="lrd-guarantee-col">
+                <Users size={20} color="#D59B28" />
+                <span>Clases con diferentes profesores franceses para acostumbrarte a distintos acentos del francés</span>
               </div>
             </div>
           </div>
@@ -2136,7 +2148,7 @@ export function LandingPage() {
                   <div className="lrd-bcard-icon-badge lrd-bbadge-gold">
                     <Crown size={26} color="#FFFFFF" strokeWidth={2.4} />
                   </div>
-                  <h4 className="lrd-bcard-title">MÉTODO PROPIO MRAF</h4>
+                  <h4 className="lrd-bcard-title">MÉTODO PROPIO MRAF®</h4>
                   <p className="lrd-bcard-desc">
                     Aprende con una metodología práctica y estructurada.
                   </p>
@@ -2257,7 +2269,7 @@ export function LandingPage() {
                       title="México"
                     />
                   </div>
-                  <span className="lrd-testi-level-sub">Nivel Intermedio 2 • México</span>
+                  <span className="lrd-testi-level-sub">Nivel Intermédiaire 2 • México</span>
                 </div>
               </div>
             </div>
@@ -2302,7 +2314,7 @@ export function LandingPage() {
                       title="España"
                     />
                   </div>
-                  <span className="lrd-testi-level-sub">Nivel Básico 2 • España</span>
+                  <span className="lrd-testi-level-sub">Nivel Basique 2 • España</span>
                 </div>
               </div>
             </div>
@@ -2347,7 +2359,7 @@ export function LandingPage() {
                       title="Argentina"
                     />
                   </div>
-                  <span className="lrd-testi-level-sub">Nivel Avanzado 1 • Argentina</span>
+                  <span className="lrd-testi-level-sub">Nivel Avancé 1 • Argentina</span>
                 </div>
               </div>
             </div>

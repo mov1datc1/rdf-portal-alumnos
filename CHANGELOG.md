@@ -2,6 +2,14 @@
 
 Todos los cambios notables realizados en el proyecto se documentan en este archivo.
 
+## [2026-11-21] - Ajustes Finales de Cliente en Landing Page (MRAF®, Niveles en Francés y Precios) v3.5.27
+- **MRAF® con Marca Registrada:** Unificadas todas las menciones visibles con el símbolo `®` (`MÉTODO MRAF®`, `MÉTODO PROPIO MRAF®`).
+- **Niveles en Francés (`#cursos`):** Actualizadas las 7 tarjetas de nivel a `BASIQUE 1`, `BASIQUE 2`, `INTERMÉDIAIRE 1`, `INTERMÉDIAIRE 2`, `AVANCÉ 1`, `AVANCÉ 2` y `PERFECTIONNEMENT` (además de navbar y testimonios).
+- **Precios Regular, Intensivo y Part Duo (`#precios`):** Agregado *«Clases de 50 minutos»* en Regular e Intensivo; eliminada la frase *«Mismo profesor»* en Part Duo.
+- **Rotación de Profesores Franceses y Certificado del Nivel:** Destacada la oportunidad de tomar clases con diferentes profesores franceses para acostumbrarse a distintos acentos del francés, y reemplazada la mención de *«Certificado oficial avalado con evaluación dual»* por *«Certificado del nivel»*.
+
+---
+
 ## [2026-11-04] - Unificación de Dorado Oficial (#D59B28) y Ajuste de Copy en Profesores v3.5.26
 - **Copy de Profesores (`#profesores`):** Actualizada la frase concepto en `LandingPage.tsx` a *“Profesores franceses que harán que el francés cobre vida.”*.
 - **Estandarización de Dorado Oficial (`#D59B28`):** Unificados todos los textos, etiquetas, botones, bordes y fondos dorados en `LandingPage.css` al tono oficial `#D59B28` (`rgb(213, 155, 40)`), eliminando variaciones secundarias (`#E2A732`, `#FBD364`, `#9A6800`, `#B37D1A`, `#F59E0B`, `#E6A72E`, `#F5C767`).

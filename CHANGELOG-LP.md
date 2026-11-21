@@ -5,6 +5,24 @@ Todos los cambios notables de la **Landing Page** de *Les Rois du Français* ser
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/),
 y se adhiere al [Versionado Semántico](https://semver.org/lang/es/).
 
+## [3.5.27] — 2026-11-21
+
+### Ajustes Finales de Cliente: MRAF®, Niveles en Francés, Precios y Certificación
+- **1. Marca Registrada en MRAF®:**
+  - Agregado el símbolo `®` en todas las menciones visibles de `MRAF®` (menú superior `MÉTODO MRAF®` y tarjeta de beneficios `MÉTODO PROPIO MRAF®`).
+- **2. Nombres de Niveles en Francés (`#cursos`):**
+  - Actualizadas las etiquetas de rango en las 7 tarjetas de niveles a francés: `BASIQUE 1` (A1), `BASIQUE 2` (A2), `INTERMÉDIAIRE 1` (A2+), `INTERMÉDIAIRE 2` (B1), `AVANCÉ 1` (B1+), `AVANCÉ 2` (B2) y `PERFECTIONNEMENT` (B2-C1), así como en el menú desplegable y testimonios.
+- **3. Duración de Clases en Modalidad Regular e Intensivo (`#precios`):**
+  - Agregada la viñeta `Clases de 50 minutos` en las tarjetas grupales de **Modalidad Regular** y **Modalidad Intensivo**.
+- **4. Eliminación de «Mismo profesor» en Part Duo (`#precios`):**
+  - Actualizada la descripción y viñetas de **Modalidad Part Duo** y **Particulares** retirando la mención de «mismo profesor».
+- **5. Clases con Diferentes Profesores Franceses y Rotación de Acentos:**
+  - Destacado en `#profesores`, subtítulo de `#precios`, tarjetas de planes y barra de garantías que los alumnos toman clases con diferentes profesores franceses para acostumbrarse a escuchar distintos acentos del francés.
+- **6. Certificado del Nivel:**
+  - Reemplazada la mención de *«Certificado oficial avalado con evaluación dual»* por *«Certificado del nivel»* en la barra de garantías y tarjetas de precios.
+
+---
+
 ## [3.5.26] — 2026-11-04
 
 ### Unificación de Dorado Oficial (#D59B28) y Ajuste de Copy en Profesores
