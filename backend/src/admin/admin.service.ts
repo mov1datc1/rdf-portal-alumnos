@@ -811,7 +811,10 @@ export class AdminService {
         settings.heroSlides = DEFAULT_HERO_SLIDES as any;
         updated = true;
       }
-      if (!settings.teachers) {
+      const hasLegacyTeachers = Array.isArray(settings.teachers) && settings.teachers.some((t: any) =>
+        t?.id === 'jean-luc' || t?.id === 'pierre' || t?.image?.includes('teacher_royal_')
+      );
+      if (!settings.teachers || hasLegacyTeachers) {
         updateData.teachers = DEFAULT_TEACHERS;
         settings.teachers = DEFAULT_TEACHERS as any;
         updated = true;
@@ -878,40 +881,74 @@ const DEFAULT_HERO_SLIDES = [
 
 const DEFAULT_TEACHERS = [
   {
-    id: 'jean-luc',
-    name: 'Jean-Luc',
-    role: 'Le Roi du Fun & Conversación',
-    city: 'París, Francia',
-    exp: '8 años de experiencia',
-    image: '/imagenes-lp/teacher_royal_jean_luc.webp',
-    badge: 'Actitud Royal',
-    hashtag: '#ReyDelFrancés',
-    quote: '¡Bonjour! Mi misión es que hables francés con total confianza, soltura y cero miedo a equivocarte.',
-    bullets: ['100% Hablante Nativo de París', 'Especialista en Metodología MRAF® y Fluidez', 'Clases interactivas en vivo con grupos máx. 8']
+    id: 'fanny',
+    name: 'Fanny',
+    role: 'Profesora de francés',
+    specialty: 'FRANCÉS REAL Y CONFIANZA',
+    city: 'Toulouse',
+    image: '/imagenes-lp/teacher_fanny.webp',
+    video: '/videos/teacher_fanny.mp4',
+    quote: "Mi objetivo es que aprendas el francés de verdad y que no tengas miedo de expresarte. En mis clases siempre habrá un ambiente de confianza."
+  },
+  {
+    id: 'jeremy',
+    name: 'Jérémy',
+    role: 'Profesor de francés',
+    specialty: 'EXPRESIÓN NATURAL Y CONVERSACIÓN',
+    city: 'Bordeaux',
+    image: '/imagenes-lp/teacher_jeremy.webp',
+    video: '/videos/teacher_jeremy.mp4',
+    quote: "Mi objetivo es que empieces a expresarte en francés de forma natural."
   },
   {
     id: 'sophie',
     name: 'Sophie',
-    role: 'La Reine de la Culture & Estilo',
-    city: 'Lyon, Francia',
-    exp: '6 años de experiencia',
-    image: '/imagenes-lp/teacher_royal_sophie.webp',
-    badge: 'Cero Aburrimiento',
-    hashtag: '#FrancésDivertido',
-    quote: '¡C\'est la vie! Aprenderás el francés de verdad, el que se habla en las calles y cafés de Francia con elegancia.',
-    bullets: ['Nativa de Lyon, Francia', 'Rotación de acentos y cultura francófona viva', 'Práctica comunicativa para viajes y vida diaria']
+    role: 'Profesora de francés',
+    specialty: 'CULTURA Y VIDA COTIDIANA',
+    city: 'Lyon',
+    image: '/imagenes-lp/teacher_sophie.webp',
+    video: '/videos/teacher_sophie.mp4',
+    quote: "Te espero para aprender francés con alegría y buen humor. ¡Gastronomía, cultura y conjugación!"
   },
   {
-    id: 'pierre',
-    name: 'Pierre',
-    role: 'El Gran Canciller del Francés',
-    city: 'Burdeos, Francia',
-    exp: '10 años de experiencia',
-    image: '/imagenes-lp/teacher_royal_pierre.webp',
-    badge: 'Savoir-Faire Royal',
-    hashtag: '#AprendeComoRey',
-    quote: '¡Le français, c\'est cool! Olvídate de las clases tradicionales y aburridas. Tu coronación en francés empieza aquí.',
-    bullets: ['Evaluador de Exámenes Escritos y Orales', 'Dominio del idioma sin estrés ni tecnicismos', 'Puntualidad y atención 100% personalizada']
+    id: 'itzel',
+    name: 'Itzel',
+    role: 'Profesora de francés',
+    specialty: 'PACIENCIA Y APRENDIZAJE CERCANO',
+    city: 'Bordeaux',
+    image: '/imagenes-lp/teacher_itzel.webp',
+    video: '/videos/teacher_itzel.mp4',
+    quote: "Soy curiosa, paciente y disfruto de las cosas sencillas. Me gusta enseñar con calma y buen humor."
+  },
+  {
+    id: 'fabien',
+    name: 'Fabien',
+    role: 'Profesor de francés',
+    specialty: 'APRENDIZAJE DINÁMICO Y DIVERTIDO',
+    city: 'Paris',
+    image: '/imagenes-lp/teacher_fabien.webp',
+    video: '/videos/teacher_fabien.mp4',
+    quote: "Olvídate de las clases aburridas; conmigo aprenderás mientras te diviertes."
+  },
+  {
+    id: 'pauline',
+    name: 'Pauline',
+    role: 'Profesora de francés',
+    specialty: 'CONFIANZA Y PROGRESO A TU RITMO',
+    city: 'Lyon',
+    image: '/imagenes-lp/teacher_pauline.webp',
+    video: '/videos/teacher_pauline.mp4',
+    quote: "Me encantará acompañarte para que avances a tu ritmo y ganes confianza en tu francés."
+  },
+  {
+    id: 'camille',
+    name: 'Camille',
+    role: 'Profesora de francés',
+    specialty: 'FRANCÉS REAL Y CULTURA FRANCESA',
+    city: 'Lyon',
+    image: '/imagenes-lp/teacher_camille.webp',
+    video: '/videos/teacher_camille.mp4',
+    quote: "Aprenderás el francés de verdad, el que escuchas en los cafés, con la elegancia francesa."
   }
 ];
 

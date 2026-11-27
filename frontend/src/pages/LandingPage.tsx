@@ -437,7 +437,12 @@ export function LandingPage() {
           if (active.length > 0) setHeroSlides(active);
         }
         if (Array.isArray(cfg.teachers) && cfg.teachers.length > 0) {
-          setTeachers(cfg.teachers);
+          const hasLegacyTestTeachers = cfg.teachers.some((t: any) =>
+            t.id === 'jean-luc' || t.id === 'pierre' || t.image?.includes('teacher_royal_')
+          );
+          if (!hasLegacyTestTeachers && cfg.teachers.length >= DEFAULT_TEACHERS.length) {
+            setTeachers(cfg.teachers);
+          }
         }
         if (cfg.levelsData && typeof cfg.levelsData === 'object' && Object.keys(cfg.levelsData).length > 0) {
           const sanitized = { ...cfg.levelsData };

@@ -98,8 +98,8 @@ export const DEFAULT_TEACHERS = [
 export const DEFAULT_LEVELS: Record<string, LevelData> = {
   A1: {
     code: 'A1',
-    sub: 'Básico 1',
-    subLabel: 'Básico 1',
+    sub: 'Basique 1',
+    subLabel: 'Basique 1',
     levelTag: 'Básico 1 – Fundamentos • 4 Meses',
     titleLine1: 'Fundamentos del francés.',
     titleLine2: '¡Empieza a hablar!',
@@ -116,8 +116,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   A2: {
     code: 'A2',
-    sub: 'Básico 2',
-    subLabel: 'Básico 2',
+    sub: 'Basique 2',
+    subLabel: 'Basique 2',
     levelTag: 'Básico 2 – Supervivencia y Rutina • 4 Meses',
     titleLine1: 'Profundiza tu comunicación.',
     titleLine2: '¡Conéctate con Francia!',
@@ -134,8 +134,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   'A2+': {
     code: 'A2+',
-    sub: 'Intermedio 1',
-    subLabel: 'Intermedio 1',
+    sub: 'Intermédiaire 1',
+    subLabel: 'Intermédiaire 1',
     levelTag: 'Intermedio 1 – Exploración y Fluidez • 4 Meses',
     titleLine1: 'Explora temas complejos.',
     titleLine2: '¡Gana fluidez y precisión!',
@@ -152,8 +152,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   B1: {
     code: 'B1',
-    sub: 'Intermedio 2',
-    subLabel: 'Intermedio 2',
+    sub: 'Intermédiaire 2',
+    subLabel: 'Intermédiaire 2',
     levelTag: 'Intermedio 2 – Consolidación y Debate • 4 Meses',
     titleLine1: 'Consolida tu autonomía.',
     titleLine2: '¡Debate y exprésate!',
@@ -170,8 +170,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   'B1+': {
     code: 'B1+',
-    sub: 'Avanzado 1',
-    subLabel: 'Avanzado 1',
+    sub: 'Avancé 1',
+    subLabel: 'Avancé 1',
     levelTag: 'Avanzado 1 – Argumentación y Dominio • 4 Meses',
     titleLine1: 'Argumenta con claridad.',
     titleLine2: '¡Comunica con soltura!',
@@ -188,8 +188,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   B2: {
     code: 'B2',
-    sub: 'Avanzado 2',
-    subLabel: 'Avanzado 2',
+    sub: 'Avancé 2',
+    subLabel: 'Avancé 2',
     levelTag: 'Avanzado 2 – Perfeccionamiento y Certificación • 4 Meses',
     titleLine1: 'Fluidez y precisión nativa.',
     titleLine2: '¡Sé un verdadero rey!',
@@ -206,8 +206,8 @@ export const DEFAULT_LEVELS: Record<string, LevelData> = {
   },
   'B2-C1': {
     code: 'B2-C1',
-    sub: 'Perfeccionamiento',
-    subLabel: 'Perfeccionamiento',
+    sub: 'Perfectionnement',
+    subLabel: 'Perfectionnement',
     levelTag: 'Perfeccionamiento • Conversación y certificación',
     durationBadge: '4 meses',
     titleLine1: 'Perfecciona tu francés.',
